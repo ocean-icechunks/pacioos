@@ -29,6 +29,13 @@ Moved here from `ocean-icechunks/icechunks` on 2026-11-13 so the PacIOOS team ca
 - **Recheck `docs/design/source-probe.md`** against real file headers before designing the
   stores; its correction box lists what the public servers got wrong.
 
+- **Skill pointers will change.** `AGENTS.md` and the team note point to
+  nmfs-opensci/agent-skills; the skills are moving to ocean-icechunks/skills
+  (ocean-icechunks/icechunks#46), which lists the updates to make here.
+- **The team note was trimmed (2026-11-13)** so it does not repeat the README, `upload/README.md`,
+  `AGENTS.md` or the issues: it now leads with working with an agent, then the tasks, then a
+  pointer to the upload instructions. Keep it that way: link, don't copy.
+
 ## Working notes
 
 - The first copy ran from a JupyterHub over a read-only SSH login, with a single approved
