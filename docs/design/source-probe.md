@@ -4,6 +4,10 @@ Research only (2026-11-10); nothing built yet. Eli is working with the PacIOOS f
 access routes other than their public servers are on the table, including handing them a
 script to run on their own files.
 
+> **Superseded for formats and layout by [`file-headers.md`](file-headers.md) (2026-11-13)**, read
+> from the copies' headers: WW3 and early WRF are NetCDF-3, WRF switches to HDF5 on 2017-08-16,
+> and nothing is compressed.
+>
 > **Corrections from the files themselves (2026-11-12).** This note was written from the public
 > servers (THREDDS, ERDDAP) before there was a login on the PacIOOS server. What the server
 > showed contradicts it in places; where they differ, this box wins:

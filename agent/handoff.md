@@ -12,11 +12,19 @@ Moved here from `ocean-icechunks/icechunks` on 2026-11-13 so the PacIOOS team ca
   server; sampled downloads all matched): ROMS forecast `roms_hiig` (2026 to 2026-11-12),
   `wrf_hi`, `ww3_hawaii`, and `roms_hiig_reanalysis/netcdf/v2.0/` (4,380 files, 1,169.8 GB).
   Table in `README.md`. Copy done as #1 (closed).
-- **No Icechunk store built yet.** `pacioos/<dataset>/icechunk/` is reserved.
+- **No Icechunk store built yet.** `pacioos/<dataset>/icechunk/` is reserved. Plans are issues
+  #10–#14 (2026-11-13), backed by a passing local smoke test in `stores/` and the header findings
+  in `docs/design/file-headers.md`. Venv for it: `~/venvs/pacioos` (from `stores/requirements.txt`).
 - **No sample copy has been opened with xarray** from Source Cooperative yet; bytes are
   verified by MD5 only. The first store build will do that.
 
 ## Open threads
+
+- **#10–#13 — virtual stores**, one per product, serving the THREDDS "best" series (Eli's choice,
+  2026-11-13: it is what PacIOOS serves, so it comes first). Each issue ends with decisions for Eli
+  (chunking, metadata repairs, whether to skip uncovered times as THREDDS does). **#14** — the
+  all-runs `(run, step)` view for forecast skill, after the best stores.
+- **#9 — upload script**: a failed destination listing can overwrite finished copies.
 
 - **#4 — daily auto-update** of forecast/WRF/WW3, the PacIOOS hackweek project (2026-11-17).
   The copies stop at 2026-11-12 until it exists, and the server's forecast archive is
