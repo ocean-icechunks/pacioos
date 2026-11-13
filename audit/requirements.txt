@@ -1,0 +1,15 @@
+# Dependencies for the file audit in audit/ (report: audit/report.md).
+#
+#     /srv/conda/bin/python3.12 -m venv audit/.venv
+#     audit/.venv/bin/pip install --no-cache-dir -r audit/requirements.txt
+#
+# Lower bounds are the versions the audit ran with on 2026-11-13. It reads metadata and
+# a few small data planes from the public copies on Source Cooperative, anonymously.
+
+numpy>=2.3
+pandas>=2.3
+pyarrow>=20          # parquet tables in out/
+obstore>=0.12        # listing and byte-range reads
+h5py>=3.16           # HDF5 headers and chunk indexes (chunk_iter needs >= 3.8)
+fsspec>=2026.2       # file-like HTTPS access for h5py
+aiohttp>=3.13        # fsspec's HTTPFileSystem is async; requests alone is not enough

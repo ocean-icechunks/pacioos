@@ -1,0 +1,6 @@
+# large scan outputs: rerun the scanners to rebuild them (README in report.md, "Method")
+.venv/
+out/headers.jsonl
+out/*.parquet
+out/erddap_time_*.csv
+__pycache__/

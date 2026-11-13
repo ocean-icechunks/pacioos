@@ -24,7 +24,7 @@ script to run on their own files.
 >   [#3](https://github.com/ocean-icechunks/pacioos/issues/3)).
 > - **No version in the reanalysis files.** Their only global attributes are `author`,
 >   `history` (created 2023) and `title = "Zlevel Model Data"`; "v2.0" exists only in the
->   THREDDS/ERDDAP description. All 4,380 files were written at once in March 2023.
+>   THREDDS/ERDDAP description. All 4,380 files were written at once in February 2023 (2023-02-16 … 02-21, from their `history`; the server's file times had suggested March; [audit](../../audit/report.md), 2026-11-13).
 > - **Other regions on disk:** Samoa (1.19 TB) and western-Pacific (3.88 TB) hindcasts, and 7
 >   forecast regions. The native-grid ROMS output keeps only the last 7 days.
 > - **The HYCOM-trick table below is out of date.** It assumed HDF5 for the forecast. Since the

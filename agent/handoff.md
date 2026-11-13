@@ -24,6 +24,10 @@ Moved here from `ocean-icechunks/icechunks` on 2026-11-13 so the PacIOOS team ca
   2026-11-13: it is what PacIOOS serves, so it comes first). Each issue ends with decisions for Eli
   (chunking, metadata repairs, whether to skip uncovered times as THREDDS does). **#14** — the
   all-runs `(run, step)` view for forecast skill, after the best stores.
+- **File audit (2026-11-13): `audit/report.md`.** The copies are complete and intact, and their best
+  time axes equal ERDDAP's. Problems are in the forecasts' contents, which THREDDS serves too:
+  71 relabelled WRF runs (2010–13), WW3 2020-04-27..05-04 probably a day early, 81 WW3 cold
+  starts, and ties between runs broken by the later file name. These feed #12 and #13.
 - **#9 — upload script**: a failed destination listing can overwrite finished copies.
 
 - **#4 — daily auto-update** of forecast/WRF/WW3, the PacIOOS hackweek project (2026-11-17).
