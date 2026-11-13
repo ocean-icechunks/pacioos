@@ -39,8 +39,11 @@ Moved here from `ocean-icechunks/icechunks` on 2026-11-13 so the PacIOOS team ca
   replace `http://localhost:8400` in the redirect with the hub's `/user/<name>/proxy/8400`.
 - Server-side copies on Source Cooperative work (1.9 GB in 40 s, MD5 identical); the layout
   move on 2026-11-12 used them, with no re-upload.
-- The live Claude Docs (transfer plan, explainer) that Eli edits are linked in the snapshot
-  headers in `docs/design/`; the docs are the live copies.
+- Three Claude Docs for the PacIOOS team, all linked from `README.md` ("Start here"). Eli edits
+  them; they are the live copies. The transfer plan and the explainer have snapshots in
+  `docs/design/` (checked against the live docs 2026-11-13); the 2026-11-13 team note
+  (upload, tasks, working with an agent: https://claude.ai/artifact/MmW3VYYgR6enaALtqToX31)
+  has no snapshot.
 
 ## Notes
 

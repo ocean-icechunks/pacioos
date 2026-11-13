@@ -22,6 +22,20 @@ Each file has a `.md5` next to it. The ROMS hindcast (`roms_hiig_assim`, 3.37 TB
 yet ([#3](https://github.com/ocean-icechunks/pacioos/issues/3)). Each dataset's Icechunk store
 will go in `pacioos/<dataset>/icechunk/`; none is built yet.
 
+## Start here: notes for the PacIOOS team
+
+Three short documents, written for PacIOOS (the live versions; the repo keeps snapshots of the
+first two in `docs/design/`):
+
+- [**PacIOOS models on Source Cooperative: how to upload, what's next, and working with an agent**](https://claude.ai/artifact/MmW3VYYgR6enaALtqToX31)
+  (2026-11-13): running the upload yourselves, the open tasks, and using a coding agent to
+  learn this repo and build the stores.
+- [**Getting the PacIOOS model files onto Source Cooperative**](https://claude.ai/artifact/4Nqhx91MozRLbfjYXmfpP7)
+  (2026-11-10): the transfer plan, the routes for copying, and the questions for PacIOOS.
+- [**How a virtual Icechunk store gets made**](https://claude.ai/artifact/BTCTko294KTQebZW6Y2K4o)
+  (2026-11-10): what a virtual store is, why the files go to the cloud first, and where
+  missing metadata goes.
+
 ## What's here
 
 | Path | What |
