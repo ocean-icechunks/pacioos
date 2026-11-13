@@ -13,11 +13,11 @@ Code to copy PacIOOS's Hawaiʻi model NetCDFs (ROMS, WRF, WW3) unchanged to Sour
 
 ## Skills
 
-Use the shared skills in <https://github.com/nmfs-opensci/agent-skills> rather than re-deriving
-practice here, and feed new general lessons back there:
+Use the shared skills in <https://github.com/ocean-icechunks/ocean-icechunks-skills> rather than re-deriving practice here, and feed new
+general lessons back there. Its README says how to install them and how to report a lesson:
 
 - `virtual-icechunk` — building, validating and documenting virtual Icechunk stores.
-- `archive-to-cloud` (proposed, nmfs-opensci/agent-skills#40) — auditing a source archive,
+- `archive-to-cloud` (proposed, ocean-icechunks/ocean-icechunks-skills#4) — auditing a source archive,
   copying it unchanged to object storage, and verifying the copies.
 
 Keep only PacIOOS-specific facts in this repo.
