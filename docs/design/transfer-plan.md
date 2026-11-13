@@ -1,5 +1,5 @@
 <!-- Mirror of the Claude Doc https://claude.ai/artifact/4Nqhx91MozRLbfjYXmfpP7
-     as Eli edited it (doc rev 2321, 2026-11-10). The doc is the live copy that goes to
+     as Eli edited it (doc rev 2344, checked 2026-11-13). The doc is the live copy that goes to
      PacIOOS; edit there and refresh this file. Background and measurements:
      source-probe.md. -->
 
@@ -94,7 +94,6 @@ The one awkward step is the Source Coop login tool's sign-in: it opens a web pag
 - [ ] How fast is that machine's network connection, and may it connect out to `data.source.coop`?
 - [ ] What speed cap and quiet hours should the copy keep to?
 - [ ] Route A or Route B?
-- [ ] Should every past forecast run be copied, or only the series the website shows?
 
 ## Connection to Earthmover
 

@@ -1,6 +1,7 @@
 <!--
-Snapshot of the Claude Doc "Intro to virtual Icechunk stores and how they are made",
-https://claude.ai/artifact/BTCTko294KTQebZW6Y2K4o, exported 2026-11-10 at rev 695.
+Snapshot of the Claude Doc now titled "How a virtual Icechunk store gets made",
+https://claude.ai/artifact/BTCTko294KTQebZW6Y2K4o, exported 2026-11-10 at rev 695
+(still rev 695 when checked 2026-11-13).
 Written for PacIOOS after a Slack question about when "the NetCDF => VirtualiZarr
 conversion happens". Eli edits the doc directly; the doc is the live version, this is a
 copy for the repo. The doc's diagram (pointers in the store, bytes in the files) is a
