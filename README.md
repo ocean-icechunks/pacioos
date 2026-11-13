@@ -44,7 +44,7 @@ first two in `docs/design/`):
 | Path | What |
 | --- | --- |
 | [`upload/`](upload/) | Scripts that copy the files to Source Cooperative and check the copies; how to run them |
-| [`audit/`](audit/) | File audit of the copies: [`audit/report.md`](audit/report.md) (2026-11-13) |
+| [`audit/`](audit/) | File audit of the copies (2026-11-13): [`report.md`](audit/report.md) (technical), [`report-pacioos.md`](audit/report-pacioos.md) (for the PacIOOS team), [`how_audit_created.md`](audit/how_audit_created.md) (a prompt to redo it) |
 | [`stores/`](stores/) | Virtual Icechunk store code: so far the smoke test behind issues #10–#14 |
 | [`docs/design/file-headers.md`](docs/design/file-headers.md) | What the copied files are, read from their headers; the reasons behind the store design |
 | [`docs/design/source-probe.md`](docs/design/source-probe.md) | What the public servers and the files showed: sizes, formats, chunking, options |
