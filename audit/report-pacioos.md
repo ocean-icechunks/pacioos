@@ -29,8 +29,8 @@ not copied yet, so it is not covered.
 - **The stores can be built from the files as they are.** Nothing is compressed, so the stores
   can point at exactly the piece of a file a reader needs. That makes **maps fast**.
 - **Time series at a point will be slow whatever we choose**, because of how time is laid out
-  in the files. The only fix is to rewrite the data in a different layout. The
-  [last section](#would-reprocessing-be-better) discusses whether that is worth doing, and
+  in the files. The only fix is to rewrite the NetCDFs in a different layout. The
+  [last section](#would-rewriting-the-netcdfs-be-worth-it) discusses whether that is worth doing, and
   what a better file layout would look like for future files.
 
 ## What we found
@@ -109,34 +109,33 @@ needs.
   request concurrency, which helps, but the count is fixed by the file layout. This is the
   main argument for the next section.
 
-## Would reprocessing be better?
+## Would rewriting the NetCDFs be worth it?
 
-**For time series, yes.** No choice of virtual chunk can make a point time series cheap,
-because the files store time one step at a time. Rewriting the data in a layout chunked along
-time is the only real fix. It does not replace the virtual stores, which stay the faithful,
-byte-for-byte record of what PacIOOS published. It would be a second product beside them.
+**For WRF, yes:** rewriting its 2010–2017 files is the one change that gives a single, simple
+store. For the reanalysis it is the only way to make time series fast. For the forecasts,
+writing future runs well matters more than rewriting the archive.
 
-The options, roughly in order of payoff:
+Rewritten files would be a new version beside the originals, and the virtual stores would
+point at them instead. They can be made from the copies on Source Cooperative without touching
+PacIOOS servers. They should be published only with PacIOOS's approval, as PacIOOS data.
 
-1. **The reanalysis: a one-time rewrite into a time-chunked, compressed Zarr/Icechunk
-   store.** The reanalysis is finished and does not change, it is the dataset people use for
-   climatologies and point series, and it is the largest. A chunk like (240 steps = 1 month,
-   1 depth, half or a quarter of the grid) makes a 12-year point series about 150 requests and
-   ~1 GB, instead of 35,040 requests and 8 GB. A map at one depth needs 2–4 requests instead of
-   1. Compressed (zstd with shuffle, and optionally rounding `temp` to 0.001 °C), it would be
-   roughly 550–600 GB instead of 1.17 TB. That estimate comes from the earlier probe; it has
-   not been measured on a full year.
-2. **Better files for the future**, so that new forecast runs (and a future reanalysis v3.0)
-   come out well chunked and the virtual stores need no rewrite at all. See the layout below.
-   This is the cheapest change, because it happens once in the model's output step.
-3. **Rewriting the WRF and WW3 archives** (15 years of hourly maps). Worth it only if point
-   time series of wind or waves turn out to be a common need. Their files are small (57–118 KB
-   per map), so a rewrite into (1 month × full grid) chunks would be quick, but it is another
-   dataset to maintain.
+| Dataset | What a rewrite would fix | Rewritten layout | Size | Worth it? |
+|---|---|---|---|---|
+| **WRF to 2017** | Two formats become one: one array per variable and one store group, instead of two groups readers must join. The 71 relabelled runs and the duplicate files can be dropped or marked in the new version. | **Minimal:** the 2017-onward layout exactly (NetCDF-4, little-endian, uncompressed, one step per chunk, the same attributes). `sst` stays as an extra variable that is empty after 2017. **Better:** the whole WRF archive in the time-chunked layout below. | 2,569 files, 0.47 TB (whole archive 0.94 TB) | **Yes**: the largest gain for the least data |
+| **ROMS reanalysis** | Time series: one chunk per day or more instead of per step. A declared fill value, `temp` and `salt` units, a version number. | Compressed NetCDF-4, chunks of (8 steps = 1 day, 1 depth, a quarter of the grid). A point series drops from 35,040 requests to 4,380, and a map takes 4 requests. With fixed 30-day files, (240, 1, quarter grid) gives 146 requests. | 4,380 files, 1.17 TB, about half that compressed | **Yes, if time series matter**: it is static, so this is done once |
+| **ROMS forecast** | Time series in the best series: one chunk per run-day. | Compressed NetCDF-4, chunks of (8, 1, quarter grid) aligned to the run start. A point series drops from 5,497 requests to 688. | 654 files, 1.24 TB | **Mainly for future runs**: the archive covers under 2 years |
+| **WW3** | Time series. The 2020 times can be corrected and the cold starts marked in the new version. | Compressed NetCDF-4, chunks of (24 steps, 1, 101, 141) aligned to the run start. A point series drops from 133,500 requests to about 5,600. | 5,232 files, 0.49 TB | **Only if wave time series are a common need** |
 
-Whatever is rewritten, the copies on Source Cooperative stay as they are. Reprocessed data is
-a new product, or a new version folder (`netcdf/v3.0/`), never a replacement in place: virtual
-stores point at exact bytes, and changing a file breaks them.
+Three constraints apply to any rewrite:
+
+- **A store joins files along time, so every file must hold a whole number of time chunks.**
+  A 1-day chunk fits any daily file; a 30-day chunk does not fit calendar months. The CEFI
+  daily files broke on exactly this.
+- **Compression ends the byte-range cutting described above**, so the chunks must be right
+  when the files are written.
+- **The originals stay unchanged** on Source Cooperative, and THREDDS keeps serving them. The
+  rewritten files hold the same values (except where a fix is made) in a different layout,
+  under a new version folder.
 
 ### A better way to structure the NetCDF files
 
@@ -151,8 +150,9 @@ For files that will be read from the cloud, and especially through a virtual sto
     run's start (8 steps for ROMS, 24 for WRF and WW3), and start every run at the same hour.
     Then the "best" series, which takes each run's first day, is made of whole chunks. A point
     time series reads one chunk per day, 8–24× fewer requests, and the all-runs view works too.
-  - **Reanalysis:** one file per month or per year rather than per day, with chunks of a
-    month or more along time.
+  - **Reanalysis:** daily files with 1-day chunks, or files of a fixed length (for example
+    30 days) holding a whole number of longer chunks. Calendar months and years do not divide
+    evenly.
 - **One depth level per chunk**, and **lat/lon tiles** (for example the grid in halves or
   quarters). A point time series then reads only the tile it needs, and a map reads 2–4 tiles.
 - **The same chunk shape in every file of a dataset, forever.** A store can only join files
@@ -183,5 +183,5 @@ For files that will be read from the cloud, and especially through a virtual sto
 4. **The reanalysis:** is `temp` in °C (the files say `ppt`), and what are `salt`'s units?
 5. **Duplicate runs:** for days with two files that start at the same time (for example WRF
    2022-02-21 and 2022-02-22), which is the right one? THREDDS uses the later file name.
-6. **Reprocessing:** would PacIOOS want a time-chunked copy of the reanalysis, and could
-   future runs be written in the layout above?
+6. **Rewriting the NetCDFs:** would PacIOOS want rewritten, time-chunked NetCDFs, starting
+   with WRF 2010–2017 and the reanalysis, and could future runs be written in the layout above?
