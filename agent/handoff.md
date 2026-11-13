@@ -31,7 +31,7 @@ Moved here from `ocean-icechunks/icechunks` on 2026-11-13 so the PacIOOS team ca
 
 - **Skill pointers updated (2026-11-13).** The skills moved from nmfs-opensci/agent-skills to
   ocean-icechunks/ocean-icechunks-skills (ocean-icechunks/icechunks#46); `AGENTS.md` points there.
-  The team note still needs the same change.
+  So does the PacIOOS team note's "Set up once" step.
 - **The team note was trimmed (2026-11-13)** so it does not repeat the README, `upload/README.md`,
   `AGENTS.md` or the issues: it now leads with working with an agent, then the tasks, then a
   pointer to the upload instructions. Keep it that way: link, don't copy.
