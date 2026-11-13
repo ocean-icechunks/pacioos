@@ -24,7 +24,7 @@ will go in `pacioos/<dataset>/icechunk/`; none is built yet.
 
 ## Start here: notes for the PacIOOS team
 
-Three short documents, written for PacIOOS (the live versions; the repo keeps snapshots of the
+Four short documents, written for PacIOOS (the live versions; the repo keeps snapshots of the
 first two in `docs/design/`):
 
 - [**PacIOOS models on Source Cooperative: how to upload, what's next, and working with an agent**](https://claude.ai/artifact/MmW3VYYgR6enaALtqToX31)
@@ -32,6 +32,9 @@ first two in `docs/design/`):
   learn this repo and build the stores.
 - [**Getting the PacIOOS model files onto Source Cooperative**](https://claude.ai/artifact/4Nqhx91MozRLbfjYXmfpP7)
   (2026-11-10): the transfer plan, the routes for copying, and the questions for PacIOOS.
+- [**PacIOOS model files on Source Cooperative: audit and chunking options**](https://claude.ai/artifact/G67caCdBJ2Z7hupYuJZHnJ)
+  (2026-11-13): what the file audit found, every chunking option for the stores, and whether
+  reprocessing would be better (snapshot: [`audit/report-pacioos.md`](audit/report-pacioos.md)).
 - [**How a virtual Icechunk store gets made**](https://claude.ai/artifact/BTCTko294KTQebZW6Y2K4o)
   (2026-11-10): what a virtual store is, why the files go to the cloud first, and where
   missing metadata goes.
