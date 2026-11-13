@@ -41,6 +41,8 @@ first two in `docs/design/`):
 | Path | What |
 | --- | --- |
 | [`upload/`](upload/) | Scripts that copy the files to Source Cooperative and check the copies; how to run them |
+| [`stores/`](stores/) | Virtual Icechunk store code: so far the smoke test behind issues #10–#14 |
+| [`docs/design/file-headers.md`](docs/design/file-headers.md) | What the copied files are, read from their headers; the reasons behind the store design |
 | [`docs/design/source-probe.md`](docs/design/source-probe.md) | What the public servers and the files showed: sizes, formats, chunking, options |
 | [`docs/design/transfer-plan.md`](docs/design/transfer-plan.md) | The plain-language transfer plan shared with PacIOOS (snapshot) |
 | [`docs/design/virtual-icechunk-explainer.md`](docs/design/virtual-icechunk-explainer.md) | "What a virtual Icechunk store is and how it is made" (snapshot) |
@@ -52,7 +54,8 @@ first two in `docs/design/`):
 - [#2](https://github.com/ocean-icechunks/pacioos/issues/2): what happens when files change or
   a new version (reanalysis v3.0) arrives.
 - [#3](https://github.com/ocean-icechunks/pacioos/issues/3): copy the ROMS hindcast.
-- Build the virtual Icechunk stores.
+- Build the virtual Icechunk stores: #10 (ROMS forecast), #11 (reanalysis), #12 (WRF), #13 (WW3),
+  #14 (all-runs view for forecast skill).
 
 The history of this work up to 2026-11-13 is in
 [ocean-icechunks/icechunks](https://github.com/ocean-icechunks/icechunks) PRs #35, #39 and #42,
