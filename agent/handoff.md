@@ -3,7 +3,7 @@
 Rolling state for this repo. Orientation only: the open threads are a record of what is
 unfinished, not a task list.
 
-## Where things stand (2026-11-13)
+## Where things stand (2026-11-14)
 
 Moved here from `ocean-icechunks/icechunks` on 2026-11-13 so the PacIOOS team can take it over
 (history: that repo's PRs #35, #39, #42; issues transferred as #1–#4 here).
@@ -12,7 +12,7 @@ Moved here from `ocean-icechunks/icechunks` on 2026-11-13 so the PacIOOS team ca
   server; sampled downloads all matched): ROMS forecast `roms_hiig` (2026 to 2026-11-12),
   `wrf_hi`, `ww3_hawaii`, and `roms_hiig_reanalysis/netcdf/v2.0/` (4,380 files, 1,169.8 GB).
   Table in `README.md`. Copy done as #1 (closed).
-- **No Icechunk store built yet.** `pacioos/<dataset>/icechunk/` is reserved. Plans: issues
+- **No production Icechunk store yet.** `pacioos/<dataset>/icechunk/` is reserved. Plans: issues
   #10 (ROMS forecast), #11 (reanalysis), #12 (WRF), #13 (WW3), #14 (all-runs view), each ending
   with decisions for Eli, with audit and chunking comments added 2026-11-13.
 - **Smoke test passed (PR #15, merged):** `stores/` builds a few runs of each product into
@@ -22,9 +22,16 @@ Moved here from `ocean-icechunks/icechunks` on 2026-11-13 so the PacIOOS team ca
 - **File audit done (PR #16, merged):** `audit/report.md`; team version is the Claude Doc
   https://claude.ai/artifact/G67caCdBJ2Z7hupYuJZHnJ (snapshot `audit/report-pacioos.md`, linked
   from the README); `audit/how_audit_created.md` is a prompt to redo it.
-- **Next, by Eli (2026-11-13): build the reanalysis store, #11.** Follow the virtual-icechunk
-  skill's order (plan, smoke-test notebook, production, docs); start from
-  `stores/pacioos_virtual.py`.
+- **Reanalysis store, #11: published 2026-11-14.** `ocean-icechunks/pacioos/roms_hiig_reanalysis/icechunk`,
+  tag `v2.0`, all 35,040 steps 2009-01-01..2020-12-28, validated anonymously from the public URL
+  (120 planes = netCDF-C; 12-year point series 49.5 s), viewer at `.../roms_hiig_reanalysis/viewer/`.
+  Decisions (Eli): one depth plane per chunk; ERDDAP metadata saved in the repo, shorter title;
+  one group. Code and the PacIOOS team guide: `stores/roms_hiig_reanalysis/`, start with
+  `how_store_created.md`; build with `build_store.py` (scan, check, write, validate; resumable,
+  scratch unless `--dest production`). Work is on branch `reanalysis-smoke-test` (PR open, see #11).
+  Viewer checked by Eli. Scratch copies deleted 2026-11-14. Project README (with tested loading
+  code) published beside the store 2026-11-14; repo copy `stores/roms_hiig_reanalysis/README.md`.
+  #11 is done apart from merging PR #18 and closing the issue.
 
 ## Open threads
 
@@ -55,6 +62,19 @@ Moved here from `ocean-icechunks/icechunks` on 2026-11-13 so the PacIOOS team ca
   pointer to the upload instructions. Keep it that way: link, don't copy.
 
 ## Working notes
+
+- **Reanalysis store facts** (detail in `stores/roms_hiig_reanalysis/how_store_created.md`):
+  all 20 sampled files have identical chunk offsets, so one header gives every reference, but
+  production still scans all files. An append rewrites root attributes. xarray needs
+  `_FillValue` base64-encoded for Zarr v3. `chunks={}` makes point series ~25x slower than
+  `chunks=None`. ERDDAP restarts now and then (503, then "unknown datasetID" for a minute).
+- `stores/icechunk_utils.py` and `stores/publish_viewer.py` are copies of the ones in
+  ocean-icechunks/icechunks (the viewer one with PacIOOS products only), so this repo stands
+  alone; a fix belongs in both. Build the viewer from a gridlook clone on `main`: Eli's
+  `~/gridlook` is on a docs branch.
+- The notebooks in `stores/roms_hiig_reanalysis/` are run with
+  `jupyter execute --inplace` in a clean venv from that folder's `requirements.txt`, and
+  committed with their outputs.
 
 - The first copy ran from a JupyterHub over a read-only SSH login, with a single approved
   `rclone` binary in `/tmp` on the PacIOOS server and keys sent over SSH stdin each run
