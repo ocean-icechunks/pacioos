@@ -28,7 +28,7 @@ Moved here from `ocean-icechunks/icechunks` on 2026-11-13 so the PacIOOS team ca
   ": 3-D Variables"; one group. Everything is in `stores/roms_hiig_reanalysis/`: start with
   `how_store_created.md`, the guide for the PacIOOS team (steps, decisions, an agent prompt).
   The scratch store, viewer and README are under `ocean-icechunks/test-repo/pacioos/roms_hiig_reanalysis/`.
-  Eli has not yet said whether the viewer draws; its opening zoom (`alt=4000000`) is a guess.
+  The viewer draws the store in an ordinary browser (Eli, 2026-11-14).
   **Remaining:** the production build script (all 4,380 files into
   `pacioos/roms_hiig_reanalysis/icechunk`, tag `v2.0`), then the project README.
 

@@ -27,6 +27,10 @@ Scratch store, viewer and README (these may be rewritten or deleted at any time)
 - viewer: <https://data.source.coop/ocean-icechunks/test-repo/pacioos/roms_hiig_reanalysis/viewer/index.html>
 - README: <https://data.source.coop/ocean-icechunks/test-repo/pacioos/roms_hiig_reanalysis/README.md>
 
+The viewer draws the scratch store in an ordinary browser, with no extension (Eli Holmes,
+2026-11-14). Both the store and the NetCDF copies are on `data.source.coop`, which sends the
+CORS headers a browser needs.
+
 ## The decisions (Eli Holmes, 2026-11-14)
 
 - **One depth level per chunk**, `(1, 1, 195, 295)`, 230 KB. The files are uncompressed HDF5
