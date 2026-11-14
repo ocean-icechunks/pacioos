@@ -1,4 +1,4 @@
-# PacIOOS Hawaiʻi ocean, wave and weather models: NetCDF and Icechunk
+# PacIOOS Hawaiʻi ocean, wave and weather models
 
 **[🌐 View data in browser](#view-it-in-a-browser)** · **[💻 Data access (code)](#how-to-open-it)** · **[📦 Data access (PacIOOS)](https://www.pacioos.hawaii.edu/data-services/)**
 
