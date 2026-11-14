@@ -188,7 +188,7 @@ uncover a covered step, which could only happen if a copy disappeared or changed
 - End to end on Source Cooperative: `--dest update-test` (a scratch copy built three runs behind)
   was caught up in one 3.9 s commit and verified. A rerun said "up to date". `build_store.py
   validate --dest update-test` then passed in full: the axis is identical to ERDDAP's, 125
-  planes equal netCDF-C, and 12 point values equal ERDDAP's.
+  planes equal netCDF-C, and 12 point values equal ERDDAP's. The copy was deleted afterwards.
 - `--dest production --dry-run`: up to date, nothing written.
 
 **Still open for the hackweek (#4):** run it after each day's upload, on a schedule. It needs no
