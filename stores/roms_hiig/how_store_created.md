@@ -19,11 +19,26 @@ documentation**. Each step has to pass before the next one starts.
 |---|---|---|
 | 1. Plan | done | issue #10; decisions below |
 | 2. Local smoke test | done | `forecast-smoke-test-local.ipynb` |
-| 3. Scratch store on Source Cooperative | **done; viewer not yet checked by a person** | `build_store.py --dest scratch`, the scratch viewer |
-| 4. Production build | not started | `build_store.py --dest production` |
-| 5. Store README and loading example | drafted | `README.md` |
+| 3. Scratch store on Source Cooperative | done | `build_store.py --dest scratch`; scratch viewer checked by Eli Holmes |
+| 4. Production build | **done, 2026-11-14** | `build_store.py --dest production`; the store and its viewer |
+| 5. Store README and loading example | **done, 2026-11-14** | `README.md`, also published beside the store; product README updated |
 
-**The scratch build** (2026-11-14, may be rewritten or deleted):
+**The store** (public, anonymous, not tagged: it will change daily once #4 exists):
+
+- store: `https://data.source.coop/ocean-icechunks/pacioos/roms_hiig/icechunk`, snapshot
+  `W6C8C8NEFTSGB8DYXN30`
+- viewer: <https://data.source.coop/ocean-icechunks/pacioos/roms_hiig/viewer/index.html>
+- README: <https://data.source.coop/ocean-icechunks/pacioos/roms_hiig/README.md> (the copy of
+  `README.md` in this folder; upload it again after editing it)
+
+The production build, 2026-11-14, as `build_store.py` printed it: the same 654 runs and checks as
+the scratch build below; written in 6 s; validated anonymously from the public URL with the same
+results (axis identical to ERDDAP's, 125 planes = netCDF-C, 12 point values = ERDDAP, land NaN),
+opened in 1.0 s; a surface map 0.2 s, a 36-level field 0.8 s, the 23-month point series 8.5 s.
+The README's loading code was run as written against it, in a clean venv holding only icechunk,
+xarray and zarr.
+
+**The scratch build** (2026-11-14, still there; may be rewritten or deleted):
 
 - store: `https://data.source.coop/ocean-icechunks/test-repo/pacioos/roms_hiig/icechunk-build`
 - viewer: [temp](https://data.source.coop/ocean-icechunks/test-repo/pacioos/roms_hiig/viewer/index.html#icechunk+https://data.source.coop/ocean-icechunks/test-repo/pacioos/roms_hiig/icechunk-build::varname=temp::px=0::py=0::alt=4000000::lat=20.5::lon=-158.2::dimIndices_time=0::dimIndices_depth=0)
@@ -130,7 +145,10 @@ To refresh the ERDDAP metadata, run
 Each new run takes over the last 7 days of the best series and adds 8 new steps. A daily update
 appends 8 steps along `time` and re-points the references of the 49 steps before them, with the
 two time-length coordinates, in one commit. This script does not do that: it writes the series
-whole, and stops on a store that holds a different series.
+whole, and stops on a store that holds a different series. The options, the manifest-split size
+to settle before the daily job starts (yearly splits, copied from the reanalysis, make each daily
+commit rewrite the whole current year's manifests), and the checks to keep are in
+[the #4 comment of 2026-11-14](https://github.com/ocean-icechunks/pacioos/issues/4#issuecomment-6870854483).
 
 ## Prompt for a coding agent
 

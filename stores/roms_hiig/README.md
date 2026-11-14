@@ -133,11 +133,11 @@ Opening takes about a second and reads only metadata.
 Each chunk is **one depth level of one variable at one time step**: `(1, 1, 195, 295)`, 230 KB.
 That shape is fixed by the files. The store points inside them and cannot rechunk them.
 
-| Read | Chunks | Data moved | Time (measured, scratch build) |
+| Read | Chunks | Data moved | Time (measured) |
 |---|---|---|---|
-| One surface map | 1 | 230 KB | 0.1 s |
-| One 3-D field, 36 levels | 36 | 8.3 MB | 0.7 s |
-| Point series, one depth, 5,497 steps | 5,497 | 1.3 GB | 7.7 s |
+| One surface map | 1 | 230 KB | 0.2 s |
+| One 3-D field, 36 levels | 36 | 8.3 MB | 0.8 s |
+| Point series, one depth, 5,497 steps | 5,497 | 1.3 GB | 8.5 s |
 
 Measured 2026-11-14 from a JupyterHub, with `zarr.config.set({"async.concurrency": 128})` and
 `chunks=None`. Rates elsewhere will differ.
@@ -157,11 +157,15 @@ Measured 2026-11-14 from a JupyterHub, with `zarr.config.set({"async.concurrency
 - **Built** by `build_store.py` in
   [ocean-icechunks/pacioos](https://github.com/ocean-icechunks/pacioos/tree/main/stores/roms_hiig).
   It read every file's header (the files come in four header layouts, so offsets differ between
-  files) and confirmed that all share one structure.
+  files), confirmed that all share one structure, and wrote the series in one commit on
+  2026-11-14: snapshot `W6C8C8NEFTSGB8DYXN30`, 5,497 steps, 797,065 references, 11 MB.
 - **Validated** from the public URL, anonymously: the time axis equals the computed one and
   ERDDAP's; every step comes from the newest run that has it; sampled planes (one step per
-  month, all 5 variables) are identical to netCDF-C reads of the files; point values equal
-  ERDDAP's; land reads as `NaN`.
+  month, all 5 variables: 125 planes) are identical to netCDF-C reads of the files; 12 point
+  values (temp, salt, zeta at 4 times) equal ERDDAP's; land reads as `NaN`.
+- **Tested with** icechunk 2.3.1, virtualizarr 2.8.0, xarray 2026.9.0, zarr 3.4.2, Python 3.12.
+  The loading code above was run as written, in a clean environment holding only the three
+  packages it names (and their dependencies).
 - **How it was made, and how to rebuild it:**
   [`how_store_created.md`](https://github.com/ocean-icechunks/pacioos/blob/main/stores/roms_hiig/how_store_created.md).
   The plan and decisions are in [issue #10](https://github.com/ocean-icechunks/pacioos/issues/10).
