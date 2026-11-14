@@ -1,0 +1,16 @@
+# Dependencies for the ROMS forecast store in this folder (issue #10).
+#
+#     python -m venv .venv && .venv/bin/pip install -r requirements.txt
+#
+# REQUIRES PYTHON >= 3.12 (icechunk 2.x). On the hub use /srv/conda/bin/python3.12.
+
+-r ../requirements.txt     # the shared list for stores/ (icechunk, virtualizarr, h5py, netCDF4, ...)
+
+matplotlib>=3.10
+
+# ../publish_viewer.py: uploads to Source Cooperative.
+boto3>=1.40
+
+# To run the notebook outside an existing Jupyter (e.g. jupyter execute).
+ipykernel>=7.0
+nbclient>=0.10

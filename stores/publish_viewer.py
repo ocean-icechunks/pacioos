@@ -99,6 +99,40 @@ PRODUCTS = {
             "title": "PacIOOS ROMS Hawaii reanalysis (scratch)",
         },
     },
+    # The ROMS forecast best-series store (issue #10), 2025-01-01 onward.
+    "roms_hiig": {
+        "bucket": "ocean-icechunks",
+        "viewer_prefix": "pacioos/roms_hiig/viewer",
+        "stores": {
+            "": {
+                "url": f"{PUBLIC}/ocean-icechunks/pacioos/roms_hiig/icechunk",
+                "title": "ROMS Hawaii forecast, best time series, 2025-",
+                "view": f"{_HAWAII_VIEW}::dimIndices_time=0::dimIndices_depth=0",
+            },
+        },
+        "variables": ("temp", "salt", "u", "v", "zeta"),
+        "catalog": {
+            "path": "static/catalog-extended.json",
+            "title": "PacIOOS ROMS Hawaii forecast",
+        },
+    },
+    # The scratch build of the forecast store (issue #10): may be rewritten or deleted.
+    "roms_hiig-scratch": {
+        "bucket": "ocean-icechunks",
+        "viewer_prefix": "test-repo/pacioos/roms_hiig/viewer",
+        "stores": {
+            "": {
+                "url": f"{PUBLIC}/ocean-icechunks/test-repo/pacioos/roms_hiig/icechunk-build",
+                "title": "ROMS Hawaii forecast, best time series (SCRATCH build)",
+                "view": f"{_HAWAII_VIEW}::dimIndices_time=0::dimIndices_depth=0",
+            },
+        },
+        "variables": ("temp", "salt", "u", "v", "zeta"),
+        "catalog": {
+            "path": "static/catalog-extended.json",
+            "title": "PacIOOS ROMS Hawaii forecast (scratch)",
+        },
+    },
 }
 DEFAULT_DIST = Path("/tmp/gridlook-dist")
 

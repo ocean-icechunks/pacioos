@@ -3,7 +3,9 @@
 Code for the virtual Icechunk stores over the NetCDF copies on Source Cooperative.
 `smoke_test.py` is the smoke test behind issues #10–#14. The **reanalysis store (#11) is
 published**, at `ocean-icechunks/pacioos/roms_hiig_reanalysis/icechunk` (tag `v2.0`), built by
-`roms_hiig_reanalysis/build_store.py`. The other products have no store yet.
+`roms_hiig_reanalysis/build_store.py`. The **ROMS forecast best-series store (#10)** is built and
+validated in scratch (`roms_hiig/build_store.py`), not yet in production. WRF and WW3 have no
+store yet.
 
 | File | What |
 | --- | --- |
@@ -14,6 +16,7 @@ published**, at `ocean-icechunks/pacioos/roms_hiig_reanalysis/icechunk` (tag `v2
 | `icechunk_utils.py` | Source Cooperative credentials and repositories (copied from ocean-icechunks/icechunks) |
 | `publish_viewer.py` | Builds the gridlook browser viewer and uploads it beside a store (adapted from ocean-icechunks/icechunks) |
 | `roms_hiig_reanalysis/` | Reanalysis v2.0 store (#11). Start with its [`how_store_created.md`](roms_hiig_reanalysis/how_store_created.md) |
+| `roms_hiig/` | ROMS forecast store, best time series (#10). Start with its [`how_store_created.md`](roms_hiig/how_store_created.md) |
 
 ```bash
 /srv/conda/bin/python3.12 -m venv ~/venvs/pacioos
