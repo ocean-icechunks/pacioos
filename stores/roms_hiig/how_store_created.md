@@ -92,6 +92,8 @@ All in `stores/roms_hiig/` unless noted.
 | `forecast-smoke-test-local.ipynb` | Step 2. Small stores in a temporary local folder, checked against netCDF-C, including a made-up gap. No credentials. Its last run is saved in it. |
 | `make_smoke_notebook.py` | The notebook's source, as plain Python; it writes the notebook |
 | `build_store.py` | Steps 3 and 4: scan every header, check them, write, validate from the public URL. Writes to scratch unless given `--dest production` |
+| `update_store.py` | The daily update (#4): diff the store against the plan from every run, write the difference in one commit, verify. `--dry-run` to see what it would do |
+| `test_update_store.py` | Tests of `update_store.py` against local repos: catch-up, rerun, late run, gap fill, refusals |
 | `README.md` | The store's README, to publish beside it |
 | `requirements.txt` | What these need (it includes `../requirements.txt`) |
 | `../pacioos_virtual.py` | The reference code shared by all PacIOOS products: header scans, the best rule, depth-plane references |
@@ -144,15 +146,60 @@ To refresh the ERDDAP metadata, run
 - **fsspec cannot fetch ERDDAP griddap queries:** it treats the `[ ]` in the URL as a glob.
   `build_store.py` uses urllib for them.
 
-## Open: the daily update (#4)
+## The daily update (#4): `update_store.py`
 
-Each new run takes over the last 7 days of the best series and adds 8 new steps. A daily update
-appends 8 steps along `time` and re-points the references of the 49 steps before them, with the
-two time-length coordinates, in one commit. This script does not do that: it writes the series
-whole, and stops on a store that holds a different series. The options, the manifest-split size
-to settle before the daily job starts (yearly splits, copied from the reanalysis, make each daily
-commit rewrite the whole current year's manifests), and the checks to keep are in
-[the #4 comment of 2026-11-14](https://github.com/ocean-icechunks/pacioos/issues/4#issuecomment-6870854483).
+Each new run takes over the last 7 days of the best series and adds 8 new steps. So a daily
+update re-points the 49 steps before the new end and appends 8 new ones. `update_store.py`
+does it the way the OISST pipeline does: **read the state, diff it against what should be there,
+do the missing work.**
+
+1. Scan the headers of any new runs (reusing `build_store.scan`; the scan file caches the
+   others), and check them.
+2. Plan the whole best series from every run.
+3. Compare the plan with the store's own `time` and `forecast_reference_time`. A step needs
+   writing if it is new, or if a different run now wins it. That is enough to find every change,
+   because a step's references depend only on (run, lead) and the copies are write-once.
+4. Make one commit: resize along `time`, set the changed references with
+   `IcechunkStore.set_virtual_refs`, rewrite the three time-length coordinates, and update the
+   coverage attributes and `history`.
+5. Reopen from storage and check the coordinates against the plan, and sampled planes of the
+   changed steps against netCDF-C.
+
+```bash
+python update_store.py --dest production --dry-run    # what would change; writes nothing
+python update_store.py --dest production
+```
+
+Each run takes about 10 s plus about 2 s for each new header, and a minute to verify. If there
+is nothing new, it commits nothing. Missed days are caught up on the next run. A run copied late
+(an older day) re-points the steps it now wins, and fills any gap. Nothing is written before the
+single commit, so a run can be killed and rerun. It **stops** rather than shorten the axis or
+uncover a covered step, which could only happen if a copy disappeared or changed (#2).
+
+**Tested 2026-11-14:**
+
+- `test_update_store.py`, local repos, about 3 minutes. Five scenarios pass:
+  - three missed days are caught up (24 steps appended, 49 re-pointed), and a rerun commits
+    nothing;
+  - a late run re-points its 8 steps;
+  - a 10-run hole leaves 31 NaN steps, and the late runs then fill it;
+  - a plan that would shorten the store is refused;
+  - a dry run writes nothing.
+
+  After each update the store reads the same as a fresh full build, and the snapshot before the
+  update still reads the old series.
+- End to end on Source Cooperative: `--dest update-test` (a scratch copy built three runs behind)
+  was caught up in one 3.9 s commit and verified. A rerun said "up to date". `build_store.py
+  validate --dest update-test` then passed in full: the axis is identical to ERDDAP's, 125
+  planes equal netCDF-C, and 12 point values equal ERDDAP's.
+- `--dest production --dry-run`: up to date, nothing written.
+
+**Still open for the hackweek (#4):** run it after each day's upload, on a schedule. It needs no
+access to the PacIOOS server, so GitHub Actions works, as for OISST. It also needs Source
+Cooperative credentials for a scheduled job (a role, not the personal `source-coop` login), and
+an alert when it stops or fails. The manifest splits stay yearly (Eli, 2026-11-14). The time
+coordinates are stored in chunks of 5,497 steps, the length at the first build, so they gain one
+more chunk every ~1.9 years.
 
 ## Prompt for a coding agent
 
