@@ -28,10 +28,9 @@ Moved here from `ocean-icechunks/icechunks` on 2026-11-13 so the PacIOOS team ca
   Decisions (Eli): one depth plane per chunk; ERDDAP metadata saved in the repo, shorter title;
   one group. Code and the PacIOOS team guide: `stores/roms_hiig_reanalysis/`, start with
   `how_store_created.md`; build with `build_store.py` (scan, check, write, validate; resumable,
-  scratch unless `--dest production`). Work is on branch `reanalysis-smoke-test`, no PR yet.
-  **Remaining:** the project README with a loading example (skill step 4); scratch copies under
-  `test-repo/pacioos/roms_hiig_reanalysis/` (`icechunk`, `icechunk-build`, viewer, README) can be
-  deleted when no longer wanted.
+  scratch unless `--dest production`). Work is on branch `reanalysis-smoke-test` (PR open, see #11).
+  Viewer checked by Eli. Scratch copies deleted 2026-11-14. **Remaining:** the project README
+  with a loading example (skill step 4).
 
 ## Open threads
 

@@ -26,6 +26,10 @@ documentation**. Each step has to pass before the next one starts.
 - store: `https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/icechunk`
 - viewer: <https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/viewer/index.html>
 
+The viewer draws the store in an ordinary browser, with no extension (checked by Eli Holmes,
+2026-11-14). Both the store and the NetCDF copies are on `data.source.coop`, which sends the
+CORS headers a browser needs.
+
 The production build, 2026-11-14, as `build_store.py` printed it:
 
 - the scan read the headers of all 4,380 files in 10 minutes (6 processes, 7.5 files/s), with
@@ -43,15 +47,9 @@ The production build, 2026-11-14, as `build_store.py` printed it:
 The same build was run first to `test-repo/pacioos/roms_hiig_reanalysis/icechunk-build`, with
 the same results.
 
-Scratch store, viewer and README from step 3 (these may be rewritten or deleted at any time):
-
-- store: `https://data.source.coop/ocean-icechunks/test-repo/pacioos/roms_hiig_reanalysis/icechunk`
-- viewer: <https://data.source.coop/ocean-icechunks/test-repo/pacioos/roms_hiig_reanalysis/viewer/index.html>
-- README: <https://data.source.coop/ocean-icechunks/test-repo/pacioos/roms_hiig_reanalysis/README.md>
-
-The viewer draws the scratch store in an ordinary browser, with no extension (Eli Holmes,
-2026-11-14). Both the store and the NetCDF copies are on `data.source.coop`, which sends the
-CORS headers a browser needs.
+The scratch copies from steps 3 and 4 (under `ocean-icechunks/test-repo/pacioos/roms_hiig_reanalysis/`)
+were deleted on 2026-11-14, after the production store was checked. `reanalysis-scratch-sc.ipynb`
+and `build_store.py --dest scratch` recreate them.
 
 ## The decisions (Eli Holmes, 2026-11-14)
 
@@ -176,6 +174,8 @@ git diff erddap_metadata.json        # review before committing
   of about 5 s.
 - **The time axis is checked against 35,040 computed steps, not against ERDDAP.** It is the
   same count and span ERDDAP lists (checked 2026-11-13).
+- **Deleting on Source Cooperative goes one key at a time.** It refuses S3's multi-object
+  `DeleteObjects` (answering `NoSuchBucket`).
 - **The notebooks never write under `pacioos/<dataset>/netcdf/`.** The NetCDF copies are
   write-once (see `AGENTS.md`).
 
