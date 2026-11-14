@@ -19,12 +19,13 @@ documentation**. Each step has to pass before the next one starts.
 | 2. Local smoke test | done | `reanalysis-smoke-test-local.ipynb` |
 | 3. Scratch store on Source Cooperative | done | `reanalysis-scratch-sc.ipynb`, viewer, scratch README |
 | 4. Production build, all 4,380 files | **done, 2026-11-14** | `build_store.py`; the store, tagged `v2.0`, and its viewer |
-| 5. Project README and loading example | not yet | |
+| 5. Project README and loading example | **done, 2026-11-14** | `README.md`, also published beside the store |
 
 **The store** (public, anonymous, tag `v2.0`):
 
 - store: `https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/icechunk`
 - viewer: <https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/viewer/index.html>
+- README: <https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/README.md> (the copy of `README.md` in this folder; upload it again after editing it)
 
 The viewer draws the store in an ordinary browser, with no extension (checked by Eli Holmes,
 2026-11-14). Both the store and the NetCDF copies are on `data.source.coop`, which sends the

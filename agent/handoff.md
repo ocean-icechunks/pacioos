@@ -29,8 +29,9 @@ Moved here from `ocean-icechunks/icechunks` on 2026-11-13 so the PacIOOS team ca
   one group. Code and the PacIOOS team guide: `stores/roms_hiig_reanalysis/`, start with
   `how_store_created.md`; build with `build_store.py` (scan, check, write, validate; resumable,
   scratch unless `--dest production`). Work is on branch `reanalysis-smoke-test` (PR open, see #11).
-  Viewer checked by Eli. Scratch copies deleted 2026-11-14. **Remaining:** the project README
-  with a loading example (skill step 4).
+  Viewer checked by Eli. Scratch copies deleted 2026-11-14. Project README (with tested loading
+  code) published beside the store 2026-11-14; repo copy `stores/roms_hiig_reanalysis/README.md`.
+  #11 is done apart from merging PR #18 and closing the issue.
 
 ## Open threads
 

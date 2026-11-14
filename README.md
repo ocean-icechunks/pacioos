@@ -23,7 +23,8 @@ yet ([#3](https://github.com/ocean-icechunks/pacioos/issues/3)). Each dataset's 
 goes in `pacioos/<dataset>/icechunk/`. The reanalysis store is built (tag `v2.0`, 2026-11-14):
 `https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/icechunk`, with a
 [viewer](https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/viewer/index.html)
-(see [`stores/roms_hiig_reanalysis/how_store_created.md`](stores/roms_hiig_reanalysis/how_store_created.md)).
+(see [its README](stores/roms_hiig_reanalysis/README.md), and
+[`how_store_created.md`](stores/roms_hiig_reanalysis/how_store_created.md) for how it was made).
 The others are not built yet.
 
 ## Start here: notes for the PacIOOS team
