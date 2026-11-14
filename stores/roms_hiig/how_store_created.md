@@ -76,6 +76,10 @@ What `build_store.py` printed for it:
   under `pacioos/roms_hiig/netcdf/`.
 - **No tag.** The store will change every day once the daily update (#4) exists, and each daily
   commit is a snapshot.
+- **One manifest per year of steps (2,920)**, the reanalysis store's convention. Monthly and
+  quarterly splits were measured, and reads were the same. Yearly splits make each daily commit
+  add up to about 3 MB of history, against 0.3–0.6 MB, which is small next to the NetCDF.
+  Measurements: [#4](https://github.com/ocean-icechunks/pacioos/issues/4#issuecomment-6871030769).
 
 ## The files
 
