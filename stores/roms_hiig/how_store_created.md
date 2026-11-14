@@ -38,10 +38,7 @@ opened in 1.0 s; a surface map 0.2 s, a 36-level field 0.8 s, the 23-month point
 The README's loading code was run as written against it, in a clean venv holding only icechunk,
 xarray and zarr.
 
-**The scratch build** (2026-11-14, still there; may be rewritten or deleted):
-
-- store: `https://data.source.coop/ocean-icechunks/test-repo/pacioos/roms_hiig/icechunk-build`
-- viewer: [temp](https://data.source.coop/ocean-icechunks/test-repo/pacioos/roms_hiig/viewer/index.html#icechunk+https://data.source.coop/ocean-icechunks/test-repo/pacioos/roms_hiig/icechunk-build::varname=temp::px=0::py=0::alt=4000000::lat=20.5::lon=-158.2::dimIndices_time=0::dimIndices_depth=0)
+**The scratch build** (2026-11-14; deleted the same day after production was checked, and `build_store.py --dest scratch` recreates it):
 
 What `build_store.py` printed for it:
 

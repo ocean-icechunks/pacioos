@@ -44,8 +44,8 @@ Moved here from `ocean-icechunks/icechunks` on 2026-11-13 so the PacIOOS team ca
   3-hourly axis, an uncovered time kept as a NaN step; **yearly manifest splits kept** for the
   same convention, after monthly/quarterly were measured (#4 comments). Code and team guide:
   `stores/roms_hiig/`, start with `how_store_created.md`. Files have four header layouts, so
-  every header is scanned. Scratch build `test-repo/pacioos/roms_hiig/icechunk-build` and its
-  viewer still exist; deleting them is suggested.
+  every header is scanned. Scratch copies deleted 2026-11-14 (`build_store.py --dest scratch`
+  recreates the scratch build).
 
 ## Open threads
 
