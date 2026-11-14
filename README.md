@@ -68,3 +68,14 @@ first two in `docs/design/`):
 The history of this work up to 2026-11-13 is in
 [ocean-icechunks/icechunks](https://github.com/ocean-icechunks/icechunks) PRs #35, #39 and #42,
 where it started.
+
+## Reuse and citation
+
+**The code** in this repository, which copies the PacIOOS files and builds the Icechunk stores,
+was written by E. E. Holmes and is released under the [Apache License 2.0](LICENSE). You are free
+to use, copy, modify and redistribute it, including commercially. Attribution is appreciated but
+not required: you do not need to cite it or ask permission.
+
+**The data** are PacIOOS's. The NetCDF copies and the Icechunk stores on Source Cooperative hold
+PacIOOS model output unchanged, so any use of them should cite PacIOOS, as described at
+<https://www.pacioos.hawaii.edu/data-services/>.
