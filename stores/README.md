@@ -10,6 +10,7 @@ here writes to Source Cooperative.
 | `smoke_test.py` | Builds a few runs of each product into local repos, reopens them read-only, and compares sampled planes with netCDF-C reads |
 | `survey_formats.py` | Reads 8 bytes of every copied file: NetCDF-3 or HDF5, and the NetCDF-3 record count |
 | `requirements.txt` | What the scripts need, checked in a clean venv |
+| `roms_hiig_reanalysis/` | Reanalysis v2.0 store (#11): `reanalysis-smoke-test-local.ipynb`, a local smoke test with its run saved, and its `requirements.txt` |
 
 ```bash
 /srv/conda/bin/python3.12 -m venv ~/venvs/pacioos
