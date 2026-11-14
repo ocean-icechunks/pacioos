@@ -58,6 +58,8 @@ BUCKET = 'ocean-icechunks'
 DESTINATIONS = {
     'scratch': 'test-repo/pacioos/roms_hiig/icechunk-build',
     'production': 'pacioos/roms_hiig/icechunk',
+    # a deliberately out-of-date copy, for testing update_store.py end to end
+    'update-test': 'test-repo/pacioos/roms_hiig/icechunk-update-test',
 }
 PUBLIC = 'https://data.source.coop'
 MIN_MINUTES = 20              # do not start the write with less time left on the keys
@@ -107,8 +109,8 @@ def _scan_one(day: str) -> dict:
 def scan(workdir: Path, procs: int) -> None:
     out = workdir / 'scan.jsonl'
     runs = fs.list_runs()
-    done = set(load_scan(workdir)) if out.exists() else set()
-    done = {d for d in done if 'error' not in load_scan(workdir)[d]} if done else set()
+    recs = load_scan(workdir) if out.exists() else {}
+    done = {d for d, r in recs.items() if 'error' not in r}
     todo = [f'{d:%Y-%m-%d}' for d in runs if f'{d:%Y-%m-%d}' not in done]
     log(f'scan: {len(runs)} runs on Source Cooperative ({runs[0]:%Y-%m-%d} .. {runs[-1]:%Y-%m-%d}); '
         f'{len(done)} scanned, {len(todo)} to go, {procs} processes')

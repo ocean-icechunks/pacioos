@@ -64,6 +64,11 @@ Moved here from `ocean-icechunks/icechunks` on 2026-11-13 so the PacIOOS team ca
   (resize + `set_virtual_refs` for 57 steps + rewrite the time coordinates), which matched a
   full build; `vz.to_icechunk` over an existing group raises `ContainsGroupError`. ERDDAP
   `roms_hiig` also ended at the 11-12 run on 2026-11-14, so there may be nothing new to catch up.
+  **Working updater:** `stores/roms_hiig/update_store.py` (diff the store against the best series
+  planned from every run, write the difference in one commit, verify; `--dry-run`), with
+  `test_update_store.py`. Tested locally and end to end on a scratch copy (deleted); production
+  dry run up to date. Run it after the catch-up copy. Left for the hackweek: schedule, a Source
+  Cooperative role (Alex Kerney set up OISST's and can help), alerts, WRF/WW3.
   The copies stop at 2026-11-12 until it exists, and the server's forecast archive is
   trimmed over time, so a missed day can be lost. Start from the NOAA OISST pipeline
   (ocean-icechunks/noaa_oisst).
