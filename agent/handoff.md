@@ -9,12 +9,12 @@ Moved here from `ocean-icechunks/icechunks` on 2026-11-13 so the PacIOOS team ca
 (history: that repo's PRs #35, #39, #42; issues transferred as #1–#4 here).
 
 - **Copied to Source Cooperative and checked** (every file has a `.md5`; listings match the
-  server; sampled downloads all matched): ROMS forecast `roms_hiig` (2026 to 2026-11-12),
+  server; sampled downloads all matched): ROMS forecast `roms_hiig` (2025-01-01 to 2026-11-12),
   `wrf_hi`, `ww3_hawaii`, and `roms_hiig_reanalysis/netcdf/v2.0/` (4,380 files, 1,169.8 GB).
   Table in `README.md`. Copy done as #1 (closed).
-- **No production Icechunk store yet.** `pacioos/<dataset>/icechunk/` is reserved. Plans: issues
-  #10 (ROMS forecast), #11 (reanalysis), #12 (WRF), #13 (WW3), #14 (all-runs view), each ending
-  with decisions for Eli, with audit and chunking comments added 2026-11-13.
+- **One store built: the reanalysis (#11, closed).** The others are not built: plans in issues
+  #10 (ROMS forecast), #12 (WRF), #13 (WW3), #14 (all-runs view), each ending with decisions
+  for Eli, with audit and chunking comments added 2026-11-13.
 - **Smoke test passed (PR #15, merged):** `stores/` builds a few runs of each product into
   local repos with computed references (the HYCOM trick: one depth plane per chunk for ROMS, one
   step for WRF/WW3), reopens read-only and matches netCDF-C reads. Why it is built that way:
@@ -22,16 +22,21 @@ Moved here from `ocean-icechunks/icechunks` on 2026-11-13 so the PacIOOS team ca
 - **File audit done (PR #16, merged):** `audit/report.md`; team version is the Claude Doc
   https://claude.ai/artifact/G67caCdBJ2Z7hupYuJZHnJ (snapshot `audit/report-pacioos.md`, linked
   from the README); `audit/how_audit_created.md` is a prompt to redo it.
-- **Reanalysis store, #11: published 2026-11-14.** `ocean-icechunks/pacioos/roms_hiig_reanalysis/icechunk`,
-  tag `v2.0`, all 35,040 steps 2009-01-01..2020-12-28, validated anonymously from the public URL
-  (120 planes = netCDF-C; 12-year point series 49.5 s), viewer at `.../roms_hiig_reanalysis/viewer/`.
+- **Reanalysis store, #11: published and closed 2026-11-14 (PR #18, merged).**
+  `ocean-icechunks/pacioos/roms_hiig_reanalysis/icechunk`, tag `v2.0`, all 35,040 steps
+  2009-01-01..2020-12-28, validated anonymously from the public URL (120 planes = netCDF-C;
+  12-year point series 49.5 s). README and viewer published beside it; Eli checked the viewer.
   Decisions (Eli): one depth plane per chunk; ERDDAP metadata saved in the repo, shorter title;
   one group. Code and the PacIOOS team guide: `stores/roms_hiig_reanalysis/`, start with
   `how_store_created.md`; build with `build_store.py` (scan, check, write, validate; resumable,
-  scratch unless `--dest production`). Work is on branch `reanalysis-smoke-test` (PR open, see #11).
-  Viewer checked by Eli. Scratch copies deleted 2026-11-14. Project README (with tested loading
-  code) published beside the store 2026-11-14; repo copy `stores/roms_hiig_reanalysis/README.md`.
-  #11 is done apart from merging PR #18 and closing the issue.
+  scratch unless `--dest production`). Scratch copies deleted. Lessons filed as
+  ocean-icechunks/ocean-icechunks-skills#14.
+- **Product README on Source Cooperative** (`ocean-icechunks/pacioos/README.md`, 2026-11-14):
+  repo copy `source-coop/README.md`; re-upload it after editing. It lists the four datasets, the
+  copies and stores. Update its table as each store is built. The one-line product description
+  is set by Eli in Source Cooperative's settings (a suggested text was given 2026-11-14).
+- **Next store, suggested (not decided):** the ROMS forecast (#10). Same grid and depth-plane
+  chunks as the reanalysis, but NetCDF-3 and the THREDDS "best" rule across runs.
 
 ## Open threads
 
@@ -68,6 +73,8 @@ Moved here from `ocean-icechunks/icechunks` on 2026-11-13 so the PacIOOS team ca
   production still scans all files. An append rewrites root attributes. xarray needs
   `_FillValue` base64-encoded for Zarr v3. `chunks={}` makes point series ~25x slower than
   `chunks=None`. ERDDAP restarts now and then (503, then "unknown datasetID" for a minute).
+- Source Cooperative refuses S3 `DeleteObjects` (answers `NoSuchBucket`): delete one key at a
+  time.
 - `stores/icechunk_utils.py` and `stores/publish_viewer.py` are copies of the ones in
   ocean-icechunks/icechunks (the viewer one with PacIOOS products only), so this repo stands
   alone; a fix belongs in both. Build the viewer from a gridlook clone on `main`: Eli's
