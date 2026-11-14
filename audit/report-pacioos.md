@@ -178,10 +178,15 @@ For files that will be read from the cloud, and especially through a virtual sto
    with the dates moved on? The 71 files are listed in `audit/out/wrf_repeated_runs.csv`.
 2. **WW3 2020-04-27 to 05-04:** are these eight files' times one day early, like the files you
    corrected in March 2024?
-3. **WW3 cold starts:** should the first step of a cold-started run (an all-zero wave field)
-   be left out of the "best" series, or kept as THREDDS serves it?
-4. **The reanalysis:** is `temp` in °C (the files say `ppt`), and what are `salt`'s units?
-5. **Duplicate runs:** for days with two files that start at the same time (for example WRF
+3. **WW3 cold starts:** a cold-started run begins with an all-zero wave field, and its spin-up
+   lasts 11 hours to more than a day (sampled 2026-11-14), so it spoils most of the day it
+   supplies to the best series. ERDDAP serves these steps as they are, and the store will too,
+   marking them with a flag. Is there a better choice, for example leaving out the
+   cold-started run's first day where an earlier run covers it?
+4. **WW3 cold starts in 2026:** there have been seven this year, four between 10-18 and 10-27
+   (every second run). Is the restart file from the previous run not being carried over?
+5. **The reanalysis:** is `temp` in °C (the files say `ppt`), and what are `salt`'s units?
+6. **Duplicate runs:** for days with two files that start at the same time (for example WRF
    2022-02-21 and 2022-02-22), which is the right one? THREDDS uses the later file name.
-6. **Rewriting the NetCDFs:** would PacIOOS want rewritten, time-chunked NetCDFs, starting
+7. **Rewriting the NetCDFs:** would PacIOOS want rewritten, time-chunked NetCDFs, starting
    with WRF 2010–2017 and the reanalysis, and could future runs be written in the layout above?
