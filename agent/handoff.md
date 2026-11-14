@@ -22,15 +22,16 @@ Moved here from `ocean-icechunks/icechunks` on 2026-11-13 so the PacIOOS team ca
 - **File audit done (PR #16, merged):** `audit/report.md`; team version is the Claude Doc
   https://claude.ai/artifact/G67caCdBJ2Z7hupYuJZHnJ (snapshot `audit/report-pacioos.md`, linked
   from the README); `audit/how_audit_created.md` is a prompt to redo it.
-- **Reanalysis store, #11: decisions made; local test and scratch store done** (branch
-  `reanalysis-smoke-test`, 2026-11-14, no PR yet). Eli decided: one depth plane per chunk;
-  metadata from PacIOOS ERDDAP, saved in the repo (`erddap_metadata.json`), title without
-  ": 3-D Variables"; one group. Everything is in `stores/roms_hiig_reanalysis/`: start with
-  `how_store_created.md`, the guide for the PacIOOS team (steps, decisions, an agent prompt).
-  The scratch store, viewer and README are under `ocean-icechunks/test-repo/pacioos/roms_hiig_reanalysis/`.
-  The viewer draws the store in an ordinary browser (Eli, 2026-11-14).
-  **Remaining:** the production build script (all 4,380 files into
-  `pacioos/roms_hiig_reanalysis/icechunk`, tag `v2.0`), then the project README.
+- **Reanalysis store, #11: published 2026-11-14.** `ocean-icechunks/pacioos/roms_hiig_reanalysis/icechunk`,
+  tag `v2.0`, all 35,040 steps 2009-01-01..2020-12-28, validated anonymously from the public URL
+  (120 planes = netCDF-C; 12-year point series 49.5 s), viewer at `.../roms_hiig_reanalysis/viewer/`.
+  Decisions (Eli): one depth plane per chunk; ERDDAP metadata saved in the repo, shorter title;
+  one group. Code and the PacIOOS team guide: `stores/roms_hiig_reanalysis/`, start with
+  `how_store_created.md`; build with `build_store.py` (scan, check, write, validate; resumable,
+  scratch unless `--dest production`). Work is on branch `reanalysis-smoke-test`, no PR yet.
+  **Remaining:** the project README with a loading example (skill step 4); scratch copies under
+  `test-repo/pacioos/roms_hiig_reanalysis/` (`icechunk`, `icechunk-build`, viewer, README) can be
+  deleted when no longer wanted.
 
 ## Open threads
 

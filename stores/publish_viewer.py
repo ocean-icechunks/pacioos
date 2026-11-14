@@ -64,6 +64,23 @@ _HAWAII_VIEW = "px=0::py=0::alt=4000000::lat=20.5::lon=-158.2"
 
 # One entry per store that gets a viewer (see ocean-icechunks/icechunks for the fields).
 PRODUCTS = {
+    # The published reanalysis store (issue #11), 2009-01-01 .. 2020-12-28, tag v2.0.
+    "roms_hiig_reanalysis": {
+        "bucket": "ocean-icechunks",
+        "viewer_prefix": "pacioos/roms_hiig_reanalysis/viewer",
+        "stores": {
+            "": {
+                "url": f"{PUBLIC}/ocean-icechunks/pacioos/roms_hiig_reanalysis/icechunk",
+                "title": "ROMS Hawaii reanalysis v2.0, 2009-2020",
+                "view": f"{_HAWAII_VIEW}::dimIndices_time=0::dimIndices_depth=0",
+            },
+        },
+        "variables": ("temp", "salt", "u", "v", "zeta"),
+        "catalog": {
+            "path": "static/catalog-extended.json",
+            "title": "PacIOOS ROMS Hawaii reanalysis",
+        },
+    },
     # The scratch copy of the reanalysis store (issue #11): may be rewritten or deleted.
     "roms_hiig_reanalysis-scratch": {
         "bucket": "ocean-icechunks",

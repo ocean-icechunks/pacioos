@@ -20,7 +20,11 @@ Cooperative and never load the PacIOOS server.
 
 Each file has a `.md5` next to it. The ROMS hindcast (`roms_hiig_assim`, 3.37 TB) is not copied
 yet ([#3](https://github.com/ocean-icechunks/pacioos/issues/3)). Each dataset's Icechunk store
-will go in `pacioos/<dataset>/icechunk/`; none is built yet.
+goes in `pacioos/<dataset>/icechunk/`. The reanalysis store is built (tag `v2.0`, 2026-11-14):
+`https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/icechunk`, with a
+[viewer](https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/viewer/index.html)
+(see [`stores/roms_hiig_reanalysis/how_store_created.md`](stores/roms_hiig_reanalysis/how_store_created.md)).
+The others are not built yet.
 
 ## Start here: notes for the PacIOOS team
 
@@ -45,7 +49,7 @@ first two in `docs/design/`):
 | --- | --- |
 | [`upload/`](upload/) | Scripts that copy the files to Source Cooperative and check the copies; how to run them |
 | [`audit/`](audit/) | File audit of the copies (2026-11-13): [`report.md`](audit/report.md) (technical), [`report-pacioos.md`](audit/report-pacioos.md) (for the PacIOOS team), [`how_audit_created.md`](audit/how_audit_created.md) (a prompt to redo it) |
-| [`stores/`](stores/) | Virtual Icechunk store code: so far the smoke test behind issues #10–#14 |
+| [`stores/`](stores/) | Virtual Icechunk store code: the smoke test behind issues #10–#14, and the reanalysis build (#11) |
 | [`docs/design/file-headers.md`](docs/design/file-headers.md) | What the copied files are, read from their headers; the reasons behind the store design |
 | [`docs/design/source-probe.md`](docs/design/source-probe.md) | What the public servers and the files showed: sizes, formats, chunking, options |
 | [`docs/design/transfer-plan.md`](docs/design/transfer-plan.md) | The plain-language transfer plan shared with PacIOOS (snapshot) |

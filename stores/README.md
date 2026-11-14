@@ -1,10 +1,9 @@
 # stores/
 
-Code for the virtual Icechunk stores over the NetCDF copies on Source Cooperative. There is no
-production build yet. `smoke_test.py` is the smoke test behind issues #10–#14. The reanalysis
-(#11) is furthest along: `roms_hiig_reanalysis/` has a local smoke test and a scratch store on
-Source Cooperative (under `ocean-icechunks/test-repo/`; nothing here writes to the production
-prefix).
+Code for the virtual Icechunk stores over the NetCDF copies on Source Cooperative.
+`smoke_test.py` is the smoke test behind issues #10–#14. The **reanalysis store (#11) is
+published**, at `ocean-icechunks/pacioos/roms_hiig_reanalysis/icechunk` (tag `v2.0`), built by
+`roms_hiig_reanalysis/build_store.py`. The other products have no store yet.
 
 | File | What |
 | --- | --- |

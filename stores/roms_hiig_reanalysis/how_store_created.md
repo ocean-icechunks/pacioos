@@ -18,10 +18,32 @@ documentation**. Each step has to pass before the next one starts.
 | 1. Plan | done | issue #11; decisions below |
 | 2. Local smoke test | done | `reanalysis-smoke-test-local.ipynb` |
 | 3. Scratch store on Source Cooperative | done | `reanalysis-scratch-sc.ipynb`, viewer, scratch README |
-| 4. Production build, all 4,380 files | **not written yet** | will be a script beside these notebooks |
+| 4. Production build, all 4,380 files | **done, 2026-11-14** | `build_store.py`; the store, tagged `v2.0`, and its viewer |
 | 5. Project README and loading example | not yet | |
 
-Scratch store, viewer and README (these may be rewritten or deleted at any time):
+**The store** (public, anonymous, tag `v2.0`):
+
+- store: `https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/icechunk`
+- viewer: <https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/viewer/index.html>
+
+The production build, 2026-11-14, as `build_store.py` printed it:
+
+- the scan read the headers of all 4,380 files in 10 minutes (6 processes, 7.5 files/s), with
+  no errors;
+- the check found every file with the same size, chunk offsets, coordinates and mask, and 8
+  steps at 00–21Z of its own day;
+- the write took 66 s: 12 yearly commits, 35,040 steps, about 5.1 million references, 171
+  objects, 68.8 MB;
+- validation, anonymously from the public URL, passed. The store opened in 1.2 s. Its time
+  axis equals the 35,040 expected steps. 120 planes (2 steps per year × 5 variables) are
+  identical to netCDF-C. Land reads as NaN. Timings, with Zarr `async.concurrency` = 128 on
+  one JupyterHub: a surface map 0.4 s, a 36-level field 0.8 s, and a 12-year surface point
+  series 49.5 s (35,040 reads, 8.1 GB).
+
+The same build was run first to `test-repo/pacioos/roms_hiig_reanalysis/icechunk-build`, with
+the same results.
+
+Scratch store, viewer and README from step 3 (these may be rewritten or deleted at any time):
 
 - store: `https://data.source.coop/ocean-icechunks/test-repo/pacioos/roms_hiig_reanalysis/icechunk`
 - viewer: <https://data.source.coop/ocean-icechunks/test-repo/pacioos/roms_hiig_reanalysis/viewer/index.html>
@@ -56,6 +78,7 @@ All in `stores/roms_hiig_reanalysis/` unless noted.
 | `erddap_metadata.json` | The ERDDAP attributes of `roms_hiig_reanalysis` and `roms_hiig_reanalysis_ssh`, saved 2026-11-14 |
 | `reanalysis-smoke-test-local.ipynb` | Step 2. Builds small stores in a temporary local folder and checks them against netCDF-C. No credentials. Its last run is saved in it. |
 | `reanalysis-scratch-sc.ipynb` | Step 3. Writes the small store to the scratch prefix on Source Cooperative, reads it back anonymously, checks CORS, uploads the scratch README |
+| `build_store.py` | Step 4, the production build: scan every header, check them, write year by year, validate from the public URL, tag `v2.0`. Resumable. Writes to scratch unless given `--dest production` |
 | `requirements.txt` | What these need (it includes `../requirements.txt`) |
 | `../pacioos_virtual.py` | The general reference code for all PacIOOS products: header scans, depth-plane references |
 | `../icechunk_utils.py` | Source Cooperative credentials (through the `source-coop` CLI) and opening a repository there |
@@ -113,6 +136,22 @@ The notebook writes only under `ocean-icechunks/test-repo/`. If the scratch stor
 exists, it skips the write and checks the existing store. To start again, use the guarded
 delete cell at its end. Then open the viewer link. Only a person looking at it can say whether
 it draws.
+
+### Step 4: the production build
+
+```bash
+cd stores/roms_hiig_reanalysis
+python build_store.py scan            # headers of all 4,380 files -> out/scan.jsonl (read-only)
+python build_store.py check           # stops if any file's layout differs from the first
+python build_store.py write --dest scratch      # the full store, under test-repo/ first
+python build_store.py validate --dest scratch   # from the public URL; tags v2.0 if it passes
+# then the same write and validate with --dest production
+```
+
+Every phase can be rerun. The scan skips files already in `out/scan.jsonl` (gitignored).
+The write skips years the store already holds, commits one year at a time, and opens fresh
+keys before each year. It stops cleanly if the keys have under 20 minutes left: log in again
+and rerun it.
 
 ### Refreshing the ERDDAP metadata
 
