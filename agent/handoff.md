@@ -12,9 +12,9 @@ Moved here from `ocean-icechunks/icechunks` on 2026-11-13 so the PacIOOS team ca
   server; sampled downloads all matched): ROMS forecast `roms_hiig` (2025-01-01 to 2026-11-12),
   `wrf_hi`, `ww3_hawaii`, and `roms_hiig_reanalysis/netcdf/v2.0/` (4,380 files, 1,169.8 GB).
   Table in `README.md`. Copy done as #1 (closed).
-- **One store built: the reanalysis (#11, closed).** The others are not built: plans in issues
-  #10 (ROMS forecast), #12 (WRF), #13 (WW3), #14 (all-runs view), each ending with decisions
-  for Eli, with audit and chunking comments added 2026-11-13.
+- **Two stores built: the reanalysis (#11, closed) and the ROMS forecast (#10).** Not built:
+  #12 (WRF), #13 (WW3), #14 (all-runs view), each ending with decisions for Eli, with audit and
+  chunking comments added 2026-11-13.
 - **Smoke test passed (PR #15, merged):** `stores/` builds a few runs of each product into
   local repos with computed references (the HYCOM trick: one depth plane per chunk for ROMS, one
   step for WRF/WW3), reopens read-only and matches netCDF-C reads. Why it is built that way:
@@ -35,8 +35,17 @@ Moved here from `ocean-icechunks/icechunks` on 2026-11-13 so the PacIOOS team ca
   repo copy `source-coop/README.md`; re-upload it after editing. It lists the four datasets, the
   copies and stores. Update its table as each store is built. The one-line product description
   is set by Eli in Source Cooperative's settings (a suggested text was given 2026-11-14).
-- **Next store, suggested (not decided):** the ROMS forecast (#10). Same grid and depth-plane
-  chunks as the reanalysis, but NetCDF-3 and the THREDDS "best" rule across runs.
+- **ROMS forecast store, #10: published 2026-11-14 (branch `roms-forecast-store`).**
+  `ocean-icechunks/pacioos/roms_hiig/icechunk`, best series of the 654 runs through 2026-11-12,
+  5,497 steps, no tag (it will change daily). Validated anonymously: axis identical to ERDDAP
+  `roms_hiig`, 125 planes = netCDF-C, 12 point values = ERDDAP. Viewer and README beside it;
+  product README updated; Eli checked the scratch viewer. Decisions (Eli): as the reanalysis
+  (depth-plane chunks, saved ERDDAP metadata, one group, lat/lon), title ": Forecast"; regular
+  3-hourly axis, an uncovered time kept as a NaN step; **yearly manifest splits kept** for the
+  same convention, after monthly/quarterly were measured (#4 comments). Code and team guide:
+  `stores/roms_hiig/`, start with `how_store_created.md`. Files have four header layouts, so
+  every header is scanned. Scratch build `test-repo/pacioos/roms_hiig/icechunk-build` and its
+  viewer still exist; deleting them is suggested.
 
 ## Open threads
 
@@ -51,11 +60,16 @@ Moved here from `ocean-icechunks/icechunks` on 2026-11-13 so the PacIOOS team ca
 - **#9 — upload script**: a failed destination listing can overwrite finished copies.
 
 - **#4 — daily auto-update** of forecast/WRF/WW3, the PacIOOS hackweek project (2026-11-17).
+  Store side, measured 2026-11-14 (comments on #4): the best series needs an incremental update
+  (resize + `set_virtual_refs` for 57 steps + rewrite the time coordinates), which matched a
+  full build; `vz.to_icechunk` over an existing group raises `ContainsGroupError`. ERDDAP
+  `roms_hiig` also ended at the 11-12 run on 2026-11-14, so there may be nothing new to catch up.
   The copies stop at 2026-11-12 until it exists, and the server's forecast archive is
   trimmed over time, so a missed day can be lost. Start from the NOAA OISST pipeline
   (ocean-icechunks/noaa_oisst).
-- **#3 — the hindcast** (3.37 TB). Eli decides which years after looking at the reanalysis,
-  maybe comparing the two (overlap 2015–2020); it may go to a different S3 bucket.
+- **#3 — the hindcast** (3.37 TB). Which years to copy is the **PacIOOS team's** call (Eli,
+  2026-11-14: she does not know how to pick them); maybe after comparing with the reanalysis
+  (overlap 2015–2020). It may go to a different S3 bucket.
 - **#2 — versions and changed files.** Hackathon scenarios. The upload script only detects a
   size change; a same-size rewrite is not noticed.
 
