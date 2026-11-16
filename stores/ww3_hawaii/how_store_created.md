@@ -22,12 +22,12 @@ step has to pass before the next one starts.
 | 3. Scratch store on Source Cooperative | done | `build_store.py --dest scratch`; scratch viewer published for Eli Holmes |
 | 4. Production build | **done, 2026-11-16** | `build_store.py --dest production`; the store and its viewer |
 | 5. Store README and loading example | **done, 2026-11-16** | `README.md` and `cold_starts_2026.png`, published beside the store |
-| 6. Daily update | not started | adapt `../roms_hiig/update_store.py` (#4) |
+| 6. Daily update | **updater done, 2026-11-16**; schedule open (#4) | `update_store.py`, over `../best_series_update.py`; first production update 2026-11-16 |
 
 **The store** (public, anonymous, not tagged: it will change daily once #4 exists):
 
-- store: `https://data.source.coop/ocean-icechunks/pacioos/ww3_hawaii/icechunk`, snapshot
-  `ZRCNA5VTJJGRR12GECW0`
+- store: `https://data.source.coop/ocean-icechunks/pacioos/ww3_hawaii/icechunk`, built as snapshot
+  `ZRCNA5VTJJGRR12GECW0`; updated 2026-11-16 to `H4T38ERC0AV8DM92RAZG` (runs through 11-15)
 - viewer: <https://data.source.coop/ocean-icechunks/pacioos/ww3_hawaii/viewer/index.html>
 - README: <https://data.source.coop/ocean-icechunks/pacioos/ww3_hawaii/README.md> (the copy of
   `README.md` in this folder; upload it again, with the figure, after editing it)
@@ -158,9 +158,12 @@ All in `stores/ww3_hawaii/` unless noted.
 | `make_smoke_notebook.py` | The notebook's source, as plain Python; it writes the notebook |
 | `build_store.py` | Steps 3 and 4: scan every header, check them, write, validate from the public URL. Writes to scratch unless given `--dest production` |
 | `make_cold_start_figure.py` | Draws `cold_starts_2026.png` for the README from the published store |
+| `update_store.py` | The daily update (#4): plan the best series from every run, write the difference from the store in one commit, verify. `--dry-run` to see what it would do |
+| `test_update_store.py` | Tests of `update_store.py` against local repos (runs 2026-09-15 .. 11-11): catch-up and rerun, late run, late cold-start run, gap fill, refusal, dry run |
 | `README.md`, `cold_starts_2026.png` | The store's README and its figure, to publish beside it |
 | `requirements.txt` | What these need (it includes `../requirements.txt`) |
 | `../pacioos_virtual.py` | Reference code shared by all PacIOOS products: header scans, the best rule |
+| `../best_series_update.py` | The diff, one-commit update and verify shared by the forecast stores' `update_store.py` |
 | `../icechunk_utils.py` | Source Cooperative credentials (through the `source-coop` CLI) |
 | `../publish_viewer.py` | Builds the gridlook viewer and uploads it beside a store (`ww3_hawaii`, `ww3_hawaii-scratch`) |
 
@@ -190,6 +193,35 @@ The scan lists the runs on Source Cooperative (not built from dates: two 2020 fi
 series in one commit. Rerun on a store that already holds the same series, it does nothing. On
 a store holding a different series it stops, because updating is the daily update's job (#4).
 
+## The daily update (#4): `update_store.py`
+
+The same as the ROMS forecast's (its `how_store_created.md` explains the steps): scan any new
+headers, check every file, plan the whole best series, then `../best_series_update.py` diffs the
+plan against the store's `time` and `forecast_reference_time`, writes the changed references
+and every coordinate on time (including `best_step_flag`) in one commit, and verifies from
+storage. A daily run appends 24 steps and re-points the 157 from the new run's start to the old
+end.
+
+```bash
+python update_store.py --dest production --dry-run    # what would change; writes nothing
+python update_store.py --dest production
+```
+
+**Tested 2026-11-16:**
+
+- `test_update_store.py`, local repos over the runs 2026-09-15 .. 11-11, about 20 minutes (most
+  of it verify reading back over HTTPS). Six scenarios pass, each checked against a fresh build:
+  three missed days (72 appended, 157 re-pointed) and a rerun that commits nothing; a late run
+  (24 re-pointed); a late cold-start run (48 re-pointed and flagged, 192 → 240 flagged steps); a
+  10-run hole (107 NaN steps) filled; a shorter plan refused; a dry run.
+- Source Cooperative reset connections in three runs in a row (`Connection reset by peer`, a
+  short body); verify and the tests now retry read errors, and the passing run needed one retry.
+- **First production update, 2026-11-16**, after the catch-up copy: 96 steps appended, 157
+  re-pointed, from the 11-12 .. 11-15 runs (all 181 steps, none a cold start). Committed
+  `H4T38ERC0AV8DM92RAZG` in 3.6 s; verified from storage (coordinates = plan, 135,190 steps; 72
+  planes = netCDF-C); then read anonymously: the 133,596 covered steps equal ERDDAP's times, to
+  2026-11-22T18Z. README updated and re-uploaded.
+
 To refresh the ERDDAP metadata, run `python -c "import ww3_store as ws; ws.save_erddap_metadata()"`
 and review `git diff erddap_metadata.json` before committing.
 
@@ -210,8 +242,9 @@ and review `git diff erddap_metadata.json` before committing.
   structure, not offsets or run length.
 - **The validation's ERDDAP point comparison is NaN-aware.** `wdir` is NaN at some sea points
   and times in both the files and ERDDAP (no wind sea), and NaN ≠ NaN.
-- **ERDDAP ends days after the store.** The copies stop at the 2026-11-11 run; ERDDAP had runs to
-  11-20 on 2026-11-16. The validation compares only the span the store covers.
+- **ERDDAP can end days after the store**, whenever the copies are behind: at the build the copies
+  stopped at the 2026-11-11 run while ERDDAP had runs to 11-15. The validation compares only the
+  span the store covers. After the 2026-11-16 catch-up and update both ended at 2026-11-22T18Z.
 
 ## Questions for PacIOOS
 

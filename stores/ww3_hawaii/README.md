@@ -23,7 +23,7 @@ Three coordinates on `time` say where each value came from: `forecast_reference_
 Every data read goes to the daily NetCDF files, copied unchanged from PacIOOS to Source
 Cooperative at `https://data.source.coop/ocean-icechunks/pacioos/ww3_hawaii/netcdf/`.
 
-What it adds over the files: **one dataset** instead of 5,232 overlapping files, the best-series
+What it adds over the files: **one dataset** instead of thousands of overlapping files (5,236 on 2026-11-16), the best-series
 rule already applied, flags on the steps to treat with care, and **the metadata PacIOOS
 publishes on ERDDAP**, which the files lack ([below](#where-the-metadata-came-from)).
 
@@ -59,7 +59,7 @@ One group (the root). Every variable is `(time, lat, lon)`, `float32`:
 
 | Coordinate | Size | Values |
 |---|---|---|
-| `time` | 135,094 (2026-11-16) | 2011-06-21T21Z to the end of the newest run, every hour |
+| `time` | 135,190 (2026-11-16) | 2011-06-21T21Z to the end of the newest run, every hour |
 | `forecast_reference_time` | on `time` | the run each step comes from (NaT if no run covers it) |
 | `forecast_period` | on `time` | hours since that run's start |
 | `best_step_flag` | on `time` | 0, or flags on the run a step comes from (below) |
@@ -75,7 +75,7 @@ One group (the root). Every variable is `(time, lat, lon)`, `float32`:
   `forecast_reference_time` NaT. ERDDAP instead leaves them out. Every other step equals one of
   ERDDAP `ww3_hawaii`'s times (checked 2026-11-16), so
   `ds.sel(time=ds.forecast_reference_time.notnull())` gives ERDDAP's axis back.
-- **The time axis is continuous**: 135,094 steps exactly one hour apart, with no gaps. An
+- **The time axis is continuous**: every step exactly one hour apart, with no gaps. An
   uncovered hour is a step of `NaN`s, never a missing step, so the series can be resampled or
   filtered as it is.
 - **Land reads as `NaN`.** The files' fill value is `-999`, and readers that decode (xarray by
@@ -240,8 +240,9 @@ Measured 2026-11-16 from a JupyterHub, with `zarr.config.set({"async.concurrency
 ## Provenance
 
 - **Source files:** PacIOOS's daily run files `ww3hawaii_YYYYMMDD.nc` (NetCDF-3, uncompressed),
-  copied unchanged from PacIOOS to Source Cooperative, each with an `.md5` beside it. 5,232
-  runs, 2011-06-21 to 2026-11-11, most of them 181 hourly steps (five in 2013 are shorter).
+  copied unchanged from PacIOOS to Source Cooperative, each with an `.md5` beside it. 5,236
+  runs, 2011-06-21 to 2026-11-15 (2026-11-16), most of them 181 hourly steps (five in 2013 are
+  shorter).
   `ww3hawaii_20201230.nc` and `…1231.nc` sit in the `netcdf/2021/` folder, as on the PacIOOS
   server; the store references them there.
 - **Built** by `build_store.py` in
@@ -261,9 +262,12 @@ Measured 2026-11-16 from a JupyterHub, with `zarr.config.set({"async.concurrency
   [`how_store_created.md`](https://github.com/ocean-icechunks/pacioos/blob/main/stores/ww3_hawaii/how_store_created.md).
   The plan and decisions are in [issue #13](https://github.com/ocean-icechunks/pacioos/issues/13).
 
-**Updates.** For now the store covers the runs copied up to 2026-11-11. A daily update (issue
-#4) will add each new run. Every update is a new Icechunk snapshot, so the series as it stood on
-an earlier day stays readable.
+**Updates.** The store is brought up to date with `update_store.py`, which adds the steps of new
+runs, re-points older steps to the newest run that has them and rewrites `best_step_flag`, in
+one commit. Last update 2026-11-16: runs through 2026-11-15, snapshot `H4T38ERC0AV8DM92RAZG`,
+135,190 steps; read anonymously afterwards, its 133,596 covered steps equal ERDDAP's times.
+Updates are run by hand until the daily update (issue #4) is scheduled. Every update is a new
+Icechunk snapshot, so the series as it stood on an earlier day stays readable.
 
 ## Citation and reuse
 

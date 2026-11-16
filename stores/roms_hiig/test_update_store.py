@@ -27,7 +27,9 @@ import update_store as us  # noqa: E402
 
 icechunk.set_logs_filter('error')
 RECS = bs.load_scan(HERE / 'out')
-RUNS = sorted(RECS)
+# The scenarios were written for the runs through 2026-11-12; pinned so that new runs
+# (and gaps such as the missing 2026-11-13) do not change the expected counts.
+RUNS = sorted(d for d in RECS if d <= '2026-11-12')
 REF = pv.scan_nc3(fs.key(RUNS[0]))
 MAIN, SSH, _ = fs.load_metadata()
 VA = fs.variable_attrs(MAIN, SSH, REF['vars']['mask']['attrs'])

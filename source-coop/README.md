@@ -17,7 +17,7 @@ about a second as one lazy `xarray` dataset.
 
 The Icechunk stores are **virtual**. Each holds only Zarr metadata and byte-range references
 to the NetCDF copies beside it, so both the store and its data are served by Source
-Cooperative. The forecast copies run to 2026-11-15 (2026-11-16), and the ROMS forecast store includes those runs; the WW3 store still ends with the 2026-11-12 run. A daily update is planned. Where the files lack
+Cooperative. The forecast copies run to 2026-11-15 (2026-11-16), and the ROMS forecast and WW3 stores include those runs. A daily update is planned. Where the files lack
 metadata (WW3 above all), the stores take PacIOOS's ERDDAP attributes, and each store's
 `metadata_source` attribute says so.
 
