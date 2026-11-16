@@ -9,13 +9,13 @@ original NetCDF files are copied, unchanged, to the
 Cooperative. Virtual Icechunk stores are then built over those copies, so readers use Source
 Cooperative and never load the PacIOOS server.
 
-## What is on Source Cooperative (2026-11-13)
+## What is on Source Cooperative (2026-11-16)
 
 | Dataset (PacIOOS id) | Copies of the NetCDFs | Files | Size |
 | --- | --- | --- | --- |
-| ROMS forecast (`roms_hiig`) | `pacioos/roms_hiig/netcdf/` | 654 | 1.24 TB |
-| WRF (`wrf_hi`) | `pacioos/wrf_hi/netcdf/` | 5,607 | 0.94 TB |
-| WaveWatch III (`ww3_hawaii`) | `pacioos/ww3_hawaii/netcdf/` | 5,232 | 0.49 TB |
+| ROMS forecast (`roms_hiig`) | `pacioos/roms_hiig/netcdf/` | 656 | 1.24 TB |
+| WRF (`wrf_hi`) | `pacioos/wrf_hi/netcdf/` | 5,610 | 0.94 TB |
+| WaveWatch III (`ww3_hawaii`) | `pacioos/ww3_hawaii/netcdf/` | 5,236 | 0.49 TB |
 | ROMS reanalysis v2.0 (`roms_hiig_reanalysis`) | `pacioos/roms_hiig_reanalysis/netcdf/v2.0/` | 4,380 | 1.17 TB |
 
 Each file has a `.md5` next to it. The ROMS hindcast (`roms_hiig_assim`, 3.37 TB) is not copied
@@ -25,7 +25,9 @@ goes in `pacioos/<dataset>/icechunk/`. The reanalysis store is built (tag `v2.0`
 [viewer](https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/viewer/index.html)
 (see [its README](stores/roms_hiig_reanalysis/README.md), and
 [`how_store_created.md`](stores/roms_hiig_reanalysis/how_store_created.md) for how it was made).
-The others are not built yet.
+The ROMS forecast and WW3 stores are built too (see the product README,
+[`source-coop/README.md`](source-coop/README.md)); WRF is not yet. The forecast copies run to
+2026-11-15 (catch-up copy 2026-11-16).
 
 ## Start here: notes for the PacIOOS team
 
