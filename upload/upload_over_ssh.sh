@@ -92,6 +92,10 @@ for run in $(seq 1 "$MAX_RUNS"); do
     echo "=== stopped: some files CHANGED since they were uploaded (see the CHANGED lines above)." \
       | tee -a "$log"; exit 4
   fi
+  if [[ $status -eq 3 ]]; then   # could not list Source Cooperative: nothing uploaded; a person checks
+    echo "=== stopped: the upload could not list what is already on Source Cooperative (see above)." \
+      "Nothing was uploaded. Check the keys and the connection, then rerun." | tee -a "$log"; exit 3
+  fi
   [[ " $* " == *" --dry-run "* ]] && exit "$status"
   echo "=== run $run ended (status $status): ${last:-no summary, connection probably dropped}." \
        "Starting again in 60 s." | tee -a "$log"

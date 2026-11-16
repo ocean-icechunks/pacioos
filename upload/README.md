@@ -70,11 +70,18 @@ touched. What to do when versions or files change is worked through in
 - **Never overwrites a finished copy.** If a file's size on the server no longer matches its
   copy, it prints `CHANGED`, leaves both alone, and exits with status 4 at the end. The
   Icechunk stores point into these copies, so a person decides what the change is (a new
-  version, or a correction). A change that keeps the same size is not noticed.
+  version, or a correction). A change that keeps the same size is not noticed. The upload
+  itself uses rclone's `--immutable`, so even a mistake in that logic cannot replace an object
+  already on Source Cooperative.
+- **Stops before uploading anything if it cannot list Source Cooperative** (expired keys,
+  network): exit status 3. A failed listing must not be mistaken for an empty destination.
 - **Computes its MD5 checksum, then uploads it.** Both steps run at the lowest CPU and disk
   priority, so the server's own work comes first.
 - **Checks the uploaded size, then uploads a small `<file>.md5`** next to it. A `.md5` file
   means that file's upload finished.
+- **A copy without its `.md5`** (an earlier run stopped just after uploading it) is not
+  uploaded again: the script downloads it to compute its MD5, writes the `.md5` if it matches
+  the file on the server, and prints `CHANGED` if not.
 
 You can stop the script at any time (Ctrl+C) and run it again: it carries on where it left off.
 For the same reason, running it once a day after the model runs finish uploads just the new
