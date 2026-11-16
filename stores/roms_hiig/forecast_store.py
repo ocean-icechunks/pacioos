@@ -132,8 +132,9 @@ def _parse(rows) -> dict:
 def load_metadata(path: Path = METADATA_FILE) -> tuple[dict, dict, str]:
     """(main, ssh, fetched): the saved ERDDAP attributes, {variable: {attribute: value}}."""
     snap = json.loads(Path(path).read_text())
-    return (_parse(snap['datasets'][ERDDAP_IDS[0]]), _parse(snap['datasets'][ERDDAP_IDS[1]]),
-            snap['fetched'])
+    main = _parse(snap['datasets'][ERDDAP_IDS[0]])
+    main['_fetched'] = snap['fetched']           # for metadata_source; not an attribute
+    return main, _parse(snap['datasets'][ERDDAP_IDS[1]]), snap['fetched']
 
 
 def compare_with_live_erddap(path: Path = METADATA_FILE) -> pd.DataFrame | None:
@@ -188,6 +189,15 @@ def variable_attrs(main: dict, ssh: dict, file_mask_attrs: dict) -> dict:
     return attrs
 
 
+def metadata_source(fetched: str) -> str:
+    """The store's `metadata_source` attribute: where its attributes came from."""
+    return (f'Variable and global attributes from PacIOOS ERDDAP datasets {ERDDAP_IDS[0]} and '
+            f'{ERDDAP_IDS[1]} ({ERDDAP}/info/{ERDDAP_IDS[0]}/index.html), saved {fetched} in '
+            'stores/roms_hiig/erddap_metadata.json of https://github.com/ocean-icechunks/pacioos. '
+            'The NetCDF files carry only author, history and title ("Zlevel Model Data"). '
+            '_FillValue (9.99e10) and mask are the files\' own. No data values were changed.')
+
+
 def global_attrs(main: dict, time_index, runs, now=None) -> dict:
     """Global attributes for a store covering `time_index`, built from `runs` (days)."""
     now = pd.Timestamp(now or pd.Timestamp.now('UTC'))
@@ -199,6 +209,7 @@ def global_attrs(main: dict, time_index, runs, now=None) -> dict:
         'time_coverage_end': f'{time_index[-1]:%Y-%m-%dT%H:%M:%SZ}',
         'comment': (attrs.get('comment', '') + ' ' + BEST_RULE).strip(),
         'source_files': URL_PREFIX + f'{DATASET}/netcdf/',
+        'metadata_source': metadata_source(main.get('_fetched', 'see erddap_metadata.json')),
         'forecast_runs': f'{len(runs)} daily runs, {runs[0]:%Y-%m-%d} to {runs[-1]:%Y-%m-%d}',
         'history': (main['NC_GLOBAL'].get('history', '') + '\n').lstrip()
                    + f'{now:%Y-%m-%dT%H:%M:%SZ} Virtual Icechunk store (best time series) over '

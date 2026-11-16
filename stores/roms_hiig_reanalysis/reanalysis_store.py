@@ -102,8 +102,9 @@ def _parse(rows) -> dict:
 def load_metadata(path: Path = METADATA_FILE) -> tuple[dict, dict, str]:
     """(main, ssh, fetched): the saved ERDDAP attributes, {variable: {attribute: value}}."""
     snap = json.loads(Path(path).read_text())
-    return (_parse(snap['datasets'][ERDDAP_IDS[0]]), _parse(snap['datasets'][ERDDAP_IDS[1]]),
-            snap['fetched'])
+    main = _parse(snap['datasets'][ERDDAP_IDS[0]])
+    main['_fetched'] = snap['fetched']           # for metadata_source; not an attribute
+    return main, _parse(snap['datasets'][ERDDAP_IDS[1]]), snap['fetched']
 
 
 def compare_with_live_erddap(path: Path = METADATA_FILE) -> pd.DataFrame | None:
@@ -145,6 +146,16 @@ def variable_attrs(main: dict, ssh: dict, file_mask_attrs: dict) -> dict:
     return attrs
 
 
+def metadata_source(fetched: str) -> str:
+    """The store's `metadata_source` attribute: where its attributes came from."""
+    return (f'Variable and global attributes from PacIOOS ERDDAP datasets {ERDDAP_IDS[0]} and '
+            f'{ERDDAP_IDS[1]} ({ERDDAP}/info/{ERDDAP_IDS[0]}/index.html), saved {fetched} in '
+            'stores/roms_hiig_reanalysis/erddap_metadata.json of '
+            'https://github.com/ocean-icechunks/pacioos. The NetCDF files carry only author, '
+            'history and title ("Zlevel Model Data"), no fill value, temp units "ppt" and no salt '
+            'units. mask is the files\' own. No data values were changed.')
+
+
 def global_attrs(main: dict, time_index, now=None) -> dict:
     """Global attributes for a store covering `time_index`."""
     now = pd.Timestamp(now or pd.Timestamp.now('UTC'))
@@ -154,6 +165,7 @@ def global_attrs(main: dict, time_index, now=None) -> dict:
         'time_coverage_start': f'{time_index[0]:%Y-%m-%dT%H:%M:%SZ}',
         'time_coverage_end': f'{time_index[-1]:%Y-%m-%dT%H:%M:%SZ}',
         'source_files': URL_PREFIX + f'{DATASET}/netcdf/{VERSION}/',
+        'metadata_source': metadata_source(main.get('_fetched', 'see erddap_metadata.json')),
         'history': main['NC_GLOBAL']['history'] + '\n'
                    + f'{now:%Y-%m-%dT%H:%M:%SZ} Virtual Icechunk store over unchanged copies of '
                    'the v2.0 NetCDF files; metadata from PacIOOS ERDDAP, no data values changed.',

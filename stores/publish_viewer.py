@@ -133,6 +133,40 @@ PRODUCTS = {
             "title": "PacIOOS ROMS Hawaii forecast (scratch)",
         },
     },
+    # The WaveWatch III best-series store (issue #13), 2011-06-21 onward; lon is 0-360.
+    "ww3_hawaii": {
+        "bucket": "ocean-icechunks",
+        "viewer_prefix": "pacioos/ww3_hawaii/viewer",
+        "stores": {
+            "": {
+                "url": f"{PUBLIC}/ocean-icechunks/pacioos/ww3_hawaii/icechunk",
+                "title": "WaveWatch III Hawaii, best time series, 2011-",
+                "view": f"{_HAWAII_VIEW}::dimIndices_time=0",
+            },
+        },
+        "variables": ("Thgt", "Tper", "Tdir", "shgt", "sper", "sdir", "whgt", "wper", "wdir"),
+        "catalog": {
+            "path": "static/catalog-extended.json",
+            "title": "PacIOOS WaveWatch III Hawaii",
+        },
+    },
+    # The scratch build of the WW3 store (issue #13): may be rewritten or deleted.
+    "ww3_hawaii-scratch": {
+        "bucket": "ocean-icechunks",
+        "viewer_prefix": "test-repo/pacioos/ww3_hawaii/viewer",
+        "stores": {
+            "": {
+                "url": f"{PUBLIC}/ocean-icechunks/test-repo/pacioos/ww3_hawaii/icechunk-build",
+                "title": "WaveWatch III Hawaii, best time series (SCRATCH build)",
+                "view": f"{_HAWAII_VIEW}::dimIndices_time=0",
+            },
+        },
+        "variables": ("Thgt", "Tper", "Tdir", "shgt", "sper", "sdir", "whgt", "wper", "wdir"),
+        "catalog": {
+            "path": "static/catalog-extended.json",
+            "title": "PacIOOS WaveWatch III Hawaii (scratch)",
+        },
+    },
 }
 DEFAULT_DIST = Path("/tmp/gridlook-dist")
 
