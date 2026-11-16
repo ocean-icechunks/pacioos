@@ -25,8 +25,8 @@ documentation**. Each step has to pass before the next one starts.
 
 **The store** (public, anonymous, not tagged: it will change daily once #4 exists):
 
-- store: `https://data.source.coop/ocean-icechunks/pacioos/roms_hiig/icechunk`, snapshot
-  `W6C8C8NEFTSGB8DYXN30`
+- store: `https://data.source.coop/ocean-icechunks/pacioos/roms_hiig/icechunk`, built as snapshot
+  `W6C8C8NEFTSGB8DYXN30`; updated 2026-11-16 to `W2V6FPBAB0ET285V2XC0` (runs through 11-15)
 - viewer: <https://data.source.coop/ocean-icechunks/pacioos/roms_hiig/viewer/index.html>
 - README: <https://data.source.coop/ocean-icechunks/pacioos/roms_hiig/README.md> (the copy of
   `README.md` in this folder; upload it again after editing it)
@@ -190,6 +190,11 @@ uncover a covered step, which could only happen if a copy disappeared or changed
   validate --dest update-test` then passed in full: the axis is identical to ERDDAP's, 125
   planes equal netCDF-C, and 12 point values equal ERDDAP's. The copy was deleted afterwards.
 - `--dest production --dry-run`: up to date, nothing written.
+- **First production update, 2026-11-16**, after the catch-up copy: 24 steps appended and 41
+  re-pointed, from the 2026-11-14 and 11-15 runs (there is no 11-13 run on the server). Committed
+  `W2V6FPBAB0ET285V2XC0` in 4.6 s; verified from storage (coordinates = plan, 5,521 steps; 24
+  planes of changed steps = netCDF-C); opened anonymously from the public URL, time
+  2025-01-01..2026-11-22T00Z. README updated and re-uploaded.
 
 **Still open for the hackweek (#4):** run it after each day's upload, on a schedule. It needs no
 access to the PacIOOS server, so GitHub Actions works, as for OISST. It also needs Source
