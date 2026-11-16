@@ -25,9 +25,17 @@
 #      Note: a file changed without changing size is NOT noticed.
 #   3. skips it if it was modified in the last MIN_AGE_MINUTES (it may still be being written),
 #   4. computes its MD5 checksum,
-#   5. uploads it,
+#   5. uploads it, with rclone's --immutable, so an object already there is never replaced,
 #   6. checks the uploaded size, then uploads "<file>.md5" next to it. A .md5 file therefore
 #      means "this upload finished". Anyone can check a file with `md5sum -c <file>.md5`.
+#
+# A file that is on Source Cooperative WITHOUT its .md5 (an earlier run stopped between steps
+# 5 and 6) is not uploaded again: its MD5 is read back by downloading it, and if it matches the
+# file here the .md5 is written (OK); if not, it is reported as CHANGED and left alone.
+#
+# If the list of what is already on Source Cooperative cannot be read (expired keys, network),
+# the script stops before uploading anything (exit status 3): it cannot tell a failed listing
+# from an empty destination, and must not treat finished copies as missing.
 #
 # So the script can be stopped at any time and run again: it carries on where it left off.
 # One line per file is printed: OK, SKIP, FAIL or CHANGED. Save it if you want a record, e.g.
@@ -64,7 +72,8 @@
 #                       overrides the VERSION table below. Leave unset normally.
 #   RCLONE=rclone       the rclone program to use
 #
-# Exit status: 0 all done; 2 some files failed (run again); 4 some files CHANGED (see above).
+# Exit status: 0 all done; 2 some files failed (run again); 3 could not list what is on Source
+# Cooperative (nothing uploaded; check keys and network); 4 some files CHANGED (see above).
 # ---------------------------------------------------------------------------------------------
 
 set -euo pipefail
@@ -141,19 +150,34 @@ low() { if command -v ionice >/dev/null; then nice -n 19 ionice -c3 "$@"; else n
 STOP_AT=0
 [[ $MAX_HOURS != 0 ]] && STOP_AT=$(( $(date +%s) + $(awk -v h="$MAX_HOURS" 'BEGIN { print int(h * 3600) }') ))
 
-# Upload one file. Arguments: product, path relative to the product's folder.
+# Upload one file. Arguments: product, then "new<TAB>path" or "check<TAB>path", the path relative
+# to the product's folder. "check" means the file is already on Source Cooperative but has no
+# .md5: it is compared by MD5, never uploaded again.
 upload_one() {
-  local product=$1 rel=$2
+  local product=$1 mode=${2%%$'\t'*} rel=${2#*$'\t'}
   local src="${SOURCE_DIR_OF_PRODUCT}/$rel" dst="sc:${DEST_OF_PRODUCT}/$rel" name=${rel##*/}
   if (( STOP_AT > 0 && $(date +%s) >= STOP_AT )); then
     echo "SKIP  $product/$rel  (MAX_HOURS reached; run again to continue)"; return 0
   fi
-  local size t0 t1 t2 md5 got
+  local size t0 t1 t2 md5 got remote_md5
   size=$(stat -c %s "$src"); t0=$(date +%s)
   md5=$(low md5sum "$src" | cut -d' ' -f1); t1=$(date +%s)
+  if [[ $mode == check ]]; then
+    # Source Cooperative keeps no checksum and no modification time, so the bytes are read back.
+    if ! remote_md5=$(low "$RCLONE" md5sum --download "$dst" | cut -d' ' -f1) || [[ -z $remote_md5 ]]; then
+      echo "FAIL  $product/$rel  (already on Source Cooperative without .md5; could not read it back)"
+      return 0
+    fi
+    if [[ $remote_md5 != "$md5" ]]; then
+      echo "CHANGED  $product/$rel  (on Source Cooperative without .md5, md5 $remote_md5;" \
+           "here $md5) -- left alone; a copy is never overwritten"; return 0
+    fi
   # The file was just read for the checksum, so this upload mostly reads it from memory.
-  if ! low "$RCLONE" copyto "$src" "$dst" --s3-disable-checksum --retries 3 -q; then
-    echo "FAIL  $product/$rel  (upload failed)"; return 0
+  # --immutable: rclone refuses to replace an object that is already there (it appeared since
+  # the listing). The next run then finds it and checks it as above.
+  elif ! low "$RCLONE" copyto "$src" "$dst" --immutable --s3-disable-checksum --retries 3 -q; then
+    echo "FAIL  $product/$rel  (upload failed, or a copy appeared there meanwhile; run again)"
+    return 0
   fi
   got=$("$RCLONE" lsf --format s "$dst" 2>/dev/null || true)
   if [[ $got != "$size" ]]; then
@@ -180,33 +204,45 @@ for product in "${PRODUCTS[@]}"; do
   dest="$DEST/$product/netcdf${version:+/$version}"
   echo "$product: $dir -> $dest/"
 
-  # What is already finished on Source Cooperative: NetCDF sizes, and which .md5 files exist.
+  # What is already on Source Cooperative: NetCDF sizes, and which .md5 files exist.
+  # A listing that fails must stop the run: read as "nothing there", it would put finished
+  # copies back in the upload list. (An empty or new prefix lists as empty with status 0.)
+  if ! listing=$("$RCLONE" lsf -R --files-only --format "ps" --separator ";" "sc:$dest/"); then
+    echo "STOPPED: could not list sc:$dest/ (keys expired? network?). Nothing was uploaded."
+    exit 3
+  fi
   declare -A remote_size=() has_md5=()
   while IFS=';' read -r path rsize; do
+    [[ -n $path ]] || continue
     if [[ $path == *.md5 ]]; then has_md5[${path%.md5}]=1; else remote_size[$path]=$rsize; fi
-  done < <("$RCLONE" lsf -R --files-only --format "ps" --separator ";" "sc:$dest/" 2>/dev/null || true)
+  done <<< "$listing"
+  unset listing
 
   # What is here, and what still needs uploading.
-  todo=(); todo_bytes=0; done_n=0; young_n=0; changed=()
+  todo=(); todo_bytes=0; done_n=0; young_n=0; check_n=0; changed=()
   while IFS=$'\t' read -r rel lsize mtime; do
     if [[ -n ${has_md5[$rel]:-} && ${remote_size[$rel]:-} == "$lsize" ]]; then
       done_n=$((done_n + 1))
     elif [[ -n ${has_md5[$rel]:-} ]]; then
       changed+=("$rel  (size here $lsize, on Source Cooperative ${remote_size[$rel]:-missing})")
+    elif [[ -n ${remote_size[$rel]:-} ]]; then
+      todo+=("check"$'\t'"$rel"); check_n=$((check_n + 1))
     elif (( $(date +%s) - ${mtime%.*} < MIN_AGE_MINUTES * 60 )); then
       young_n=$((young_n + 1))
     else
-      todo+=("$rel"); todo_bytes=$((todo_bytes + lsize))
+      todo+=("new"$'\t'"$rel"); todo_bytes=$((todo_bytes + lsize))
     fi
   done < <(cd "$dir" && find . -type f -name '*.nc' -printf '%P\t%s\t%T@\n' | sort)
 
-  echo "$product: ${#todo[@]} files to upload ($((todo_bytes / 1000000000)) GB)," \
-       "$done_n already on Source Cooperative, $young_n too new (under $MIN_AGE_MINUTES min old)," \
-       "${#changed[@]} changed"
+  echo "$product: $(( ${#todo[@]} - check_n )) files to upload ($((todo_bytes / 1000000000)) GB)," \
+       "$done_n already on Source Cooperative, $check_n there without .md5 (to check by MD5)," \
+       "$young_n too new (under $MIN_AGE_MINUTES min old), ${#changed[@]} changed"
   for c in "${changed[@]}"; do echo "CHANGED  $product/$c  -- left alone; a finished copy is never overwritten"; done
   changed_n=$((changed_n + ${#changed[@]}))
   if (( DRY_RUN )); then
-    for rel in "${todo[@]:0:5}"; do echo "  would upload $rel"; done
+    for t in "${todo[@]:0:5}"; do
+      [[ $t == check* ]] && echo "  would check ${t#*$'\t'}" || echo "  would upload ${t#*$'\t'}"
+    done
     (( ${#todo[@]} > 5 )) && echo "  ... and $(( ${#todo[@]} - 5 )) more"
     unset remote_size has_md5; continue
   fi
@@ -215,7 +251,8 @@ for product in "${PRODUCTS[@]}"; do
   if (( ${#todo[@]} )); then
     while IFS= read -r line; do
       echo "$line"
-      case $line in OK*) ok_n=$((ok_n + 1)) ;; FAIL*) fail_n=$((fail_n + 1)) ;; SKIP*) skip_n=$((skip_n + 1)) ;; esac
+      case $line in OK*) ok_n=$((ok_n + 1)) ;; FAIL*) fail_n=$((fail_n + 1)) ;; SKIP*) skip_n=$((skip_n + 1)) ;;
+                    CHANGED*) changed_n=$((changed_n + 1)) ;; esac
     done < <(printf '%s\0' "${todo[@]}" | xargs -0 -n1 -P "$PARALLEL" bash -c 'upload_one "$0" "$1"' "$product")
   fi
   unset remote_size has_md5
