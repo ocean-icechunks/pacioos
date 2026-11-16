@@ -4,8 +4,9 @@ Code for the virtual Icechunk stores over the NetCDF copies on Source Cooperativ
 `smoke_test.py` is the smoke test behind issues #10–#14. The **reanalysis store (#11) is
 published**, at `ocean-icechunks/pacioos/roms_hiig_reanalysis/icechunk` (tag `v2.0`), built by
 `roms_hiig_reanalysis/build_store.py`. The **ROMS forecast best-series store (#10) is published**, at
-`ocean-icechunks/pacioos/roms_hiig/icechunk`, built by `roms_hiig/build_store.py`. WRF and WW3
-have no store yet.
+`ocean-icechunks/pacioos/roms_hiig/icechunk`, built by `roms_hiig/build_store.py`. The **WW3
+best-series store (#13) is published**, at `ocean-icechunks/pacioos/ww3_hawaii/icechunk`, built by
+`ww3_hawaii/build_store.py`. WRF has no store yet.
 
 | File | What |
 | --- | --- |
@@ -17,6 +18,7 @@ have no store yet.
 | `publish_viewer.py` | Builds the gridlook browser viewer and uploads it beside a store (adapted from ocean-icechunks/icechunks) |
 | `roms_hiig_reanalysis/` | Reanalysis v2.0 store (#11). Start with its [`how_store_created.md`](roms_hiig_reanalysis/how_store_created.md) |
 | `roms_hiig/` | ROMS forecast store, best time series (#10). Start with its [`how_store_created.md`](roms_hiig/how_store_created.md) |
+| `ww3_hawaii/` | WaveWatch III store, best time series, with cold-start flags and ERDDAP metadata (#13). Start with its [`how_store_created.md`](ww3_hawaii/how_store_created.md) |
 
 ```bash
 /srv/conda/bin/python3.12 -m venv ~/venvs/pacioos

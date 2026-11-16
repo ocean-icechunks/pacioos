@@ -3,7 +3,7 @@
 Rolling state for this repo. Orientation only: the open threads are a record of what is
 unfinished, not a task list.
 
-## Where things stand (2026-11-14)
+## Where things stand (2026-11-16)
 
 Moved here from `ocean-icechunks/icechunks` on 2026-11-13 so the PacIOOS team can take it over
 (history: that repo's PRs #35, #39, #42; issues transferred as #1–#4 here).
@@ -12,9 +12,8 @@ Moved here from `ocean-icechunks/icechunks` on 2026-11-13 so the PacIOOS team ca
   server; sampled downloads all matched): ROMS forecast `roms_hiig` (2025-01-01 to 2026-11-12),
   `wrf_hi`, `ww3_hawaii`, and `roms_hiig_reanalysis/netcdf/v2.0/` (4,380 files, 1,169.8 GB).
   Table in `README.md`. Copy done as #1 (closed).
-- **Two stores built: the reanalysis (#11, closed) and the ROMS forecast (#10).** Not built:
-  #12 (WRF), #13 (WW3), #14 (all-runs view), each ending with decisions for Eli, with audit and
-  chunking comments added 2026-11-13.
+- **Three stores built: the reanalysis (#11, closed), the ROMS forecast (#10, closed) and WW3
+  (#13, 2026-11-16, branch `ww3-store`).** Not built: #12 (WRF), #14 (all-runs view).
 - **Smoke test passed (PR #15, merged):** `stores/` builds a few runs of each product into
   local repos with computed references (the HYCOM trick: one depth plane per chunk for ROMS, one
   step for WRF/WW3), reopens read-only and matches netCDF-C reads. Why it is built that way:
@@ -47,13 +46,26 @@ Moved here from `ocean-icechunks/icechunks` on 2026-11-13 so the PacIOOS team ca
   every header is scanned. Scratch copies deleted 2026-11-14 (`build_store.py --dest scratch`
   recreates the scratch build).
 
+- **WW3 store, #13: published 2026-11-16 (branch `ww3-store`, no PR yet).**
+  `ocean-icechunks/pacioos/ww3_hawaii/icechunk`, snapshot `ZRCNA5VTJJGRR12GECW0`, 135,094 hourly
+  steps 2011-06-21T21Z..2026-11-18T18Z (1,594 uncovered), no tag. Validated anonymously: covered
+  steps identical to ERDDAP's 133,500 times, 72 planes = netCDF-C, 12 points = ERDDAP. Viewer,
+  README (with `cold_starts_2026.png`) and product README published. Decisions (Eli,
+  2026-11-14): regular hourly axis; `z` a scalar; `best_step_flag` (1 cold-start run, 2 suspect
+  2020 time label); **all metadata from ERDDAP, and the store must say so** (`metadata_source`,
+  added to the ROMS stores too; reanalysis `v2.0` tag left on its old snapshot, Eli's call). The
+  README's figure shows the Oct 2026 cold-start chain, and that runs *after* a cold start stay low
+  but are unflagged. Code and team guide (with the file-vs-store attribute table):
+  `stores/ww3_hawaii/how_store_created.md`. Scratch store and viewer
+  (`test-repo/pacioos/ww3_hawaii/`) still exist: delete after Eli checks production.
+
 ## Open threads
 
 - **#10–#13 — virtual stores** serve the THREDDS "best" series (Eli, 2026-11-13: it is what
   PacIOOS serves). Facts that shape them, from the audit: WRF needs two groups (byte order changes
   2017-08-16); ties between runs go to the later file name (as THREDDS); 71 relabelled WRF runs,
-  WW3 2020-04-27..05-04 probably a day early, and 81 WW3 cold starts are open decisions
-  (recommended: keep and flag) and questions for PacIOOS. Only one-step (or one-depth-plane)
+  WW3 2020-04-27..05-04 probably a day early, and 81 WW3 cold starts (WW3: kept and flagged in
+  `best_step_flag`; questions for PacIOOS in the audit doc). Only one-step (or one-depth-plane)
   chunks are possible in a best series. **#14**: the all-runs view, after the best stores.
 - **No materialized rewrite.** Eli (2026-11-13): stores stay virtual. "Reprocessing" in the team
   report means rewriting the NetCDFs themselves (WRF 2010–17 first), a PacIOOS decision.

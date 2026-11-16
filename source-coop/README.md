@@ -13,11 +13,13 @@ about a second as one lazy `xarray` dataset.
 | **ROMS ocean reanalysis v2.0** (`roms_hiig_reanalysis`), 3-hourly, ~4 km, 36 depths | [PacIOOS](https://www.pacioos.hawaii.edu/metadata/roms_hiig_reanalysis.html) | 2009-01-01 to 2020-12-28 | `roms_hiig_reanalysis/netcdf/v2.0/`, 4,380 files, 1.17 TB | **`https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/icechunk`** ([README](https://source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/README.md)) |
 | **ROMS ocean forecast** (`roms_hiig`), daily runs | [Currents forecast](https://www.pacioos.hawaii.edu/currents/model-hawaii/) | 2025-01-01 to 2026-11-12 | `roms_hiig/netcdf/`, 654 files, 1.24 TB | **`https://data.source.coop/ocean-icechunks/pacioos/roms_hiig/icechunk`**, best time series ([README](https://source.coop/ocean-icechunks/pacioos/roms_hiig/README.md)) |
 | **WRF weather model** (`wrf_hi`), daily runs | [Wind forecast](https://www.pacioos.hawaii.edu/weather/model-wind-hawaii/) | 2010-05-14 to 2026-11-11 | `wrf_hi/netcdf/`, 5,607 files, 0.94 TB | not built yet |
-| **WaveWatch III waves** (`ww3_hawaii`), daily runs | [Wave forecast](https://www.pacioos.hawaii.edu/waves/model-hawaii/) | 2011-06-21 to 2026-11-11 | `ww3_hawaii/netcdf/`, 5,232 files, 0.49 TB | not built yet |
+| **WaveWatch III waves** (`ww3_hawaii`), daily runs | [Wave forecast](https://www.pacioos.hawaii.edu/waves/model-hawaii/) | 2011-06-21 to 2026-11-11 | `ww3_hawaii/netcdf/`, 5,232 files, 0.49 TB | **`https://data.source.coop/ocean-icechunks/pacioos/ww3_hawaii/icechunk`**, best time series, hourly, with flags on cold starts ([README](https://source.coop/ocean-icechunks/pacioos/ww3_hawaii/README.md)) |
 
 The Icechunk stores are **virtual**. Each holds only Zarr metadata and byte-range references
 to the NetCDF copies beside it, so both the store and its data are served by Source
-Cooperative. The forecast copies stop at 2026-11-12; a daily update is planned.
+Cooperative. The forecast copies stop at 2026-11-11/12; a daily update is planned. Where the files lack
+metadata (WW3 above all), the stores take PacIOOS's ERDDAP attributes, and each store's
+`metadata_source` attribute says so.
 
 ## View it in a browser
 
@@ -25,6 +27,7 @@ Cooperative. The forecast copies stop at 2026-11-12; a daily update is planned.
 |---|---|
 | ROMS reanalysis v2.0 | [Open surface temperature in the viewer](https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/viewer/index.html) |
 | ROMS forecast, best time series | [Open surface temperature in the viewer](https://data.source.coop/ocean-icechunks/pacioos/roms_hiig/viewer/index.html) |
+| WaveWatch III, best time series | [Open significant wave height in the viewer](https://data.source.coop/ocean-icechunks/pacioos/ww3_hawaii/viewer/index.html) |
 
 It draws in an ordinary browser, with no extension.
 
@@ -37,6 +40,7 @@ icechunk 2.3 or newer are required; no credentials are needed.
 |---|---|
 | ROMS reanalysis v2.0 | [Open in Python](https://source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/README.md) |
 | ROMS forecast, best time series | [Open in Python](https://source.coop/ocean-icechunks/pacioos/roms_hiig/README.md) |
+| WaveWatch III, best time series | [Open in Python](https://source.coop/ocean-icechunks/pacioos/ww3_hawaii/README.md) |
 
 **NetCDF copies:** anonymous HTTPS (with byte ranges) or S3 (endpoint
 `https://data.source.coop`, bucket `ocean-icechunks`), at
