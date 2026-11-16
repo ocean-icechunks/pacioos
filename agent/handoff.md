@@ -13,7 +13,7 @@ Moved here from `ocean-icechunks/icechunks` on 2026-11-13 so the PacIOOS team ca
   `wrf_hi`, `ww3_hawaii`, and `roms_hiig_reanalysis/netcdf/v2.0/` (4,380 files, 1,169.8 GB).
   Table in `README.md`. Copy done as #1 (closed).
 - **Three stores built: the reanalysis (#11, closed), the ROMS forecast (#10, closed) and WW3
-  (#13, 2026-11-16, branch `ww3-store`).** Not built: #12 (WRF), #14 (all-runs view).
+  (#13, closed 2026-11-16, PR #22).** Not built: #12 (WRF), #14 (all-runs view).
 - **Smoke test passed (PR #15, merged):** `stores/` builds a few runs of each product into
   local repos with computed references (the HYCOM trick: one depth plane per chunk for ROMS, one
   step for WRF/WW3), reopens read-only and matches netCDF-C reads. Why it is built that way:
@@ -34,7 +34,7 @@ Moved here from `ocean-icechunks/icechunks` on 2026-11-13 so the PacIOOS team ca
   repo copy `source-coop/README.md`; re-upload it after editing. It lists the four datasets, the
   copies and stores. Update its table as each store is built. The one-line product description
   is set by Eli in Source Cooperative's settings (a suggested text was given 2026-11-14).
-- **ROMS forecast store, #10: published 2026-11-14 (branch `roms-forecast-store`).**
+- **ROMS forecast store, #10: published 2026-11-14 (PR #20, merged; #10 closed).**
   `ocean-icechunks/pacioos/roms_hiig/icechunk`, best series of the 654 runs through 2026-11-12,
   5,497 steps, no tag (it will change daily). Validated anonymously: axis identical to ERDDAP
   `roms_hiig`, 125 planes = netCDF-C, 12 point values = ERDDAP. Viewer and README beside it;
@@ -46,7 +46,7 @@ Moved here from `ocean-icechunks/icechunks` on 2026-11-13 so the PacIOOS team ca
   every header is scanned. Scratch copies deleted 2026-11-14 (`build_store.py --dest scratch`
   recreates the scratch build).
 
-- **WW3 store, #13: published 2026-11-16 (branch `ww3-store`, no PR yet).**
+- **WW3 store, #13: published 2026-11-16 (PR #22, merged; #13 closed).**
   `ocean-icechunks/pacioos/ww3_hawaii/icechunk`, snapshot `ZRCNA5VTJJGRR12GECW0`, 135,094 hourly
   steps 2011-06-21T21Z..2026-11-18T18Z (1,594 uncovered), no tag. Validated anonymously: covered
   steps identical to ERDDAP's 133,500 times, 72 planes = netCDF-C, 12 points = ERDDAP. Viewer,
@@ -69,7 +69,10 @@ Moved here from `ocean-icechunks/icechunks` on 2026-11-13 so the PacIOOS team ca
   chunks are possible in a best series. **#14**: the all-runs view, after the best stores.
 - **No materialized rewrite.** Eli (2026-11-13): stores stay virtual. "Reprocessing" in the team
   report means rewriting the NetCDFs themselves (WRF 2010–17 first), a PacIOOS decision.
-- **#9 — upload script**: a failed destination listing can overwrite finished copies.
+- **#9 — upload script**: a failed destination listing can overwrite finished copies. **Next
+  (Eli, 2026-11-16): fix it before the catch-up copy**, which Eli runs (server login). Copies
+  stop at 2026-11-11/12; ERDDAP had WW3 runs to 11-22 on 11-16, and the server trims its archive.
+  After that: the WW3 daily updater (adapt `stores/roms_hiig/update_store.py`, #4), then WRF (#12).
 
 - **#4 — daily auto-update** of forecast/WRF/WW3, the PacIOOS hackweek project (2026-11-17).
   Store side, measured 2026-11-14 (comments on #4): the best series needs an incremental update
