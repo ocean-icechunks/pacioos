@@ -69,10 +69,17 @@ Moved here from `ocean-icechunks/icechunks` on 2026-11-13 so the PacIOOS team ca
   chunks are possible in a best series. **#14**: the all-runs view, after the best stores.
 - **No materialized rewrite.** Eli (2026-11-13): stores stay virtual. "Reprocessing" in the team
   report means rewriting the NetCDFs themselves (WRF 2010–17 first), a PacIOOS decision.
-- **#9 — upload script**: a failed destination listing can overwrite finished copies. **Next
-  (Eli, 2026-11-16): fix it before the catch-up copy**, which Eli runs (server login). Copies
-  stop at 2026-11-11/12; ERDDAP had WW3 runs to 11-22 on 11-16, and the server trims its archive.
-  After that: the WW3 daily updater (adapt `stores/roms_hiig/update_store.py`, #4), then WRF (#12).
+- **#9 — upload script fixed (PR #24, merged; #9 closed 2026-11-16).** A failed listing stops
+  the run (exit 3; the SSH wrapper stops too), uploads use `--immutable`, and a copy without a
+  `.md5` is checked by downloaded MD5, never re-uploaded. Measured on Source Cooperative: it keeps
+  no mtime, so plain `copyto` overwrote identical bytes and `--immutable` refuses even identical
+  bytes; an empty prefix lists with status 0, failures exit 1. Lesson filed as
+  ocean-icechunks/ocean-icechunks-skills#15. `upload_over_ssh.sh` does not pass `DEST` (left
+  as is). **Not yet run on the server.**
+- **Catch-up copy — Eli runs it** (server login); start with `--dry-run` (expect 0 "without
+  .md5"). Copies stop at 2026-11-11/12; ERDDAP had WW3 runs to 11-22 on 11-16, and the server
+  trims its archive. After that: the WW3 daily updater (adapt `stores/roms_hiig/update_store.py`,
+  #4), then WRF (#12).
 
 - **#4 — daily auto-update** of forecast/WRF/WW3, the PacIOOS hackweek project (2026-11-17).
   Store side, measured 2026-11-14 (comments on #4): the best series needs an incremental update
