@@ -56,8 +56,8 @@ Moved here from `ocean-icechunks/icechunks` on 2026-11-13 so the PacIOOS team ca
   added to the ROMS stores too; reanalysis `v2.0` tag left on its old snapshot, Eli's call). The
   README's figure shows the Oct 2026 cold-start chain, and that runs *after* a cold start stay low
   but are unflagged. Code and team guide (with the file-vs-store attribute table):
-  `stores/ww3_hawaii/how_store_created.md`. Scratch store and viewer
-  (`test-repo/pacioos/ww3_hawaii/`) still exist: delete after Eli checks production.
+  `stores/ww3_hawaii/how_store_created.md`. Eli checked the viewer; scratch
+  store and viewer deleted 2026-11-16 (`build_store.py --dest scratch` recreates them).
 
 ## Open threads
 

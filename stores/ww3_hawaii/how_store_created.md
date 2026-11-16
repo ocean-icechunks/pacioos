@@ -55,7 +55,7 @@ icechunk 2.3.1, xarray 2026.9.0 and zarr 3.4.2 (and their dependencies). That ru
 `forecast_reference_time.values.max()` is NaT when any step is uncovered, so the README drops
 NaT first.
 
-**The scratch build**, 2026-11-14, gave the same counts and passed the same validation
+**The scratch build** (deleted 2026-11-16 after production was checked; `--dest scratch` recreates it), 2026-11-14, gave the same counts and passed the same validation
 (snapshot `WN020N5KCHE3P48WZYZ0`, written in 18 s; full point series 143 s). The header scan of
 all 5,232 files took 12.5 minutes and agreed with the file audit.
 

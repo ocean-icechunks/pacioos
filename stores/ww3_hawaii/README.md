@@ -75,8 +75,16 @@ One group (the root). Every variable is `(time, lat, lon)`, `float32`:
   `forecast_reference_time` NaT. ERDDAP instead leaves them out. Every other step equals one of
   ERDDAP `ww3_hawaii`'s times (checked 2026-11-16), so
   `ds.sel(time=ds.forecast_reference_time.notnull())` gives ERDDAP's axis back.
+- **The time axis is continuous**: 135,094 steps exactly one hour apart, with no gaps. An
+  uncovered hour is a step of `NaN`s, never a missing step, so the series can be resampled or
+  filtered as it is.
 - **Land reads as `NaN`.** The files' fill value is `-999`, and readers that decode (xarray by
   default) turn it into `NaN`. The land area grows from 1,051 to 1,062 cells on 2015-12-30.
+- **The swell (`s…`) and wind-wave (`w…`) fields are also `NaN` at sea** wherever the model
+  found no swell or no wind sea in that cell at that time. It is in the files: at 2012-02-24T02Z
+  `ww3hawaii_20120223.nc` holds `-999` in 4,837 cells of `shgt` against 1,051 land cells of
+  `Thgt`. The number changes from hour to hour and is larger in the early years. The total-sea
+  fields (`Thgt`, `Tper`, `Tdir`) are `NaN` only on land.
 - **The files' `z` dimension of length 1 is dropped**, and `z = 0` kept as a scalar coordinate.
   The bytes referenced are the same.
 
