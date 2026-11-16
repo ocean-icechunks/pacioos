@@ -5,6 +5,17 @@ unfinished, not a task list.
 
 ## Where things stand (2026-11-16)
 
+- **Catch-up copy and first production ROMS update, 2026-11-16 (branch `catchup-2026-11-16`).**
+  Run by the agent from the hub over the `pacioos` SSH alias (Eli's OK; `rclone` on the server is
+  at `/tmp/eliholmes-rclone/rclone`; logs in `~/pacioos-upload-logs/logs/`, run with
+  `LOG_DIR=$HOME/...`, not a quoted `~`). Dry run clean (0 without `.md5`, 0 changed); 9 files
+  uploaded, copies now end 2026-11-15 for all three forecasts; all verified by downloaded MD5.
+  **No 11-13 run** on the server for ROMS or WRF, and **WRF 11-12 is short** (67 hourly steps to
+  11-15 00Z instead of 163; the copy matches the server) — ask PacIOOS, and note for #12.
+  `update_store.py --dest production` then added 24 steps, re-pointed 41: snapshot
+  `W2V6FPBAB0ET285V2XC0`, 5,521 steps to 2026-11-22T00Z, verified and opened anonymously. Store
+  README and product README updated and re-uploaded. The WW3 store still ends with the 11-12 run.
+
 Moved here from `ocean-icechunks/icechunks` on 2026-11-13 so the PacIOOS team can take it over
 (history: that repo's PRs #35, #39, #42; issues transferred as #1–#4 here).
 
@@ -75,11 +86,10 @@ Moved here from `ocean-icechunks/icechunks` on 2026-11-13 so the PacIOOS team ca
   no mtime, so plain `copyto` overwrote identical bytes and `--immutable` refuses even identical
   bytes; an empty prefix lists with status 0, failures exit 1. Lesson filed as
   ocean-icechunks/ocean-icechunks-skills#15. `upload_over_ssh.sh` does not pass `DEST` (left
-  as is). **Not yet run on the server.**
-- **Catch-up copy — Eli runs it** (server login); start with `--dry-run` (expect 0 "without
-  .md5"). Copies stop at 2026-11-11/12; ERDDAP had WW3 runs to 11-22 on 11-16, and the server
-  trims its archive. After that: the WW3 daily updater (adapt `stores/roms_hiig/update_store.py`,
-  #4), then WRF (#12).
+  as is). First run on the server 2026-11-16 (catch-up), clean.
+- **Catch-up copy done 2026-11-16** (above). Next: the WW3 daily updater (adapt
+  `stores/roms_hiig/update_store.py`, #4), then WRF (#12). Until #4 is scheduled, catch-ups are by
+  hand: the same wrapper, then `update_store.py`.
 
 - **#4 — daily auto-update** of forecast/WRF/WW3, the PacIOOS hackweek project (2026-11-17).
   Store side, measured 2026-11-14 (comments on #4): the best series needs an incremental update

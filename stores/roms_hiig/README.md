@@ -56,7 +56,7 @@ One group (the root):
 
 | Coordinate | Size | Values |
 |---|---|---|
-| `time` | 5,497 (2026-11-14) | 2025-01-01T00Z to 7 days after the newest run, every 3 hours |
+| `time` | 5,521 (2026-11-16) | 2025-01-01T00Z to 7 days after the newest run, every 3 hours |
 | `forecast_reference_time` | on `time` | the run each step comes from (NaT if no run covers it) |
 | `forecast_period` | on `time` | hours since that run's start, 0 to 168 |
 | `depth` | 36 | 0.25 to 5,500 m, positive down |
@@ -153,7 +153,7 @@ Measured 2026-11-14 from a JupyterHub, with `zarr.config.set({"async.concurrency
 
 - **Source files:** PacIOOS's daily forecast files `hiig_forec_YYYYMMDD.nc` (NetCDF-3,
   uncompressed), copied unchanged from PacIOOS to Source Cooperative, each with an `.md5` beside
-  it. 654 runs, 2025-01-01 to 2026-11-12; 27 days have no run, at most 3 in a row.
+  it. 656 runs, 2025-01-01 to 2026-11-15 (2026-11-16); 28 days have no run, at most 3 in a row.
 - **Built** by `build_store.py` in
   [ocean-icechunks/pacioos](https://github.com/ocean-icechunks/pacioos/tree/main/stores/roms_hiig).
   It read every file's header (the files come in four header layouts, so offsets differ between
@@ -170,9 +170,11 @@ Measured 2026-11-14 from a JupyterHub, with `zarr.config.set({"async.concurrency
   [`how_store_created.md`](https://github.com/ocean-icechunks/pacioos/blob/main/stores/roms_hiig/how_store_created.md).
   The plan and decisions are in [issue #10](https://github.com/ocean-icechunks/pacioos/issues/10).
 
-**Updates.** For now the store covers the runs copied up to 2026-11-12. A daily update (issue
-#4) will add each new run. Every update is a new Icechunk snapshot, so the series as it stood on
-an earlier day stays readable.
+**Updates.** The store is brought up to date with `update_store.py`, which adds the steps of new
+runs and re-points older steps to the newest run that has them, in one commit. Last update
+2026-11-16: runs through 2026-11-15, snapshot `W2V6FPBAB0ET285V2XC0`, 5,521 steps. Updates are
+run by hand until the daily update (issue #4) is scheduled. Every update is a new Icechunk
+snapshot, so the series as it stood on an earlier day stays readable.
 
 ## Citation and reuse
 
