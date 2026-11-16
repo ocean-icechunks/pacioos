@@ -14,7 +14,16 @@ unfinished, not a task list.
   11-15 00Z instead of 163; the copy matches the server) — ask PacIOOS, and note for #12.
   `update_store.py --dest production` then added 24 steps, re-pointed 41: snapshot
   `W2V6FPBAB0ET285V2XC0`, 5,521 steps to 2026-11-22T00Z, verified and opened anonymously. Store
-  README and product README updated and re-uploaded. The WW3 store still ends with the 11-12 run.
+  README and product README updated and re-uploaded (PR #26, merged).
+- **WW3 updater and first production WW3 update, 2026-11-16 (branch `ww3-updater`).** The diff /
+  one-commit update / verify moved into `stores/best_series_update.py`, shared by
+  `roms_hiig/update_store.py` and the new `ww3_hawaii/update_store.py` (time units read from the
+  store; every coordinate on time rewritten, so `best_step_flag` too; verify finds the lead from
+  the file's own time and **retries read errors**: Source Cooperative reset connections in three
+  test runs in a row). Tests: ROMS 5/5 (pinned to runs through 11-12), WW3 6/6 (incl. a late
+  cold-start run). Production: 96 appended, 157 re-pointed, snapshot `H4T38ERC0AV8DM92RAZG`,
+  135,190 steps to 2026-11-22T18Z; covered steps = ERDDAP's 133,596. WRF (#12) can reuse the
+  shared module.
 
 Moved here from `ocean-icechunks/icechunks` on 2026-11-13 so the PacIOOS team can take it over
 (history: that repo's PRs #35, #39, #42; issues transferred as #1–#4 here).
@@ -87,21 +96,20 @@ Moved here from `ocean-icechunks/icechunks` on 2026-11-13 so the PacIOOS team ca
   bytes; an empty prefix lists with status 0, failures exit 1. Lesson filed as
   ocean-icechunks/ocean-icechunks-skills#15. `upload_over_ssh.sh` does not pass `DEST` (left
   as is). First run on the server 2026-11-16 (catch-up), clean.
-- **Catch-up copy done 2026-11-16** (above). Next: the WW3 daily updater (adapt
-  `stores/roms_hiig/update_store.py`, #4), then WRF (#12). Until #4 is scheduled, catch-ups are by
-  hand: the same wrapper, then `update_store.py`.
+- **Catch-up copy done 2026-11-16** (above); both stores updated. Until #4 is scheduled,
+  catch-ups are by hand: the same wrapper, then each store's `update_store.py` (dry run first).
+  Next store: WRF (#12).
 
 - **#4 — daily auto-update** of forecast/WRF/WW3, the PacIOOS hackweek project (2026-11-17).
   Store side, measured 2026-11-14 (comments on #4): the best series needs an incremental update
   (resize + `set_virtual_refs` for 57 steps + rewrite the time coordinates), which matched a
   full build; `vz.to_icechunk` over an existing group raises `ContainsGroupError`. ERDDAP
   `roms_hiig` also ended at the 11-12 run on 2026-11-14, so there may be nothing new to catch up.
-  **Working updater:** `stores/roms_hiig/update_store.py` (diff the store against the best series
-  planned from every run, write the difference in one commit, verify; `--dry-run`), with
-  `test_update_store.py`. Tested locally and end to end on a scratch copy (deleted); production
-  dry run up to date. Run it after the catch-up copy. Left for the hackweek: schedule, a Source
-  Cooperative role (Alex Kerney set up OISST's and can help), alerts, WRF/WW3.
-  The copies stop at 2026-11-12 until it exists, and the server's forecast archive is
+  **Working updaters** for ROMS and WW3 (`update_store.py` in each store folder, over
+  `stores/best_series_update.py`; `--dry-run`), each with `test_update_store.py`; both used on
+  production 2026-11-16. Left for the hackweek: schedule (the upload on the server, then the two
+  updaters), a Source Cooperative role (Alex Kerney set up OISST's and can help), alerts, WRF.
+  The copies fall behind whenever no one runs the upload, and the server's forecast archive is
   trimmed over time, so a missed day can be lost. Start from the NOAA OISST pipeline
   (ocean-icechunks/noaa_oisst).
 - **#3 — the hindcast** (3.37 TB). Which years to copy is the **PacIOOS team's** call (Eli,

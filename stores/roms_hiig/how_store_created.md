@@ -89,7 +89,7 @@ All in `stores/roms_hiig/` unless noted.
 | `forecast-smoke-test-local.ipynb` | Step 2. Small stores in a temporary local folder, checked against netCDF-C, including a made-up gap. No credentials. Its last run is saved in it. |
 | `make_smoke_notebook.py` | The notebook's source, as plain Python; it writes the notebook |
 | `build_store.py` | Steps 3 and 4: scan every header, check them, write, validate from the public URL. Writes to scratch unless given `--dest production` |
-| `update_store.py` | The daily update (#4): diff the store against the plan from every run, write the difference in one commit, verify. `--dry-run` to see what it would do |
+| `update_store.py` | The daily update (#4): plan the best series from every run, then `../best_series_update.py` (shared with WW3) diffs, writes the difference in one commit and verifies. `--dry-run` to see what it would do |
 | `test_update_store.py` | Tests of `update_store.py` against local repos: catch-up, rerun, late run, gap fill, refusals |
 | `README.md` | The store's README, to publish beside it |
 | `requirements.txt` | What these need (it includes `../requirements.txt`) |
@@ -167,7 +167,13 @@ python update_store.py --dest production --dry-run    # what would change; write
 python update_store.py --dest production
 ```
 
-Each run takes about 10 s plus about 2 s for each new header, and a minute to verify. If there
+Steps 3–5 are in `../best_series_update.py`, shared with the WW3 store since 2026-11-16 (it reads
+the time units from the store and rewrites every coordinate on time). Verify finds each step's
+lead from the file's own time variable, and retries read errors, since Source Cooperative resets
+connections now and then. `test_update_store.py` is pinned to the runs through 2026-11-12, the
+data its expected counts were written for; it passed again on the shared code.
+
+Each run takes about 10 s plus about 2 s for each new header, and about two minutes to verify. If there
 is nothing new, it commits nothing. Missed days are caught up on the next run. A run copied late
 (an older day) re-points the steps it now wins, and fills any gap. Nothing is written before the
 single commit, so a run can be killed and rerun. It **stops** rather than shorten the axis or
