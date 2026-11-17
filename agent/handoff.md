@@ -5,8 +5,9 @@ unfinished, not a task list.
 
 ## Where things stand (2026-11-16)
 
-- **Catch-up copy and first production ROMS update, 2026-11-16 (branch `catchup-2026-11-16`).**
-  Run by the agent from the hub over the `pacioos` SSH alias (Eli's OK; `rclone` on the server is
+- **Catch-up copy and first production ROMS update, 2026-11-16 (PR #26, merged).**
+  Run by the agent from the hub over the `pacioos` SSH alias (Eli asks the agent to run it, with
+  her OK per run; `rclone` on the server is
   at `/tmp/eliholmes-rclone/rclone`; logs in `~/pacioos-upload-logs/logs/`, run with
   `LOG_DIR=$HOME/...`, not a quoted `~`). Dry run clean (0 without `.md5`, 0 changed); 9 files
   uploaded, copies now end 2026-11-15 for all three forecasts; all verified by downloaded MD5.
@@ -15,7 +16,7 @@ unfinished, not a task list.
   `update_store.py --dest production` then added 24 steps, re-pointed 41: snapshot
   `W2V6FPBAB0ET285V2XC0`, 5,521 steps to 2026-11-22T00Z, verified and opened anonymously. Store
   README and product README updated and re-uploaded (PR #26, merged).
-- **WW3 updater and first production WW3 update, 2026-11-16 (branch `ww3-updater`).** The diff /
+- **WW3 updater and first production WW3 update, 2026-11-16 (PR #27, merged).** The diff /
   one-commit update / verify moved into `stores/best_series_update.py`, shared by
   `roms_hiig/update_store.py` and the new `ww3_hawaii/update_store.py` (time units read from the
   store; every coordinate on time rewritten, so `best_step_flag` too; verify finds the lead from
