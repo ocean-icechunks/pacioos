@@ -5,6 +5,15 @@ unfinished, not a task list.
 
 ## Where things stand (2026-11-17)
 
+- **Ready for the hackweek, 2026-11-17 (PR #29, merged).** The team note doc was brought up to
+  date (stores, updaters, new agent prompts, #12/#14) and snapshotted as
+  `docs/design/team-note.md`. The README now opens with "Start here": four numbered first steps
+  (clone, start an agent, install the skill, a first prompt, then #4) and the four team docs
+  with their snapshots. Issue #4 has a status line at the top of its body and a
+  [status comment](https://github.com/ocean-icechunks/pacioos/issues/4#issuecomment-6933876409)
+  (what exists, catch-up by hand, what is left, questions for PacIOOS). Eli added a ruleset on
+  `main` (PR required); PacIOOS team members are not yet collaborators (Eli to add, Write
+  access). Sharing of the Claude Docs is Eli's (Share button).
 - **Catch-up copy and first production ROMS update, 2026-11-16 (PR #26, merged).**
   Run by the agent from the hub over the `pacioos` SSH alias (Eli asks the agent to run it, with
   her OK per run; `rclone` on the server is
