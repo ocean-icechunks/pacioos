@@ -31,8 +31,22 @@ The ROMS forecast and WW3 stores are built too (see the product README,
 
 ## Start here: notes for the PacIOOS team
 
-Four short documents, written for PacIOOS (the live versions; snapshots in the repo are linked
-beside each):
+**First steps:**
+
+1. **Clone this repo** and start your coding agent (Claude Code, GitHub Copilot, Codex,
+   Antigravity) in its folder. It reads `AGENTS.md` for the rules on its own.
+2. **Install the `virtual-icechunk` skill** from
+   [ocean-icechunks/ocean-icechunks-skills](https://github.com/ocean-icechunks/ocean-icechunks-skills#install)
+   (its README says how).
+3. **Ask the agent:** "Read AGENTS.md and agent/handoff.md, then tell me what this repo does and
+   what is open." More prompts that work well are in the team note below.
+4. **Pick a task.** The hackweek project is
+   [#4, the daily update](https://github.com/ocean-icechunks/pacioos/issues/4). Start with its
+   [status comment](https://github.com/ocean-icechunks/pacioos/issues/4#issuecomment-6933876409).
+   The other open tasks are under "Open work" below.
+
+Background, in four short documents written for PacIOOS (the live versions; snapshots in the
+repo are linked beside each):
 
 - [**PacIOOS models on Source Cooperative: how to upload, what's next, and working with an agent**](https://claude.ai/artifact/MmW3VYYgR6enaALtqToX31)
   (2026-11-17): running the upload yourselves, the open tasks, and using a coding agent to
