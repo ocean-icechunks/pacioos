@@ -3,7 +3,7 @@
 Rolling state for this repo. Orientation only: the open threads are a record of what is
 unfinished, not a task list.
 
-## Where things stand (2026-11-16)
+## Where things stand (2026-11-17)
 
 - **Catch-up copy and first production ROMS update, 2026-11-16 (PR #26, merged).**
   Run by the agent from the hub over the `pacioos` SSH alias (Eli asks the agent to run it, with
@@ -82,6 +82,11 @@ Moved here from `ocean-icechunks/icechunks` on 2026-11-13 so the PacIOOS team ca
 
 ## Open threads
 
+- **Server access ended, 2026-11-17.** The `pacioos` SSH login refused this hub's key on
+  2026-11-17 (publickey denied; the key is intact). Eli thinks the access was granted for 7 days
+  (from about 2026-11-10). No catch-up until PacIOOS renews it or runs the upload themselves;
+  the copies end 2026-11-15. Status for the hackweek is in a #4 comment (2026-11-17).
+
 - **#10–#13 — virtual stores** serve the THREDDS "best" series (Eli, 2026-11-13: it is what
   PacIOOS serves). Facts that shape them, from the audit: WRF needs two groups (byte order changes
   2017-08-16); ties between runs go to the later file name (as THREDDS); 71 relabelled WRF runs,
@@ -155,12 +160,15 @@ Moved here from `ocean-icechunks/icechunks` on 2026-11-13 so the PacIOOS team ca
   them; they are the live copies. The transfer plan and the explainer have snapshots in
   `docs/design/` (checked against the live docs 2026-11-13); the 2026-11-13 team note
   (upload, tasks, working with an agent: https://claude.ai/artifact/MmW3VYYgR6enaALtqToX31)
-  has no snapshot; the audit doc's snapshot is `audit/report-pacioos.md`.
+  was brought up to date 2026-11-17 (stores, updaters, #12/#14) and snapshotted as
+  `docs/design/team-note.md`; the audit doc's snapshot is `audit/report-pacioos.md`. Eli
+  controls sharing (Share button); the repo snapshots are the fallback for readers without access.
 
 ## Notes
 
 - [source-probe.md](../docs/design/source-probe.md) — public-server probe, sizes, chunking, options; corrections box at top
 - [transfer-plan.md](../docs/design/transfer-plan.md) — snapshot of the transfer plan doc
 - [virtual-icechunk-explainer.md](../docs/design/virtual-icechunk-explainer.md) — snapshot of the explainer doc
+- [team-note.md](../docs/design/team-note.md) — snapshot of the team note doc (2026-11-17)
 - [file-headers.md](../docs/design/file-headers.md) — what the copies' headers showed; why the store code is built as it is
 - [audit/report.md](../audit/report.md) — full file audit (problems P1–P11, method, limitations)

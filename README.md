@@ -3,13 +3,47 @@
 Code for creating an Icechunk pipeline for PacIOOS model data: the Hawaiʻi regional ROMS
 ocean model, WRF wind and weather, and WaveWatch III waves.
 
+## Start here: notes for the PacIOOS team
+
+**First steps:**
+
+1. **Clone this repo** and start your coding agent (Claude Code, GitHub Copilot, Codex,
+   Antigravity) in its folder. It reads `AGENTS.md` for the rules on its own.
+2. **Install the `virtual-icechunk` skill** from
+   [ocean-icechunks/ocean-icechunks-skills](https://github.com/ocean-icechunks/ocean-icechunks-skills#install)
+   (its README says how).
+3. **Ask the agent:** "Read AGENTS.md and agent/handoff.md, then tell me what this repo does and
+   what is open." More prompts that work well are in the team note below.
+4. **Pick a task.** The hackweek project is
+   [#4, the daily update](https://github.com/ocean-icechunks/pacioos/issues/4). Start with its
+   [status comment](https://github.com/ocean-icechunks/pacioos/issues/4#issuecomment-6933876409).
+   The other open tasks are under "Open work" below.
+
+Background, in four short documents written for PacIOOS (the live versions; snapshots in the
+repo are linked beside each):
+
+- [**PacIOOS models on Source Cooperative: how to upload, what's next, and working with an agent**](https://claude.ai/artifact/MmW3VYYgR6enaALtqToX31)
+  (2026-11-17): running the upload yourselves, the open tasks, and using a coding agent to
+  learn this repo, the stores and their daily updaters (snapshot:
+  [`docs/design/team-note.md`](docs/design/team-note.md)).
+- [**Getting the PacIOOS model files onto Source Cooperative**](https://claude.ai/artifact/4Nqhx91MozRLbfjYXmfpP7)
+  (2026-11-10): the transfer plan, the routes for copying, and the questions for PacIOOS
+  (snapshot: [`docs/design/transfer-plan.md`](docs/design/transfer-plan.md)).
+- [**PacIOOS model files on Source Cooperative: audit and chunking options**](https://claude.ai/artifact/G67caCdBJ2Z7hupYuJZHnJ)
+  (2026-11-13): what the file audit found, every chunking option for the stores, and whether
+  reprocessing would be better (snapshot: [`audit/report-pacioos.md`](audit/report-pacioos.md)).
+- [**How a virtual Icechunk store gets made**](https://claude.ai/artifact/BTCTko294KTQebZW6Y2K4o)
+  (2026-11-10): what a virtual store is, why the files go to the cloud first, and where
+  missing metadata goes (snapshot:
+  [`docs/design/virtual-icechunk-explainer.md`](docs/design/virtual-icechunk-explainer.md)).
+
+## What is on Source Cooperative (2026-11-16)
+
 PacIOOS's public servers (THREDDS, ERDDAP) do not expose the model files themselves, so the
 original NetCDF files are copied, unchanged, to the
 [`ocean-icechunks/pacioos`](https://source.coop/ocean-icechunks/pacioos) product on Source
 Cooperative. Virtual Icechunk stores are then built over those copies, so readers use Source
 Cooperative and never load the PacIOOS server.
-
-## What is on Source Cooperative (2026-11-16)
 
 | Dataset (PacIOOS id) | Copies of the NetCDFs | Files | Size |
 | --- | --- | --- | --- |
@@ -29,23 +63,6 @@ The ROMS forecast and WW3 stores are built too (see the product README,
 [`source-coop/README.md`](source-coop/README.md)); WRF is not yet. The forecast copies run to
 2026-11-15 (catch-up copy 2026-11-16).
 
-## Start here: notes for the PacIOOS team
-
-Four short documents, written for PacIOOS (the live versions; the repo keeps snapshots of the
-first two in `docs/design/`):
-
-- [**PacIOOS models on Source Cooperative: how to upload, what's next, and working with an agent**](https://claude.ai/artifact/MmW3VYYgR6enaALtqToX31)
-  (2026-11-13): running the upload yourselves, the open tasks, and using a coding agent to
-  learn this repo and build the stores.
-- [**Getting the PacIOOS model files onto Source Cooperative**](https://claude.ai/artifact/4Nqhx91MozRLbfjYXmfpP7)
-  (2026-11-10): the transfer plan, the routes for copying, and the questions for PacIOOS.
-- [**PacIOOS model files on Source Cooperative: audit and chunking options**](https://claude.ai/artifact/G67caCdBJ2Z7hupYuJZHnJ)
-  (2026-11-13): what the file audit found, every chunking option for the stores, and whether
-  reprocessing would be better (snapshot: [`audit/report-pacioos.md`](audit/report-pacioos.md)).
-- [**How a virtual Icechunk store gets made**](https://claude.ai/artifact/BTCTko294KTQebZW6Y2K4o)
-  (2026-11-10): what a virtual store is, why the files go to the cloud first, and where
-  missing metadata goes.
-
 ## What's here
 
 | Path | What |
@@ -56,6 +73,7 @@ first two in `docs/design/`):
 | [`docs/design/file-headers.md`](docs/design/file-headers.md) | What the copied files are, read from their headers; the reasons behind the store design |
 | [`docs/design/source-probe.md`](docs/design/source-probe.md) | What the public servers and the files showed: sizes, formats, chunking, options |
 | [`docs/design/transfer-plan.md`](docs/design/transfer-plan.md) | The plain-language transfer plan shared with PacIOOS (snapshot) |
+| [`docs/design/team-note.md`](docs/design/team-note.md) | The team note: upload, open tasks, working with an agent (snapshot) |
 | [`docs/design/virtual-icechunk-explainer.md`](docs/design/virtual-icechunk-explainer.md) | "What a virtual Icechunk store is and how it is made" (snapshot) |
 
 ## Open work (hackweek, 2026-11-17)
