@@ -36,11 +36,21 @@ from typing import Callable
 import numpy as np
 import pandas as pd
 
+from email_notifications import try_email_error
 import pacioos_virtual as pv
 
 
 def log(*a):
     print(time.strftime('%H:%M:%S'), *a, flush=True)
+
+
+def notify_update_error(error: BaseException, description: str, dest: str,
+                        script_filepath: str) -> None:
+    """Add product and destination context to a shared error notification."""
+    try_email_error(
+        script_filepath, error, subject_add=f'({dest})',
+        message_add=f'Product: {description}\nDestination: {dest}',
+    )
 
 
 class Stop(RuntimeError):
@@ -257,17 +267,26 @@ def main(description: str, bs, open_store: Callable, default_procs: int = 4) -> 
     ap.add_argument('--procs', type=int, default=default_procs)
     ap.add_argument('--dry-run', action='store_true', help='report what would change; write nothing')
     a = ap.parse_args()
-    a.workdir.mkdir(parents=True, exist_ok=True)
-    log(f'update: {bs.BUCKET}/{bs.DESTINATIONS[a.dest]}' + (' (PRODUCTION)' if a.dest == 'production' else ''))
-    bs.scan(a.workdir, a.procs)
-    planned = bs.planned_dataset(a.workdir)[0]
-    repo, time_left = bs.open_destination(a.dest)
-    log(f'  keys valid for {time_left}')
-    if bs._written(repo) is None:
-        sys.exit('  the store is empty: build it first with build_store.py write')
-    storage = icechunk.http_storage(f'{bs.PUBLIC}/{bs.BUCKET}/{bs.DESTINATIONS[a.dest]}')
     try:
+        a.workdir.mkdir(parents=True, exist_ok=True)
+        log(f'update: {bs.BUCKET}/{bs.DESTINATIONS[a.dest]}' +
+            (' (PRODUCTION)' if a.dest == 'production' else ''))
+        bs.scan(a.workdir, a.procs)
+        planned = bs.planned_dataset(a.workdir)[0]
+        repo, time_left = bs.open_destination(a.dest)
+        log(f'  keys valid for {time_left}')
+        if bs._written(repo) is None:
+            sys.exit('  the store is empty: build it first with build_store.py write')
+        storage = icechunk.http_storage(f'{bs.PUBLIC}/{bs.BUCKET}/{bs.DESTINATIONS[a.dest]}')
         update(repo, storage, planned, open_store, dry_run=a.dry_run)
     except Stop as exc:
+        notify_update_error(exc, description, a.dest, sys.argv[0])
         sys.exit(f'  stopped: {exc}')
+    except SystemExit as exc:
+        if exc.code not in (None, 0):
+            notify_update_error(exc, description, a.dest, sys.argv[0])
+        raise
+    except Exception as exc:
+        notify_update_error(exc, description, a.dest, sys.argv[0])
+        raise
     log('update: done')
