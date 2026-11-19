@@ -118,6 +118,10 @@ class Busy(RuntimeError):
     pass
 
 
+class RecoveryRequired(RuntimeError):
+    """Application-owned recovery guidance safe for email; never wrap external error text."""
+
+
 @contextlib.contextmanager
 def locked(directory):
     directory = Path(directory)

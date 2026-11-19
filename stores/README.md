@@ -28,21 +28,11 @@ outside Icechunker's store/README automation and the bundle publisher.
 | `roms_hiig/` | ROMS forecast store, best time series (#10). Start with its [`how_store_created.md`](roms_hiig/how_store_created.md) |
 | `ww3_hawaii/` | WaveWatch III store, best time series, with cold-start flags and ERDDAP metadata (#13). Start with its [`how_store_created.md`](ww3_hawaii/how_store_created.md) |
 
-The ROMS and WW3 `update_store.py` scripts send failure email by default for errors during
-scanning, planning, destination access, update, or verification. Use `--no-email` to suppress
-alerts, such as for a manual run. Successful runs, no-ops, and successful dry runs send no email.
-Configure `PACIOOS_ALERT_EMAIL_TO`, `PACIOOS_ALERT_EMAIL_FROM`, and
-`PACIOOS_SMTP_HOST`; `PACIOOS_SMTP_PORT` defaults to 587 for STARTTLS or 465 for SSL. Choose
-`PACIOOS_SMTP_SECURITY=starttls` (default) or `ssl`. SMTP authentication uses
-`PACIOOS_SMTP_USERNAME` and `PACIOOS_SMTP_PASSWORD` together. Keep these values in the job's
-secret store, not in the repository. The authenticated account does not automatically authorize
-the `From` address; the SMTP relay must permit that sender. If recipient is unset, no email is
-attempted. SMTP configuration or delivery failures are logged without replacing the updater's
-original error or nonzero exit.
-
-`email_notifications.py` provides reusable `email_error(...)`, which reads recipients from
-`PACIOOS_ALERT_EMAIL_TO` unless passed directly, and `try_email_error(...)`, a best-effort
-try/except wrapper for alerts in other Python scripts.
+The ROMS and WW3 `update_store.py` scripts are manual tools and do not send email; the old
+`--no-email` option has been removed. Scheduled automation uses `icechunker sync --notify`
+and `icechunker verify --scope full --notify`, with one aggregated failure alert from the
+parent runner. See [notification setup](../ops/README.md#failure-email) for private SMTP
+configuration and skip/dry-run behavior.
 
 ```bash
 /srv/conda/bin/python3.12 -m venv ~/venvs/pacioos

@@ -36,21 +36,11 @@ from typing import Callable
 import numpy as np
 import pandas as pd
 
-from email_notifications import try_email_error
 import pacioos_virtual as pv
 
 
 def log(*a):
     print(time.strftime('%H:%M:%S'), *a, flush=True)
-
-
-def notify_update_error(error: BaseException, description: str, dest: str,
-                        script_filepath: str) -> None:
-    """Add product and destination context to a shared error notification."""
-    try_email_error(
-        script_filepath, error, subject_add=f'({dest})',
-        message_add=f'Product: {description}\nDestination: {dest}',
-    )
 
 
 class Stop(RuntimeError):
@@ -252,7 +242,7 @@ def update(repo, storage, planned, open_store: Callable, dry_run: bool = False) 
 
 
 def main(description: str, bs, open_store: Callable, default_procs: int = 4) -> None:
-    """Run a product update; `bs` is its build_store module. `--no-email` disables error alerts."""
+    """Run a manual product update; `bs` is its build_store module."""
     import argparse
     import sys
     import warnings
@@ -266,8 +256,6 @@ def main(description: str, bs, open_store: Callable, default_procs: int = 4) -> 
     ap.add_argument('--workdir', type=Path, default=Path(bs.HERE) / 'out')
     ap.add_argument('--procs', type=int, default=default_procs)
     ap.add_argument('--dry-run', action='store_true', help='report what would change; write nothing')
-    ap.add_argument('--no-email', action='store_true',
-                    help='do not send email notifications for errors')
     a = ap.parse_args()
     try:
         a.workdir.mkdir(parents=True, exist_ok=True)
@@ -282,15 +270,5 @@ def main(description: str, bs, open_store: Callable, default_procs: int = 4) -> 
         storage = icechunk.http_storage(f'{bs.PUBLIC}/{bs.BUCKET}/{bs.DESTINATIONS[a.dest]}')
         update(repo, storage, planned, open_store, dry_run=a.dry_run)
     except Stop as exc:
-        if not a.no_email:
-            notify_update_error(exc, description, a.dest, sys.argv[0])
         sys.exit(f'  stopped: {exc}')
-    except SystemExit as exc:
-        if exc.code not in (None, 0) and not a.no_email:
-            notify_update_error(exc, description, a.dest, sys.argv[0])
-        raise
-    except Exception as exc:
-        if not a.no_email:
-            notify_update_error(exc, description, a.dest, sys.argv[0])
-        raise
     log('update: done')

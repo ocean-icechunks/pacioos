@@ -178,6 +178,23 @@ Preserve existing applicable options, including `--dataset`, `--config`, sync `-
 and verification `--scope recent|full` (default `recent`). Do not add compatibility wrappers,
 old command aliases or a cron-install/remove interface to the deployed payload.
 
+`sync` and `verify` support explicit `--notify` failure email, off by default for manual use.
+Generated cron commands opt in. One parent-owned summary follows all selected datasets;
+success, idle runs, dry runs and expected dataset-lock skips do not alert. Delivery is
+best-effort and cannot change job results or recovery state. Keep SMTP credentials private
+beneath the root and provision the job environment separately; alerts contain safe status,
+exception type/location, exact log paths and explicitly marked application-owned recovery
+guidance, never arbitrary exception text. Reuse the existing worker log: the parent assigns
+its unique filename, the worker appends a marked JSON failure footer, and the parent reads
+only that bounded footer after exit, validating log/dataset/action/scope identity. Do not
+create separate report files/directories or scrape arbitrary output. Keep existing durable
+failure and pending records independent. Missing/invalid summaries fall back explicitly to
+status and the exact expected log path; summaries follow normal log retention. Standalone
+manual updater scripts do not email. One parent-level exception boundary also attempts a
+safe alert for startup/orchestration failures and reraises the original exception; expected
+installation-lock contention remains silent. Keep independent monitoring for failures
+outside that boundary or when the interpreter/sender cannot run.
+
 Help must work without configuration, credentials or network access and exit successfully.
 Handle help before configuration loading, credential checks or scientific-stack imports.
 `check` makes no network requests or credential exchanges and does not claim remote

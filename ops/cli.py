@@ -26,6 +26,10 @@ DESCRIPTIONS = {
 }
 
 
+class InstallationBusy(ValueError):
+    """Expected installation-lock contention, not an operational failure alert."""
+
+
 def parser():
     p = argparse.ArgumentParser(description='Icechunker: immutable PacIOOS copies and virtual stores.',
         epilog='Root: directory containing icechunker (default deployment ~/icechunker). '
@@ -42,6 +46,9 @@ def parser():
         if action in ('sync', 'verify'):
             command.add_argument('--dataset', action='append', help='repeat to select configured datasets; default all')
             command.add_argument('--worker', help=argparse.SUPPRESS)
+            command.add_argument('--log-id', help=argparse.SUPPRESS)
+            command.add_argument('--notify', action='store_true',
+                                 help='send one best-effort failure email; no alerts for dry runs or lock skips')
         if action == 'sync':
             command.add_argument('--dry-run', action='store_true', help='list differences; no remote writes (contacts services)')
         if action == 'verify':
@@ -78,6 +85,30 @@ def main(argv=None):
         target = getattr(args, 'command', None)
         (sub.choices[target] if target else p).print_help()
         return 0
+    args.scope = getattr(args, 'scope', 'recent')
+    args.dry_run = getattr(args, 'dry_run', False)
+    args.dataset = getattr(args, 'dataset', None)
+    args.worker = getattr(args, 'worker', None)
+    try:
+        return dispatch(args)
+    except InstallationBusy:
+        raise
+    except Exception as exc:
+        if (getattr(args, 'notify', False) and not args.dry_run and not args.worker
+                and args.action in ('sync', 'verify')):
+            try:
+                from notifications import notify_failures
+                logs = Path(os.environ.get('ICECHUNKER_ROOT', '~/icechunker')).expanduser() / 'logs'
+                notify_failures(args.action, args.scope, [
+                    ('parent-job', 'failed ({}); selected work may be incomplete'.format(type(exc).__name__))
+                ], logs)
+            except Exception:
+                print('Icechunker: parent failure notification unavailable; inspect job output.',
+                      file=sys.stderr)
+        raise
+
+
+def dispatch(args):
     from layout import installation_root, managed_path, environment
     root = Path(installation_root(os.environ.get('ICECHUNKER_ROOT', '~/icechunker')))
     for folder in ('app', '.runtime', 'state', 'config', 'logs'):
@@ -98,7 +129,7 @@ def main(argv=None):
         try:
             fcntl.flock(lock, (fcntl.LOCK_EX if args.action == 'clean' else fcntl.LOCK_SH) | fcntl.LOCK_NB)
         except BlockingIOError:
-            raise ValueError('Installation or another command is busy; retry later')
+            raise InstallationBusy('Installation or another command is busy; retry later')
         if args.action == 'status':
             return local_status(root)
         if args.action == 'clean':
@@ -119,10 +150,6 @@ def main(argv=None):
         if sys.version_info < (3, 12):
             raise ValueError('Run bootstrap first; processing requires the managed Python 3.12 environment')
         from jobs import run
-        args.scope = getattr(args, 'scope', 'recent')
-        args.dry_run = getattr(args, 'dry_run', False)
-        args.dataset = getattr(args, 'dataset', None)
-        args.worker = getattr(args, 'worker', None)
         return run(args)
 
 

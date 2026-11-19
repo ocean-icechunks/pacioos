@@ -5,7 +5,7 @@ import os
 import tempfile
 from pathlib import Path
 
-from common import atomic_json, read_json
+from common import RecoveryRequired, atomic_json, read_json
 
 
 @contextmanager
@@ -156,12 +156,12 @@ def prepare(cfg, model, bs, work, objects, incoming, full=False):
         approved = set(read_json(work / 'approved-runs.json', []))
         missing = [run for run in missing if run not in approved or run not in records or 'error' in records[run]]
     if missing:
-        raise RuntimeError(f'{len(missing)} historical headers lack a validated cache. '
-                           'Normal sync will not scan the archive. Run icechunker verify --scope full once.')
+        raise RecoveryRequired(f'{len(missing)} historical headers lack a validated cache. '
+                               'Normal sync will not scan the archive. Run icechunker verify --scope full once.')
     load_reference(work)  # require a cached grid; no old source file is reopened for planning
     reference = next((run for run in runs if run in approved and run in records), None)
     if reference is None:
-        raise RuntimeError('No cached schema baseline. Run icechunker verify --scope full once.')
+        raise RecoveryRequired('No cached schema baseline. Run icechunker verify --scope full once.')
     if new_runs:
         print(f'Routine verification: scanning {len(new_runs)} new/pending headers; '
               f'reusing {len(runs) - len(new_runs)} historical cached headers.', flush=True)

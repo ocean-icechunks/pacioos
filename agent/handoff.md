@@ -99,6 +99,35 @@ operator's supervised validation; local readiness does not establish remote acce
   (464,032,417,051 bytes). Also deleted and verified removal of the 2,569 Era 1 checksum
   sidecars (136,157 bytes). The uploader skips WRF runs before 2017-08-16.
 
+### Scheduled failure email implemented locally (2026-11-19)
+
+Implemented opt-in failure email for scheduled Icechunker automation.
+`sync`/`verify --notify` opt into one parent-owned aggregated alert; generated cron commands
+opt in. Manual defaults, successful/idle jobs, dry runs and normal dataset-lock skips do not
+email. SMTP failures cannot replace job failures or change recovery state. Alerts use safe
+status, exception type/location, exact log paths and explicitly marked recovery guidance.
+Notified workers append a marked JSON failure footer to their existing stdout/stderr log.
+The parent assigns its unique filename and reads only that bounded, identity-validated
+footer after exit. There are no sidecar report files, temporary report directories or
+report cleanup steps. Missing/invalid summaries explicitly fall back to status and the
+exact expected log path. Existing durable status/pending records are unchanged.
+At the operator's request, preexisting worker/shared retry error
+messages are preserved in logs; they are not automatically sanitized.
+Standalone updater email hooks and `--no-email` are removed. Runtime packaging and operator
+SMTP/environment instructions are updated.
+One CLI parent-level exception boundary now attempts safe alerts for startup and orchestration
+failures (paths, permissions, configuration/imports, timeout bookkeeping), then reraises the
+original exception. Ordinary worker aggregates are not sent twice; expected installation-lock
+contention stays silent. Sender/import failures cannot replace the original parent error.
+
+Local validation passed: 115 operations/deployment tests plus two standalone updater tests,
+mocked SMTP, compilation, shell syntax and whitespace checks. Tests used isolated Python 3.13
+because the local venv interpreter and OS Python were unavailable. Twenty-one parent/report/SMTP tests
+also passed on pinned Python 3.12.12; the full science stack was not tested on that interpreter.
+No deployment, bootstrap, real email, cron changes or production jobs were run.
+Changes remain uncommitted; `.envrc` is untouched. Missing interpreters, argument-parsing
+exits, killed parents and broken SMTP still require independent monitoring.
+
 ### Reconciliation with main prepared (2026-11-19)
 
 Merged main's product-viewer/build-bundle and team WRF documentation into

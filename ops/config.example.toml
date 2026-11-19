@@ -17,7 +17,8 @@ max_run_age_hours = 72
 log_retention_days = 30
 sync_schedule = "17 */3 * * *"
 full_verify_schedule = "47 2 * * 0"
-# Configure cron MAILTO separately if the server has working mail delivery.
+# Generated cron commands opt into failure email with --notify.
+# Provision SMTP environment privately; see README.md. Never put credential values here.
 
 [datasets.roms_hiig]
 source_dir = "/export/data/model/ocn/roms_forecast/hiig"
