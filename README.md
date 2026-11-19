@@ -58,7 +58,7 @@ Cooperative and never load the PacIOOS server.
 | Dataset (PacIOOS id) | Copies of the NetCDFs | Files | Size |
 | --- | --- | --- | --- |
 | ROMS forecast (`roms_hiig`) | `pacioos/roms_hiig/netcdf/` | 657 | 1.25 TB |
-| WRF (`wrf_hi`) | `pacioos/wrf_hi/netcdf/` | 5,610 | 0.94 TB |
+| WRF (`wrf_hi`) | `pacioos/wrf_hi/netcdf/` | 3,041 | 0.46 TB |
 | WaveWatch III (`ww3_hawaii`) | `pacioos/ww3_hawaii/netcdf/` | 5,237 | 0.49 TB |
 | ROMS reanalysis v2.0 (`roms_hiig_reanalysis`) | `pacioos/roms_hiig_reanalysis/netcdf/v2.0/` | 4,380 | 1.17 TB |
 
@@ -74,7 +74,8 @@ The ROMS forecast and WW3 stores are built too (see the product README,
 [WRF store](https://source.coop/ocean-icechunks/pacioos/wrf_hi/README.md) for the HDF5 era
 from 2017-08-16; its store and README remain team-managed. The 2026-11-18 catch-up
 extended the NetCDF copies to the 2026-11-17 ROMS run and 2026-11-16 WW3 run; both new files
-were verified by full downloaded MD5. WRF copies still end at 2026-11-15. The ROMS forecast
+were verified by full downloaded MD5. The latest copied WRF run is dated 2026-11-15,
+and the WRF Icechunk forecast extends through 2026-11-22T00Z. The ROMS forecast
 and WW3 Icechunk stores include those new copies, with forecast coverage through
 2026-11-24T00Z and 2026-11-23T18Z, respectively.
 
@@ -99,8 +100,7 @@ and WW3 Icechunk stores include those new copies, with forecast coverage through
 - [#2](https://github.com/ocean-icechunks/pacioos/issues/2): what happens when files change or
   a new version (reanalysis v3.0) arrives.
 - [#3](https://github.com/ocean-icechunks/pacioos/issues/3): copy the ROMS hindcast.
-- Build the virtual Icechunk stores: #10 (ROMS forecast), #11 (reanalysis), #12 (WRF), #13 (WW3),
-  #14 (all-runs view for forecast skill).
+- [#14](https://github.com/ocean-icechunks/pacioos/issues/14): build the all-runs view for forecast skill.
 
 The history of this work up to 2026-11-13 is in
 [ocean-icechunks/icechunks](https://github.com/ocean-icechunks/icechunks) PRs #35, #39 and #42,

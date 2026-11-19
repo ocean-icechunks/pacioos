@@ -81,17 +81,16 @@ def scan_h5(key: str) -> dict:
         for name, d in h.items():
             if not isinstance(d, h5py.Dataset):
                 continue
-            assert d.compression is None and not d.shuffle, (key, name)
+            assert d.id.get_create_plist().get_nfilters() == 0, (key, name)
             rec = {"dims": None, "shape": d.shape, "dtype": d.dtype.str, "chunk": d.chunks,
                    "attrs": {a: (x.decode() if isinstance(x, bytes) else x) for a, x in d.attrs.items()
                              if not a.startswith("_Netcdf4") and a not in ("CLASS", "NAME", "REFERENCE_LIST", "DIMENSION_LIST")}}
             if d.chunks is not None and d.ndim >= 3:
-                n = d.id.get_num_chunks()
-                infos = [d.id.get_chunk_info(i) for i in range(n)]
-                order = np.argsort([i.chunk_offset for i in infos], axis=0)[:, 0]
-                infos = [infos[i] for i in order]
-                rec["offsets"] = np.array([i.byte_offset for i in infos], "uint64")
-                rec["nbytes"] = np.array([i.size for i in infos], "uint64")
+                infos = []
+                d.id.chunk_iter(lambda c: infos.append((c.chunk_offset, c.byte_offset, c.size)))
+                infos.sort()
+                rec["offsets"] = np.array([offset for _, offset, _ in infos], "uint64")
+                rec["nbytes"] = np.array([size for _, _, size in infos], "uint64")
                 assert len(infos) == d.shape[0] // d.chunks[0], (key, name)  # every chunk allocated
             out["vars"][name] = rec
         out["time"] = _decode_time(h["time"][:], out["vars"]["time"]["attrs"]["units"])

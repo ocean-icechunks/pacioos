@@ -196,6 +196,7 @@ export RCLONE DEST STOP_AT
 echo "Started $(date '+%F %T %Z') on $(hostname) — products: ${PRODUCTS[*]} — parallel: $PARALLEL" \
      "— dry run: $DRY_RUN"
 
+WRF_FIRST_PUBLIC_RUN=20170816
 ok_n=0; fail_n=0; skip_n=0; changed_n=0
 for product in "${PRODUCTS[@]}"; do
   dir=${SOURCE_DIR[$product]}
@@ -221,6 +222,10 @@ for product in "${PRODUCTS[@]}"; do
   # What is here, and what still needs uploading.
   todo=(); todo_bytes=0; done_n=0; young_n=0; check_n=0; changed=()
   while IFS=$'\t' read -r rel lsize mtime; do
+    if [[ $product == wrf_hi && ${rel##*/} =~ ^wrf_hi_([0-9]{8})\.nc$ &&
+          ${BASH_REMATCH[1]} < $WRF_FIRST_PUBLIC_RUN ]]; then
+      continue
+    fi
     if [[ -n ${has_md5[$rel]:-} && ${remote_size[$rel]:-} == "$lsize" ]]; then
       done_n=$((done_n + 1))
     elif [[ -n ${has_md5[$rel]:-} ]]; then

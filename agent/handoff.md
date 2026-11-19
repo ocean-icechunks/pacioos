@@ -5,6 +5,22 @@ unfinished, not a task list.
 
 ## Where things stand (2026-11-19)
 
+### WRF publication and archive scope (#12)
+
+- **WRF Era 2 store published (#12).** The single root group at
+  `ocean-icechunks/pacioos/wrf_hi/icechunk` has 80,087 covered hours from 3,041 HDF5
+  runs, 2017-08-16T03Z through 2026-11-22T00Z. Production snapshot
+  `P9R11AXCREQ7KGD2NQQ0` opened anonymously, matched the ERDDAP time axis and four
+  point values, and matched four source NetCDF planes. It uses the approved forecast
+  title and saved ERDDAP metadata. The tested loading example and build source bundle
+  are beside the public store. Daily updates are tracked in #4.
+
+- **WRF Era 1 removed from public distribution.** With explicit authorization, deleted 2,569
+  Era 1 NetCDF objects (471,465,439,096 bytes) after checking the published PacIOOS stores and
+  WRF scratch snapshots for references. The public WRF inventory contains 3,041 Era 2 NetCDFs
+  (464,032,417,051 bytes). Also deleted and verified removal of the 2,569 Era 1 checksum
+  sidecars (136,157 bytes). The uploader skips WRF runs before 2017-08-16.
+
 ### Reconciliation with main prepared (2026-11-19)
 
 Merged main's product-viewer/build-bundle and team WRF documentation into
