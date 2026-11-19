@@ -5,8 +5,8 @@ unfinished, not a task list.
 
 ## Where things stand (2026-11-19)
 
-- **One product viewer and the build files published, 2026-11-19 (branch
-  `product-bundle-root-viewer`).** Viewer at `pacioos/viewer/index.html`, catalog = forecast,
+- **One product viewer and the build files published, 2026-11-19 (PR #34,
+  merged).** Viewer at `pacioos/viewer/index.html`, catalog = forecast,
   reanalysis, WW3 (`publish_viewer.py --product pacioos`). `stores/publish_bundle.py` uploads
   the committed READMEs, `requirements.txt`, notebooks, scripts and saved metadata, mirroring
   `stores/` under `pacioos/`; rerun it after editing a README (it replaces `pacioos/README.md`).
