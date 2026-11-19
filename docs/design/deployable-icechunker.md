@@ -8,6 +8,9 @@ packages. It supersedes the deployment layout, migration, release-retention and 
 interface in `automation-plan.md` and older handoff entries. Preserve their data-processing
 safeguards where they do not conflict with the decisions below.
 
+The manual-deployment and rolling-main distribution follow-up was implemented locally on
+2026-11-19. Live GitHub publication remains unverified; see the handoff for checks performed.
+
 ## Reusable packaging principles
 
 1. **Optimize for the operator's understanding.** A person should immediately see how to
@@ -58,6 +61,45 @@ safeguards where they do not conflict with the decisions below.
 
 These principles are reusable beyond PacIOOS. The concrete paths, versions and dataset
 behavior below are specific to this deployment; do not generalize them blindly.
+
+## Payload generation and distribution
+
+An operator must be able to deploy without a coding agent. `ops/README.md`, also shipped as
+the payload's root README, documents obtaining the package, checksum verification, staging,
+bootstrap, configuration/key provisioning and supervised validation. `ops/` is a development
+directory; `ops/package.py` is the source of truth for the runtime manifest, including required
+files from `upload/` and `stores/`. Building requires only Python's standard library. Ship
+source code and dependency locks, without operator config, credentials, environments, durable
+state or default header seeds. Bootstrap installs dependencies on the target host.
+
+The approved GitHub distribution is one rolling main payload, implemented by
+`.github/workflows/icechunker-payload.yml`:
+
+- Build on every push to `main` and on manual dispatch from `main`. Validate the manifest,
+  archive checksum, extracted contents/permissions, shell syntax and help before publication.
+- Replace `icechunker-main.tar.gz` and its `.sha256` companion on the single mutable
+  `icechunker-main` prerelease. Use stable asset names and URLs, record the source commit in
+  release notes, and move only that dedicated tag. Do not create a release for each commit.
+- Use release assets because Actions workflow artifacts require expiration; release assets
+  have no automatic expiration. The earlier per-commit, 30-day artifact proposal is superseded.
+- Serialize runs without cancelling an active asset replacement. Publish only from `main`,
+  and skip publication when its head has advanced beyond the build's commit. Use contents-write
+  permission for release/tag updates; repository policy must permit mutable releases and the
+  dedicated tag update. No server access, production jobs or cron activation belongs in CI.
+
+The tar archive preserves executable permissions and encloses the payload in one `icechunker/`
+directory (user-requested 2026-11-19). Local archive builds use the same layout. CI requires
+exactly this one entry at the extraction root before validating the enclosed payload; the
+manifest paths remain relative to the payload root. Use `--strip-components=1` when extracting
+into an installation or staging root, including a custom installation root.
+Operators verify its checksum before extraction and `MANIFEST.sha256` afterwards. Extract
+fresh installs into the chosen root; extract upgrades into a new
+`<root>/.runtime/install-work/payload/` and invoke its bootstrap with `--root`. Never unpack an
+upgrade directly over the active app. Downloaded archives remain temporary install-work files,
+removed after successful bootstrap. The persistent GitHub prerelease does not change the
+one-active-installation rule or permit permanent local release copies. Asset replacement is
+not atomic across the archive/checksum pair; if downloads overlap an update, download both again
+when checksum verification fails.
 
 ## Approved layout
 
@@ -252,6 +294,13 @@ Do not rewrite model selection, computed virtual references or array layout for 
 
 ## Acceptance checks
 
+- Manual payload generation and documented staging work without an agent or scientific
+  dependencies. Both CI and local-build archives contain exactly one top-level `icechunker/`
+  directory. Extraction preserves executable permissions; documented fresh-install and upgrade
+  staging commands strip that directory and pass manifest verification at the chosen root.
+- Rolling publication creates or replaces the same release assets, records the source commit,
+  and skips non-main/stale builds. Check failure handling locally with mocked publication;
+  separately verify real GitHub download/checksums and replacement after the first hosted runs.
 - Global help, `help <command>` and every subcommand's `--help` work with absent config/keys
   and network disabled; `check` remains local-only.
 - Fresh and repeated installation leave one application and one environment, with no

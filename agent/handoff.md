@@ -5,6 +5,84 @@ unfinished, not a task list.
 
 ## Where things stand (2026-11-19)
 
+### Icechunker archive parent directory prepared (2026-11-19)
+
+The user requested a top-level `icechunker/` directory in the GHA-produced tarball.
+`.github/workflows/icechunker-payload.yml` now builds the payload under that name and
+archives the directory itself. Extracted-payload validation requires exactly that one
+entry at the extraction root, then checks the manifest, contents, permissions and offline
+help inside it. Release notes and the workflow summary describe the new archive layout.
+
+`ops/README.md` uses the same layout for local builds and documents
+`--strip-components=1` for fresh-install and upgrade staging extraction, preserving the
+chosen installation root. `docs/design/deployable-icechunker.md` records the archive
+contract and acceptance checks. The payload manifest remains relative to its own root.
+
+Local validation executed the workflow's actual path-preparation, build/archive and
+extracted-content validation scripts successfully. All archive entries were confirmed to
+start with `icechunker/`; fresh-install and upgrade staging extractions using the documented
+strip option both passed manifest verification. Archive checksums, permissions, shell
+syntax and offline CLI/bootstrap help passed, as did `git diff --check`. Actionlint was
+not available for this follow-up; earlier validation below is historical.
+
+**Pending:** user approval of the proposed commit message before creating a commit, then
+push and hosted release/download verification. Changes remain uncommitted. No release
+publication, server deployment, bootstrap execution, production processing or cron changes
+were performed. The unrelated untracked `stores/wrf_hi/` directory remains untouched.
+
+### Manual deployment and rolling main payload prepared (2026-11-19)
+
+The root README now links to complete agent-free deployment instructions in `ops/README.md`:
+generate the explicit payload with `ops/package.py` or download it, verify the archive and
+payload manifests, stage a fresh installation or an upgrade, then run bootstrap and supervised
+validation manually. Copying `ops/` alone is insufficient; the payload includes required
+modules and metadata from `upload/` and `stores/` too.
+
+`.github/workflows/icechunker-payload.yml` builds and validates on every push to `main` or a
+manual dispatch from `main`. The final user-requested distribution is one rolling
+`icechunker-main` prerelease with replaceable `icechunker-main.tar.gz` and
+`icechunker-main.tar.gz.sha256` assets at stable URLs. Release notes identify the source
+commit and the dedicated tag moves to it. This supersedes the initial per-commit, 30-day
+Actions-artifact proposal: workflow artifacts must expire, while release assets have no
+automatic expiration. Publication is serialized without cancellation during asset replacement;
+non-main and stale builds do not publish. The workflow requires contents-write permission,
+mutable releases and permission to update its dedicated tag. It never deploys to a server.
+
+Local validation passed actionlint 1.7.12, all build/archive/extraction/checksum/permission/help
+steps, README build commands and shell syntax, and mocked first-publication, replacement,
+stale-build and failed-upload scenarios. The deployment test suite passed 13 of 14 tests in
+the current Python environment; the remaining local-readiness test errors because Icechunk
+is not installed there. These checks do not establish live GitHub publication or host setup.
+
+**Pending:** after the workflow is pushed to `main`, confirm the rolling release and tag,
+download both assets, and verify the archive and payload checksums. Confirm a subsequent
+successful build replaces the same assets. No live release publication, server deployment,
+bootstrap, production processing or cron changes were performed for this follow-up.
+
+### Updated merged runtime deployed (2026-11-19)
+
+Deployed the explicit 26-file runtime payload from merged main commit `8253aac` to the
+existing Icechunker root. This completes the pending 15-minute-default deployment below
+and includes the merged WRF automation exclusions and shared credential-helper changes.
+The six untracked legacy wrappers remain excluded from the payload and untouched locally.
+
+Deployment acquired the exclusive installation lock and both existing dataset locks,
+verified the previous payload, and confirmed the dependency lock was unchanged before
+replacement. Temporary rollback copies were retained until validation passed, then removed
+along with the incoming payload. No bootstrap or dependency installation was run.
+
+Server validation passed all 26 runtime checksums, private ownership/permissions, host-Python
+early-helper syntax, shell syntax, global/per-command help and local readiness checks using
+the installed environment. Config parsing confirms an effective 15-minute minimum age and
+configured datasets `roms_hiig` and `ww3_hawaii`. Configuration, credentials, durable state,
+installed runtime metadata and crontab were compared before/after and are unchanged.
+
+Local validation passed 83 operations/deployment tests, six store-authentication tests and
+six upload-authentication tests (95 total), shell syntax and whitespace checks. No production
+sync, historical verification, credential exchange, remote README publication or cron change
+was performed. Production processing and conditional README publication still require the
+operator's supervised validation; local readiness does not establish remote access.
+
 ### WRF publication and archive scope (#12)
 
 - **WRF Era 2 store published (#12).** The single root group at

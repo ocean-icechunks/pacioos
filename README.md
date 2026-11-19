@@ -3,7 +3,9 @@
 Code for creating an Icechunk pipeline for PacIOOS model data: the Hawaiʻi regional ROMS
 ocean model, WRF wind and weather, and WaveWatch III waves.
 
-For server setup, see the [Icechunker operator guide](ops/README.md). Bootstrap creates a
+For server setup without an agent, start with
+[obtaining and staging the Icechunker payload](ops/README.md#obtain-and-stage-the-payload):
+download the rolling main payload or build it from this repository. Bootstrap creates a
 missing `config/config.toml` from the example and a private empty `config/source-coop.key`,
 preserving existing files. Review the config and fill in the key before running jobs.
 
