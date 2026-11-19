@@ -145,5 +145,6 @@ def run_workers(cfg, args, names, notify):
                     details[name] = job_reports.read_failure(cfg, args, name, log_id)
         failed |= code != 0
     if notify and failures:
-        notify_failures(args.action, args.scope, failures, Path(cfg['install_root']) / 'logs', details=details)
+        notify_failures(cfg, args.action, args.scope, failures,
+                        Path(cfg['install_root']) / 'logs', details=details)
     return 1 if failed else 0

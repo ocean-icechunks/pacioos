@@ -114,7 +114,8 @@ exact expected log path. Existing durable status/pending records are unchanged.
 At the operator's request, preexisting worker/shared retry error
 messages are preserved in logs; they are not automatically sanitized.
 Standalone updater email hooks and `--no-email` are removed. Runtime packaging and operator
-SMTP/environment instructions are updated.
+SMTP/TOML instructions are updated; optional SMTP passwords are stored in a private file
+beneath the installation root.
 One CLI parent-level exception boundary now attempts safe alerts for startup and orchestration
 failures (paths, permissions, configuration/imports, timeout bookkeeping), then reraises the
 original exception. Ordinary worker aggregates are not sent twice; expected installation-lock

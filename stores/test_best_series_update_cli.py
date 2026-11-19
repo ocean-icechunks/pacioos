@@ -1,5 +1,4 @@
 """Standalone updaters preserve their errors without sending automation email."""
-import os
 from pathlib import Path
 import sys
 import tempfile
@@ -17,11 +16,7 @@ class StandaloneTests(unittest.TestCase):
             with self.subTest(error=type(error).__name__), tempfile.TemporaryDirectory() as temporary:
                 builder = SimpleNamespace(HERE=Path(temporary), BUCKET='bucket',
                     DESTINATIONS={'scratch': 'scratch'}, scan=Mock(side_effect=error))
-                with patch.dict(os.environ, {
-                        'PACIOOS_ALERT_EMAIL_TO': 'ops@example.org',
-                        'PACIOOS_ALERT_EMAIL_FROM': 'sender@example.org',
-                        'PACIOOS_SMTP_HOST': 'smtp.example.org'}), \
-                        patch.dict(sys.modules, {'icechunk': SimpleNamespace(set_logs_filter=Mock())}), \
+                with patch.dict(sys.modules, {'icechunk': SimpleNamespace(set_logs_filter=Mock())}), \
                         patch.object(sys, 'argv', ['update_store.py', '--workdir', temporary]), \
                         patch('smtplib.SMTP') as smtp, patch('smtplib.SMTP_SSL') as smtp_ssl, \
                         patch.object(updater, 'log'):

@@ -181,8 +181,9 @@ old command aliases or a cron-install/remove interface to the deployed payload.
 `sync` and `verify` support explicit `--notify` failure email, off by default for manual use.
 Generated cron commands opt in. One parent-owned summary follows all selected datasets;
 success, idle runs, dry runs and expected dataset-lock skips do not alert. Delivery is
-best-effort and cannot change job results or recovery state. Keep SMTP credentials private
-beneath the root and provision the job environment separately; alerts contain safe status,
+best-effort and cannot change job results or recovery state. Store SMTP settings in the
+installation's TOML config; keep only the optional SMTP password in a mode-600 file owned by
+the job user beneath the root. Alerts contain safe status,
 exception type/location, exact log paths and explicitly marked application-owned recovery
 guidance, never arbitrary exception text. Reuse the existing worker log: the parent assigns
 its unique filename, the worker appends a marked JSON failure footer, and the parent reads

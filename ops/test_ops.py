@@ -277,6 +277,16 @@ class ConfigTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'key_file must stay inside'):
             self.config('key_file = "/outside/key"\n')
 
+    def test_optional_notification_settings_are_not_validated_during_config_load(self):
+        cfg = self.config('[notifications]\nsmtp_password_file = "config/smtp-password"\n')
+        self.assertEqual(cfg['notifications']['smtp_password_file'], 'config/smtp-password')
+        cfg = self.config('[notifications]\nsmtp_password_file = "/outside/password"\n')
+        self.assertEqual(cfg['notifications']['smtp_password_file'], '/outside/password')
+        cfg = self.config('[notifications]\nsmtp_password_file = 42\n')
+        self.assertEqual(cfg['notifications']['smtp_password_file'], 42)
+        cfg = self.config('notifications = "invalid optional setting"\n')
+        self.assertEqual(cfg['notifications'], 'invalid optional setting')
+
     def test_direct_python_job_environment_and_working_directory_stay_inside_root(self):
         cfg = self.config()
         (self.root / '.runtime/tmp').mkdir(parents=True)

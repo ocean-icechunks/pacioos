@@ -18,25 +18,26 @@ import notifications
 import package
 
 
-SMTP_SETTINGS = {
-    'PACIOOS_ALERT_EMAIL_TO': 'ops@example.org, team@example.org',
-    'PACIOOS_ALERT_EMAIL_FROM': 'icechunker@example.org',
-    'PACIOOS_SMTP_HOST': 'smtp.example.org',
-    'PACIOOS_SMTP_USERNAME': 'mailer',
-    'PACIOOS_SMTP_PASSWORD': 'smtp-secret',
-}
-
-
 class SMTPTests(unittest.TestCase):
     def setUp(self):
-        settings = patch.dict(os.environ, SMTP_SETTINGS, clear=True)
-        settings.start()
-        self.addCleanup(settings.stop)
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name)
+        self.password_file = self.root / 'smtp-password'
+        self.password_file.write_text('smtp-secret\n')
+        self.password_file.chmod(0o600)
+        self.cfg = {'install_root': str(self.root), 'notifications': {
+            'to_addresses': ['ops@example.org', 'team@example.org'],
+            'from_address': 'icechunker@example.org',
+            'smtp_host': 'smtp.example.org',
+            'smtp_username': 'mailer',
+            'smtp_password_file': str(self.password_file),
+        }}
 
     def test_starttls_summary_and_envelope_exclude_credentials(self):
         with patch('notifications.smtplib.SMTP') as client:
             client.return_value.__enter__.return_value.send_message.return_value = {}
-            notifications.notify_failures('verify', 'full', [
+            notifications.notify_failures(self.cfg, 'verify', 'full', [
                 ('roms_hiig', 'failed (exit 1)'), ('ww3_hawaii', 'timed out')], Path('/root/logs'),
                 details={name: dict(log_path=f'/root/logs/{name}-verify-current.log')
                          for name in ('roms_hiig', 'ww3_hawaii')})
@@ -58,29 +59,63 @@ class SMTPTests(unittest.TestCase):
         self.assertNotIn('Traceback', message.get_content())
 
     def test_ssl_and_custom_port(self):
-        with patch.dict(os.environ, PACIOOS_SMTP_SECURITY='ssl', PACIOOS_SMTP_PORT='2465'), \
-                patch('notifications.smtplib.SMTP_SSL') as client:
+        self.cfg['notifications'].update(smtp_security='ssl', smtp_port=2465)
+        with patch('notifications.smtplib.SMTP_SSL') as client:
             client.return_value.__enter__.return_value.send_message.return_value = {}
-            notifications.send_message('failure', 'summary')
+            notifications.send_message(self.cfg, 'failure', 'summary')
         self.assertEqual(client.call_args.args, ('smtp.example.org', 2465))
         self.assertIn('context', client.call_args.kwargs)
         client.return_value.__enter__.return_value.starttls.assert_not_called()
 
+    def test_unauthenticated_relay_does_not_read_password_or_login(self):
+        self.cfg['notifications'].pop('smtp_username')
+        self.cfg['notifications'].pop('smtp_password_file')
+        with patch.dict(os.environ, {}, clear=True), \
+                patch('notifications.smtplib.SMTP') as client:
+            client.return_value.__enter__.return_value.send_message.return_value = {}
+            notifications.send_message(self.cfg, 'failure', 'summary')
+        smtp = client.return_value.__enter__.return_value
+        client.assert_called_once_with('smtp.example.org', 587, timeout=30)
+        smtp.login.assert_not_called()
+        smtp.send_message.assert_called_once()
+
+    def test_password_file_must_be_private_before_connecting(self):
+        self.password_file.chmod(0o640)
+        with patch('notifications.smtplib.SMTP') as client, \
+                contextlib.redirect_stderr(io.StringIO()) as output:
+            notifications.notify_failures(
+                self.cfg, 'sync', 'recent', [('roms_hiig', 'failed')], '/logs')
+        client.assert_not_called()
+        self.assertIn('could not be delivered', output.getvalue())
+        self.assertNotIn('smtp-secret', output.getvalue())
+
     def test_invalid_configuration_never_connects_or_logs_values(self):
-        for override in ({'PACIOOS_ALERT_EMAIL_TO': ''},
-                         {'PACIOOS_ALERT_EMAIL_TO': 'ops@example.org\nBcc: secret@example.org'},
-                         {'PACIOOS_ALERT_EMAIL_FROM': 'sender@example.org\r\nsecret'},
-                         {'PACIOOS_SMTP_HOST': ''},
-                         {'PACIOOS_SMTP_SECURITY': 'plain'},
-                         {'PACIOOS_SMTP_PORT': 'smtp-secret'},
-                         {'PACIOOS_SMTP_PASSWORD': ''}):
-            with self.subTest(override=list(override)), patch.dict(os.environ, override), \
+        for override in ({'to_addresses': []},
+                         {'to_addresses': ['ops@example.org\nBcc: secret@example.org']},
+                         {'from_address': 'sender@example.org\r\nsecret'},
+                         {'smtp_host': ''},
+                         {'smtp_security': 'plain'},
+                         {'smtp_port': 'smtp-secret'},
+                         {'smtp_password_file': ''},
+                         {'smtp_password_file': '/outside/password'},
+                         {'smtp_password_file': 42}):
+            cfg = dict(self.cfg, notifications=dict(self.cfg['notifications'], **override))
+            with self.subTest(override=list(override)), \
                     patch('notifications.smtplib.SMTP') as client, \
                     contextlib.redirect_stderr(io.StringIO()) as output:
-                notifications.notify_failures('sync', 'recent', [('roms_hiig', 'failed')], '/logs')
+                notifications.notify_failures(cfg, 'sync', 'recent', [('roms_hiig', 'failed')], '/logs')
             client.assert_not_called()
             self.assertIn('could not be delivered', output.getvalue())
             self.assertNotIn('secret', output.getvalue())
+
+    def test_malformed_notification_table_is_only_reported_when_sending(self):
+        cfg = dict(self.cfg, notifications='invalid optional setting')
+        with patch('notifications.smtplib.SMTP') as client, \
+                contextlib.redirect_stderr(io.StringIO()) as output:
+            notifications.notify_failures(
+                cfg, 'sync', 'recent', [('roms_hiig', 'failed')], '/logs')
+        client.assert_not_called()
+        self.assertIn('could not be delivered', output.getvalue())
 
     def test_delivery_errors_and_partial_refusal_are_safe_and_visible(self):
         for partial in (False, True):
@@ -91,7 +126,8 @@ class SMTPTests(unittest.TestCase):
                     smtp.send_message.return_value = {'ops@example.org': (550, b'smtp-secret')}
                 else:
                     smtp.login.side_effect = smtplib.SMTPAuthenticationError(535, b'smtp-secret')
-                notifications.notify_failures('sync', 'recent', [('roms_hiig', 'failed')], '/logs')
+                notifications.notify_failures(
+                    self.cfg, 'sync', 'recent', [('roms_hiig', 'failed')], '/logs')
             self.assertIn('could not be delivered', output.getvalue())
             self.assertNotIn('smtp-secret', output.getvalue())
 
@@ -103,9 +139,18 @@ class JobNotificationTests(unittest.TestCase):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         self.root = Path(temporary.name)
+        password_file = self.root / 'config/smtp-password'
+        password_file.parent.mkdir(mode=0o700)
+        password_file.write_text('smtp-secret\n')
+        password_file.chmod(0o600)
         self.cfg = dict(install_root=str(self.root), config_file=str(self.root / 'config.toml'),
                         state_dir=str(self.root / 'state'), bucket='bucket', prefix='pacioos',
                         log_retention_days=30, max_job_seconds=20,
+                        notifications=dict(to_addresses=['ops@example.org'],
+                                           from_address='icechunker@example.org',
+                                           smtp_host='smtp.example.org',
+                                           smtp_username='mailer',
+                                           smtp_password_file=str(password_file)),
                         datasets={name: dict(store_prefix=f'pacioos/{name}/icechunk')
                                   for name in ('roms_hiig', 'ww3_hawaii')})
         for target, options in [('jobs.load_config', dict(return_value=self.cfg)),
@@ -142,7 +187,7 @@ class JobNotificationTests(unittest.TestCase):
                     parsed = cli.parser()[0].parse_args(call.args[0][3:])
                     expected_details[parsed.worker] = dict(unavailable=True, log_path=str(
                         job_reports.log_path(self.cfg, parsed.worker, action, parsed.log_id)))
-                notify.assert_called_once_with(action, scope, [
+                notify.assert_called_once_with(self.cfg, action, scope, [
                     ('roms_hiig', 'failed (exit 1)'), ('ww3_hawaii', 'failed (exit 1)')],
                     self.root / 'logs', details=expected_details)
 
@@ -160,7 +205,7 @@ class JobNotificationTests(unittest.TestCase):
                 patch('jobs.notify_failures') as notify, contextlib.redirect_stderr(io.StringIO()):
             self.assertEqual(jobs.run(self.args()), 1)
         parsed = cli.parser()[0].parse_args(run.call_args_list[0].args[0][3:])
-        notify.assert_called_once_with('sync', 'recent', [('roms_hiig', 'timed out')],
+        notify.assert_called_once_with(self.cfg, 'sync', 'recent', [('roms_hiig', 'timed out')],
             self.root / 'logs', details={'roms_hiig': dict(log_path=str(
                 job_reports.log_path(self.cfg, 'roms_hiig', 'sync', parsed.log_id)))})
         self.assertTrue((common.dataset_state(self.cfg, 'roms_hiig') / 'last-timeout.json').exists())
@@ -171,7 +216,7 @@ class JobNotificationTests(unittest.TestCase):
             self.assertEqual(jobs.run(self.args()), 1)
         self.assertEqual(run.call_count, 2)
         self.assertNotIn('credential-secret', output.getvalue())
-        self.assertEqual(notify.call_args.args[2], [
+        self.assertEqual(notify.call_args.args[3], [
             ('roms_hiig', 'worker launch failed'), ('ww3_hawaii', 'failed (exit 1)')])
 
     def test_worker_logs_application_error_without_notifying_and_keeps_recovery_state(self):
@@ -205,7 +250,6 @@ class JobNotificationTests(unittest.TestCase):
             common.atomic_json(state / name, {'preserve': name})
         before = {path.name: path.read_bytes() for path in state.iterdir()}
         with patch('jobs.run_bounded', side_effect=[1, 0]), \
-                patch.dict(os.environ, SMTP_SETTINGS, clear=True), \
                 patch('notifications.smtplib.SMTP', side_effect=OSError('credential-secret')), \
                 contextlib.redirect_stderr(io.StringIO()) as output:
             self.assertEqual(jobs.run(self.args()), 1)
@@ -218,7 +262,7 @@ class JobNotificationTests(unittest.TestCase):
         guidance = 'No cached schema baseline. Run icechunker verify --scope full once.'
         logs = []
         with patch('notifications.send_message') as send:
-            def deliver(subject, body):
+            def deliver(cfg, subject, body):
                 self.assertTrue(all(path.is_file() for path in logs))
                 raise OSError('smtp-secret')
             send.side_effect = deliver
@@ -235,7 +279,7 @@ class JobNotificationTests(unittest.TestCase):
                     contextlib.redirect_stderr(io.StringIO()) as output:
                 self.assertEqual(jobs.run(self.args()), 1)
         send.assert_called_once()
-        body = send.call_args.args[1]
+        body = send.call_args.args[2]
         self.assertIn('Error: RecoveryRequired', body)
         self.assertIn('Reason: ' + guidance, body)
         self.assertIn('Error: RuntimeError', body)
@@ -257,7 +301,7 @@ class JobNotificationTests(unittest.TestCase):
                 patch('jobs.notify_failures') as notify, contextlib.redirect_stderr(io.StringIO()):
             self.assertEqual(jobs.run(self.args(dataset=['roms_hiig', 'roms_hiig'])), 1)
         run.assert_called_once()
-        self.assertEqual(notify.call_args.args[2], [('roms_hiig', 'failed (exit 1)')])
+        self.assertEqual(notify.call_args.args[3], [('roms_hiig', 'failed (exit 1)')])
         parsed = cli.parser()[0].parse_args(run.call_args.args[0][3:])
         self.assertEqual(notify.call_args.kwargs['details'], {'roms_hiig': dict(unavailable=True,
             log_path=str(job_reports.log_path(self.cfg, 'roms_hiig', 'sync', parsed.log_id)))})

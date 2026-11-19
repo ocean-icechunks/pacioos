@@ -97,9 +97,11 @@ def main(argv=None):
         if (getattr(args, 'notify', False) and not args.dry_run and not args.worker
                 and args.action in ('sync', 'verify')):
             try:
+                from common import load_config
                 from notifications import notify_failures
-                logs = Path(os.environ.get('ICECHUNKER_ROOT', '~/icechunker')).expanduser() / 'logs'
-                notify_failures(args.action, args.scope, [
+                cfg = load_config(getattr(args, 'config', None))
+                logs = Path(cfg['install_root']) / 'logs'
+                notify_failures(cfg, args.action, args.scope, [
                     ('parent-job', 'failed ({}); selected work may be incomplete'.format(type(exc).__name__))
                 ], logs)
             except Exception:

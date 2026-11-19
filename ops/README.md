@@ -309,25 +309,23 @@ send email unless explicitly opted in. Successful/idle jobs, dry runs (even fail
 and expected dataset-lock skips send nothing. A lock skip still returns nonzero and records
 `last-skip.json`; monitor repeated skips separately.
 
-Configure these environment variables for the job:
+Configure failure email in `config/config.toml`:
 
-| Variable | Meaning |
+| `[notifications]` key | Meaning |
 | --- | --- |
-| `PACIOOS_ALERT_EMAIL_TO` | Required comma-separated recipients |
-| `PACIOOS_ALERT_EMAIL_FROM` | Required sender permitted by the SMTP relay |
-| `PACIOOS_SMTP_HOST` | Required SMTP relay |
-| `PACIOOS_SMTP_SECURITY` | `starttls` (default) or `ssl`; unencrypted SMTP is unsupported |
-| `PACIOOS_SMTP_PORT` | Defaults to 587 for STARTTLS, 465 for SSL |
-| `PACIOOS_SMTP_USERNAME`, `PACIOOS_SMTP_PASSWORD` | Set both for authentication, or neither |
+| `from_address` | Required sender permitted by the SMTP relay |
+| `to_addresses` | Required TOML list of recipients |
+| `smtp_host` | Required SMTP relay |
+| `smtp_security` | `starttls` (default) or `ssl`; unencrypted SMTP is unsupported |
+| `smtp_port` | Defaults to 587 for STARTTLS, 465 for SSL |
+| `smtp_username`, `smtp_password_file` | Set both for authentication, or omit both for an unauthenticated relay |
 
-Cron does not inherit your interactive shell's exports. Provision these privately for the
-cron job, not as values in crontab, TOML examples, logs or git. One option is a trusted shell
-file at `<root>/config/notifications.env`, owned by the job user, mode `600` inside the
-mode-`700` config directory, containing `export` assignments. Icechunker does not create or
-automatically source it. For this option, prepend
-`. "$HOME/icechunker/config/notifications.env" &&` to each generated command (after the five
-schedule fields), using the actual root if customized. Do not enable shell tracing. Keep
-credential values out of the cron command itself; the filename is not a credential.
+The password itself must not be stored in TOML. Create the configured password file beneath
+the installation root, owned by the job user, mode `600` (the config directory is mode `700`).
+For example, `config/smtp-password` may contain the password and a trailing newline. The file
+is read only when sending an alert. The configured path must stay inside the root, including
+through symlinks. Do not put the password in crontab, logs, or git. Cron needs no exported SMTP
+environment.
 
 Alerts contain action/scope, failed dataset names, failure/timeout status and, when available,
 the exception type, failing function and exact worker log path. Explicitly marked,

@@ -17,8 +17,15 @@ max_run_age_hours = 72
 log_retention_days = 30
 sync_schedule = "17 */3 * * *"
 full_verify_schedule = "47 2 * * 0"
-# Generated cron commands opt into failure email with --notify.
-# Provision SMTP environment privately; see README.md. Never put credential values here.
+# Generated cron commands opt into failure email with --notify. Uncomment and configure:
+# [notifications]
+# from_address = "icechunker@example.org"
+# to_addresses = ["ops@example.org"]
+# smtp_host = "mail.hawaii.edu"
+# smtp_security = "starttls"        # defaults to starttls; ssl is also supported
+# smtp_port = 587                   # defaults to 587 for starttls or 465 for ssl
+# smtp_username = "icechunker"      # omit this and smtp_password_file for unauthenticated relay
+# smtp_password_file = "config/smtp-password"  # owned by the job user, mode 600
 
 [datasets.roms_hiig]
 source_dir = "/export/data/model/ocn/roms_forecast/hiig"
