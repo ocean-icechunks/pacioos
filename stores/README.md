@@ -28,9 +28,10 @@ outside Icechunker's store/README automation and the bundle publisher.
 | `roms_hiig/` | ROMS forecast store, best time series (#10). Start with its [`how_store_created.md`](roms_hiig/how_store_created.md) |
 | `ww3_hawaii/` | WaveWatch III store, best time series, with cold-start flags and ERDDAP metadata (#13). Start with its [`how_store_created.md`](ww3_hawaii/how_store_created.md) |
 
-The ROMS and WW3 `update_store.py` scripts send failure email for errors during scanning,
-planning, destination access, update, or verification. Successful runs, no-ops, and successful
-dry runs send no email. Configure `PACIOOS_ALERT_EMAIL_TO`, `PACIOOS_ALERT_EMAIL_FROM`, and
+The ROMS and WW3 `update_store.py` scripts send failure email by default for errors during
+scanning, planning, destination access, update, or verification. Use `--no-email` to suppress
+alerts, such as for a manual run. Successful runs, no-ops, and successful dry runs send no email.
+Configure `PACIOOS_ALERT_EMAIL_TO`, `PACIOOS_ALERT_EMAIL_FROM`, and
 `PACIOOS_SMTP_HOST`; `PACIOOS_SMTP_PORT` defaults to 587 for STARTTLS or 465 for SSL. Choose
 `PACIOOS_SMTP_SECURITY=starttls` (default) or `ssl`. SMTP authentication uses
 `PACIOOS_SMTP_USERNAME` and `PACIOOS_SMTP_PASSWORD` together. Keep these values in the job's
