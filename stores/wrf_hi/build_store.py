@@ -81,7 +81,7 @@ def scan_one(key: str, cache: Path) -> None:
         return
     for attempt in range(READ_ATTEMPTS):
         try:
-            source = pv.scan_h5(key)
+            source = pv.scan_h5(key, strict_chunks=True)
             break
         except (OSError, ClientError) as error:
             if attempt == READ_ATTEMPTS - 1:
@@ -342,7 +342,7 @@ def main() -> None:
     if args.action == "scan":
         scan(keys, args.workdir, args.workers)
         return
-    reference = pv.scan_h5(keys[-1])
+    reference = pv.scan_h5(keys[-1], strict_chunks=True)
     scans = load_scans(keys, args.workdir, grid_signature(reference["coords"]))
     best = best_series(scans)
     print(f"{len(keys)} compatible runs, {len(best)} covered hours: {best.index[0]} to {best.index[-1]}",

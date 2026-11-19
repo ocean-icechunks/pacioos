@@ -73,24 +73,35 @@ def scan_nc3(key: str) -> dict:
     return out
 
 
-def scan_h5(key: str) -> dict:
-    """Header of one HDF5 file: per chunked variable, the native chunk offsets in C order, plus times."""
+def scan_h5(key: str, *, strict_chunks: bool = False) -> dict:
+    """Read HDF5 chunk offsets in C order and decode the time coordinate.
+
+    WRF opts into filter-free chunks and the faster chunk-index walk.
+    """
     fs = fsspec.filesystem("https")
     out = {"key": key, "format": "hdf5", "vars": {}}
     with fs.open(URL_PREFIX + key, "rb", block_size=2**20, cache_type="blockcache") as f, h5py.File(f, "r") as h:
         for name, d in h.items():
             if not isinstance(d, h5py.Dataset):
                 continue
-            assert d.id.get_create_plist().get_nfilters() == 0, (key, name)
+            if strict_chunks:
+                assert d.id.get_create_plist().get_nfilters() == 0, (key, name)
+            else:
+                assert d.compression is None and not d.shuffle, (key, name)
             rec = {"dims": None, "shape": d.shape, "dtype": d.dtype.str, "chunk": d.chunks,
                    "attrs": {a: (x.decode() if isinstance(x, bytes) else x) for a, x in d.attrs.items()
                              if not a.startswith("_Netcdf4") and a not in ("CLASS", "NAME", "REFERENCE_LIST", "DIMENSION_LIST")}}
             if d.chunks is not None and d.ndim >= 3:
-                infos = []
-                d.id.chunk_iter(lambda c: infos.append((c.chunk_offset, c.byte_offset, c.size)))
-                infos.sort()
-                rec["offsets"] = np.array([offset for _, offset, _ in infos], "uint64")
-                rec["nbytes"] = np.array([size for _, _, size in infos], "uint64")
+                if strict_chunks:
+                    infos = []
+                    d.id.chunk_iter(infos.append)
+                    infos.sort(key=lambda info: info.chunk_offset)
+                else:
+                    infos = [d.id.get_chunk_info(i) for i in range(d.id.get_num_chunks())]
+                    order = np.argsort([i.chunk_offset for i in infos], axis=0)[:, 0]
+                    infos = [infos[i] for i in order]
+                rec["offsets"] = np.array([i.byte_offset for i in infos], "uint64")
+                rec["nbytes"] = np.array([i.size for i in infos], "uint64")
                 assert len(infos) == d.shape[0] // d.chunks[0], (key, name)  # every chunk allocated
             out["vars"][name] = rec
         out["time"] = _decode_time(h["time"][:], out["vars"]["time"]["attrs"]["units"])

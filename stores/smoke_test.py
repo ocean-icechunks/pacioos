@@ -58,10 +58,10 @@ def check_wrf_era2_assignment(scans: list[dict], best: pd.DataFrame) -> None:
     assert best.loc[WRF_DUPLICATE_HOUR, "lead"] in repeated
 
 
-def scan(key):
+def scan(key: str, *, strict_chunks: bool = False) -> dict:
     import fsspec
     magic = fsspec.filesystem("https").cat_file(pb.URL_PREFIX + key, start=0, end=4)
-    return pb.scan_nc3(key) if magic[:3] == b"CDF" else pb.scan_h5(key)
+    return pb.scan_nc3(key) if magic[:3] == b"CDF" else pb.scan_h5(key, strict_chunks=strict_chunks)
 
 
 def build_group(scans, best, sci, dims_of, time_units):
@@ -120,7 +120,7 @@ if args.wrf_era2:
 
 for prod, (keys, step, sci, split) in PRODUCTS.items():
     t0 = time.time()
-    scans = [scan(k) for k in keys]
+    scans = [scan(k, strict_chunks=prod == "wrf_hi") for k in keys]
     best = pb.best_assignment(scans, step)
     if prod == "wrf_hi":
         assert all(s["format"] == "hdf5" for s in scans)
