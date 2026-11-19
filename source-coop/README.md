@@ -24,10 +24,19 @@ A daily update is planned. Where the files lack
 metadata (WW3 above all), the stores take PacIOOS's ERDDAP attributes, and each store's
 `metadata_source` attribute says so.
 
+Each Icechunker-managed dataset's README gains a **Global metadata attributes** section when
+Icechunker next processes a completed transfer. It distinguishes attributes of the published
+Icechunk snapshot from those of the latest copied NetCDF file and identifies both sources.
+Later syncs refresh changed content while preserving the rest of the README. Static ROMS
+reanalysis documents its existing `v2.0` store tag. The PacIOOS team's WRF store and README
+are excluded from this automation. Existing archives are not scanned just to initialize
+these listings.
+
 ## View it in a browser
 
-One viewer, [`pacioos/viewer/`](https://data.source.coop/ocean-icechunks/pacioos/viewer/index.html), serves every store; its dataset picker lists
-them all. These links open each store directly:
+One viewer, [`pacioos/viewer/`](https://data.source.coop/ocean-icechunks/pacioos/viewer/index.html),
+offers ROMS forecast, reanalysis and WW3. The team-managed WRF store is not yet in this
+catalog. These links open each included store directly:
 
 | Dataset | Viewer |
 |---|---|
@@ -80,6 +89,11 @@ it); at this root, the shared modules and scripts (`pacioos_virtual.py`, `icechu
 `best_series_update.py`, `publish_viewer.py`, ...) and the shared `requirements.txt`. The builds
 are Python scripts rather than one production notebook; `build_store.py` is that step. The WRF
 store's build files are in [`wrf_hi/build-source.zip`](https://data.source.coop/ocean-icechunks/pacioos/wrf_hi/build-source.zip).
+
+Bundle publication leaves WRF untouched and stops before any upload if a destination README
+contains Icechunker's generated metadata markers. Updates to those READMEs must preserve the
+generated section through a separate reviewed prose update. Unmanaged README uploads are
+conditional on the remote ETag, protecting edits made during publication.
 
 ## Citation and reuse
 

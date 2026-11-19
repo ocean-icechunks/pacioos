@@ -3,6 +3,16 @@
 Code for creating an Icechunk pipeline for PacIOOS model data: the Hawaiʻi regional ROMS
 ocean model, WRF wind and weather, and WaveWatch III waves.
 
+For server setup, see the [Icechunker operator guide](ops/README.md). Bootstrap creates a
+missing `config/config.toml` from the example and a private empty `config/source-coop.key`,
+preserving existing files. Review the config and fill in the key before running jobs.
+
+Sync also maintains each configured dataset's Source Cooperative README with separate
+listings of published Icechunk and latest-file NetCDF global attributes. Initialization waits
+for the next transfer; later syncs upload the README only when content changes. Static ROMS
+reanalysis supports versioned copies and README metadata, using its existing `v2.0` store tag.
+See [dataset README metadata](ops/README.md#dataset-readme-metadata) for setup and retry behavior.
+
 ## Start here: notes for the PacIOOS team
 
 **First steps:**
@@ -37,7 +47,7 @@ repo are linked beside each):
   missing metadata goes (snapshot:
   [`docs/design/virtual-icechunk-explainer.md`](docs/design/virtual-icechunk-explainer.md)).
 
-## What is on Source Cooperative (2026-11-16)
+## What is on Source Cooperative (2026-11-18)
 
 PacIOOS's public servers (THREDDS, ERDDAP) do not expose the model files themselves, so the
 original NetCDF files are copied, unchanged, to the
@@ -47,9 +57,9 @@ Cooperative and never load the PacIOOS server.
 
 | Dataset (PacIOOS id) | Copies of the NetCDFs | Files | Size |
 | --- | --- | --- | --- |
-| ROMS forecast (`roms_hiig`) | `pacioos/roms_hiig/netcdf/` | 656 | 1.24 TB |
+| ROMS forecast (`roms_hiig`) | `pacioos/roms_hiig/netcdf/` | 657 | 1.25 TB |
 | WRF (`wrf_hi`) | `pacioos/wrf_hi/netcdf/` | 5,610 | 0.94 TB |
-| WaveWatch III (`ww3_hawaii`) | `pacioos/ww3_hawaii/netcdf/` | 5,236 | 0.49 TB |
+| WaveWatch III (`ww3_hawaii`) | `pacioos/ww3_hawaii/netcdf/` | 5,237 | 0.49 TB |
 | ROMS reanalysis v2.0 (`roms_hiig_reanalysis`) | `pacioos/roms_hiig_reanalysis/netcdf/v2.0/` | 4,380 | 1.17 TB |
 
 Each file has a `.md5` next to it. The ROMS hindcast (`roms_hiig_assim`, 3.37 TB) is not copied
@@ -60,13 +70,19 @@ goes in `pacioos/<dataset>/icechunk/`. The reanalysis store is built (tag `v2.0`
 (see [its README](stores/roms_hiig_reanalysis/README.md), and
 [`how_store_created.md`](stores/roms_hiig_reanalysis/how_store_created.md) for how it was made).
 The ROMS forecast and WW3 stores are built too (see the product README,
-[`source-coop/README.md`](source-coop/README.md)); WRF is not yet. The forecast copies run to
-2026-11-15 (catch-up copy 2026-11-16).
+[`source-coop/README.md`](source-coop/README.md)). The PacIOOS team also published a
+[WRF store](https://source.coop/ocean-icechunks/pacioos/wrf_hi/README.md) for the HDF5 era
+from 2017-08-16; its store and README remain team-managed. The 2026-11-18 catch-up
+extended the NetCDF copies to the 2026-11-17 ROMS run and 2026-11-16 WW3 run; both new files
+were verified by full downloaded MD5. WRF copies still end at 2026-11-15. The ROMS forecast
+and WW3 Icechunk stores include those new copies, with forecast coverage through
+2026-11-24T00Z and 2026-11-23T18Z, respectively.
 
 ## What's here
 
 | Path | What |
 | --- | --- |
+| [`ops/README.md`](ops/README.md) | Icechunker server operator guide: one command, bootstrap, verification and manual cron activation |
 | [`upload/`](upload/) | Scripts that copy the files to Source Cooperative and check the copies; how to run them |
 | [`audit/`](audit/) | File audit of the copies (2026-11-13): [`report.md`](audit/report.md) (technical), [`report-pacioos.md`](audit/report-pacioos.md) (for the PacIOOS team), [`how_audit_created.md`](audit/how_audit_created.md) (a prompt to redo it) |
 | [`stores/`](stores/) | Virtual Icechunk store code: the smoke test behind issues #10–#14, and the reanalysis build (#11) |

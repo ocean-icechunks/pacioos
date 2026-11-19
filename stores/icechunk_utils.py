@@ -1,15 +1,17 @@
 """
-Copied unchanged from ocean-icechunks/icechunks (icechunk_utils.py, 2026-11-14) so this
-repository runs on its own; fix bugs in both places.
+Originally copied from ocean-icechunks/icechunks (icechunk_utils.py, 2026-11-14).
+PacIOOS also supports local service-account API keys via the upload credential helper.
+Shared fixes still belong in both repositories.
 
 Helpers for opening Icechunk repositories on Source Cooperative using
-temporary credentials managed by the source-coop CLI.
+temporary credentials from a local API key or the source-coop CLI.
 """
 
 import json
 import os
 import shutil
 import subprocess
+import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
@@ -39,12 +41,24 @@ _DEFAULT_CREDS_CACHE = _default_creds_cache()
 _LOGIN_HINT = f"Run: {SOURCE_COOP_CLI} login --duration 1d --port 8400"
 
 
+def _credential_helper() -> Path:
+    """Find the helper in the published bundle or the repository/runtime layout."""
+    folder = Path(__file__).resolve().parent
+    for helper in (folder / 'source_coop_credentials.py',
+                   folder.parent / 'upload' / 'source_coop_credentials.py'):
+        if helper.is_file():
+            return helper
+    raise FileNotFoundError('Missing source_coop_credentials.py; download it beside icechunk_utils.py')
+
+
 def get_source_credentials(creds_cache: str | None = None):
     """
     Refresh and return Source Cooperative temporary credentials.
 
-    Calls the source-coop CLI to ensure the cached token is up to date,
-    then reads the credentials from the cache file.
+    Auto-selects an existing local API-key file, exchanging it in memory. Otherwise
+    calls the source-coop CLI and reads its cache. SOURCE_COOP_AUTH=api-key|cli
+    selects explicitly; a failed exchange never falls back to another identity.
+    An explicit creds_cache selects the CLI in auto mode.
 
     Parameters
     ----------
@@ -62,6 +76,29 @@ def get_source_credentials(creds_cache: str | None = None):
         a warning is printed, but it is the caller's decision what to do. Use
         ``open_source_icechunk_repo`` if you want a clean stop instead.
     """
+    auth = os.environ.get("SOURCE_COOP_AUTH", "auto")
+    key_file = Path(os.environ.get("SOURCE_COOP_API_KEY_FILE") or
+                    Path.home() / ".source-coop" / "pacioos.key")
+    if auth == "auto":
+        auth = "api-key" if creds_cache is None and key_file.exists() else "cli"
+    if auth not in ("api-key", "cli"):
+        raise ValueError("SOURCE_COOP_AUTH must be auto, api-key, or cli")
+    if auth == "api-key":
+        helper = _credential_helper()
+        role = os.environ.get("SOURCE_COOP_ROLE_ARN") or "arn:aws:iam::ocean-icechunks:role/FullAccess"
+        result = subprocess.run(
+            [sys.executable, str(helper), "--key-file", str(key_file), "--role-arn", role],
+            check=True, stdout=subprocess.PIPE, text=True,
+        )
+        temporary = json.loads(result.stdout)
+        return {
+            "aws_access_key_id": temporary["AccessKeyId"],
+            "aws_secret_access_key": temporary["SecretAccessKey"],
+            "aws_session_token": temporary["SessionToken"],
+            "region_name": "us-east-1",
+            "endpoint_url": "https://data.source.coop",
+        }, datetime.fromisoformat(temporary["Expiration"].replace("Z", "+00:00"))
+
     creds_cache = creds_cache or _DEFAULT_CREDS_CACHE
 
     try:
@@ -108,7 +145,7 @@ def open_source_icechunk_repo(
     """
     Open or create an Icechunk repo on Source Cooperative.
 
-    Refreshes credentials via the source-coop CLI before opening.
+    Refreshes credentials via the local API-key helper or source-coop CLI before opening.
 
     Parameters
     ----------

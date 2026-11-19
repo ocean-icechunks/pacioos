@@ -15,8 +15,10 @@ covered step. See ../best_series_update.py for what each step does.
   python update_store.py --dest scratch
   python update_store.py --dest production
 
-Needs the venv from requirements.txt and, to write, Source Cooperative keys
-(source-coop login --duration 1d --port 8400, or a role in a scheduled job).
+Needs the venv from requirements.txt and, to write, Source Cooperative credentials.
+An existing ~/.source-coop/pacioos.key is auto-selected (boto3 required); otherwise
+use source-coop login --duration 1d --port 8400. SOURCE_COOP_AUTH=api-key|cli selects
+explicitly; SOURCE_COOP_API_KEY_FILE overrides the key path.
 """
 from __future__ import annotations
 

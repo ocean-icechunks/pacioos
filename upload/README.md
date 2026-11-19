@@ -10,6 +10,7 @@ built over the copies, so readers use Source Cooperative instead of the PacIOOS 
 | `upload_to_source_coop.sh` | the upload | on the server that holds the files |
 | `verify_source_coop_copy.py` | checks the copies, byte for byte | anywhere; it needs no login |
 | `upload_over_ssh.sh` | runs the upload from another machine, over a read-only SSH login | that other machine |
+| `source_coop_credentials.py` | exchanges a local service-account API key for temporary upload credentials (requires `boto3`) | the job host, including the PacIOOS server; currently called by the SSH wrapper and store helper |
 
 ## Products
 
@@ -49,9 +50,11 @@ touched. What to do when versions or files change is worked through in
 1. **Get `rclone`.** It is one program file, and needs no installation or root. Download the
    Linux zip from <https://rclone.org/downloads/>, check it against the published `SHA256SUMS`,
    and unzip it anywhere you like.
-2. **Get Source Cooperative upload keys.** You need an account that can write to the
-   `ocean-icechunks/pacioos` product, and the
-   [`source-coop` CLI](https://github.com/source-cooperative/source-coop-cli). Then either:
+2. **Get Source Cooperative upload keys.** For unattended jobs, use a service-account API
+   key as described below; it may be stored on this server. The local job runner in
+   [`ops/`](../ops/README.md) exchanges it for temporary credentials automatically after
+   you bootstrap and configure it. For manual runs, the
+   [`source-coop` CLI](https://github.com/source-cooperative/source-coop-cli) is another option:
    - `eval "$(source-coop creds --format env)"`, which gives keys for about 12 hours, or
    - set up the AWS profile described at the top of `upload_to_source_coop.sh`. It gets fresh
      keys by itself, which is better for long runs.
@@ -65,7 +68,7 @@ touched. What to do when versions or files change is worked through in
    ```
 
 **What it does for each file:**
-- **Skips** the file if it is already on Source Cooperative, or if it changed in the last 2 hours
+- **Skips** the file if it is already on Source Cooperative, or if it changed in the last 15 minutes
   (it may still be being written).
 - **Never overwrites a finished copy.** If a file's size on the server no longer matches its
   copy, it prints `CHANGED`, leaves both alone, and exits with status 4 at the end. The
@@ -106,11 +109,61 @@ machine's network.
 
 ## Running it from another machine (`upload_over_ssh.sh`)
 
+The default SSH target is `pacioos` (set up in your local SSH config), the remote binary is
+`/tmp/pacioos-rclone/rclone`, and logs are saved locally to `~/pacioos-upload-logs/logs/`,
+outside the repository. All three can be overridden with `SSH_HOST`, `REMOTE_RCLONE`, and
+`LOG_DIR`. These paths do not depend on a person's name. The remote binary must exist before
+running the wrapper; changing the default does not install or move it.
+
 This is how the first copy was made (Nov 2026), by someone with a read-only login on the PacIOOS
 server. The upload script and short-lived keys are sent over SSH for each run, and nothing is
-saved on the server except the `rclone` program the run uses. Runs are sized to end before the
-keys expire, and the next run starts with fresh keys. The logs are kept on the machine running
-it. Setup and settings are described at the top of the script.
+saved on the server except the `rclone` program the run uses. Runs stop starting new files half
+an hour before the keys expire, and the next run starts with fresh keys. The logs are kept on
+the machine running it. Setup and settings are described at the top of the script.
+
+### Service-account API key on the job host
+
+For a current Source Cooperative service-account key (starting with `sck_`), keep the key at
+`~/.source-coop/pacioos.key` on the machine running the job, outside this repository. Create the
+directory with mode `700` and the key file with mode `600`. The file contains only the key,
+optionally followed by a newline. Long-lived service-account keys are permitted on the
+PacIOOS server for unattended jobs (approved 2026-11-18). Provision a key owned by the
+operating team; keep it out of git, logs, and cron command lines. The SSH workflow can still
+keep its key on the initiating machine and send only temporary credentials to the server.
+
+Source Cooperative documents exchanging these keys for temporary S3 credentials at
+<https://docs.source.coop/automated-access>. The service account needs read/write access to
+`ocean-icechunks/pacioos`. The wrapper automatically uses the API-key file if present, otherwise
+it uses the browser-login `source-coop` CLI. Set `SOURCE_COOP_AUTH=api-key` or `cli` to select
+explicitly. An API-key failure stops the wrapper before SSH; it never falls back to another
+identity after a failed exchange.
+
+The API-key helper requires local Python 3 and `boto3`. It checks key format, checksum,
+ownership, and private permissions before exchanging the key at the fixed Source Cooperative
+STS endpoint. Temporary credentials are kept in memory and sent over SSH stdin, never written
+to disk. Each exchange requests one hour, so each upload batch starts files for at most about
+30 minutes before fetching fresh credentials. In the SSH workflow the long-lived key stays
+on the initiating machine; in a local scheduled workflow it stays on the job host.
+
+Persistent bootstrap and cron instructions are in [`ops/README.md`](../ops/README.md), with
+the design in [`automation-plan.md`](../docs/design/automation-plan.md). The new local runner
+separates routine recent-window Icechunk validation from a periodic historical audit. Existing
+standalone update scripts retain their earlier validation behavior. Bootstrap and cron
+activation are left to the human operator; staging the package does not run either.
+
+Optional settings: `SOURCE_COOP_API_KEY_FILE` overrides the local key path, and
+`SOURCE_COOP_ROLE_ARN` overrides the default `arn:aws:iam::ocean-icechunks:role/FullAccess`.
+The service account's Example usage menu supplies its role ARN. An API key identifies the
+account; the role selects FullAccess or ReadOnly and cannot grant access the account lacks.
+An older Access Key ID / Secret Access Key pair is a different credential format; do not put
+that pair in the single-key file.
+
+```bash
+PARALLEL=1 bash upload/upload_over_ssh.sh --dry-run roms_hiig ww3_hawaii
+# After reviewing the dry run, omit --dry-run to upload missing files.
+```
+
+Offline authentication checks: `python3 -m unittest discover -s upload -p 'test_upload_auth.py'`.
 
 ## Things about Source Cooperative that `rclone` needs told
 

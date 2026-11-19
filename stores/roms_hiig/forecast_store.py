@@ -72,11 +72,11 @@ def list_runs() -> pd.DatetimeIndex:
     """The run days whose copies are on Source Cooperative, from an anonymous listing."""
     import re
     from obstore.store import S3Store
-    store = S3Store('ocean-icechunks', endpoint='https://data.source.coop', region='us-east-1',
+    store = S3Store(pv.BUCKET, endpoint=pv.PUBLIC, region='us-east-1',
                     skip_signature=True)
     pat = re.compile(r'/hiig_forec_(\d{8})\.nc$')
     days = []
-    for batch in store.list(prefix=f'pacioos/{DATASET}/netcdf/'):
+    for batch in store.list(prefix=f'{pv.ROOT_PREFIX}/{DATASET}/netcdf/'):
         for obj in batch:
             m = pat.search(obj['path'])
             if m:

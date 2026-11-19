@@ -85,11 +85,11 @@ def list_runs() -> list[str]:
     2021 year folder.
     """
     from obstore.store import S3Store
-    store = S3Store('ocean-icechunks', endpoint='https://data.source.coop', region='us-east-1',
+    store = S3Store(pv.BUCKET, endpoint=pv.PUBLIC, region='us-east-1',
                     skip_signature=True)
-    keys = [o['path'] for b in store.list(prefix=f'pacioos/{DATASET}/netcdf/') for o in b
+    keys = [o['path'] for b in store.list(prefix=f'{pv.ROOT_PREFIX}/{DATASET}/netcdf/') for o in b
             if NAME_RE.search(o['path'])]
-    return sorted((k.removeprefix('pacioos/') for k in keys), key=name_date)
+    return sorted((k.removeprefix(pv.ROOT_PREFIX + '/') for k in keys), key=name_date)
 
 
 def name_date(key: str) -> pd.Timestamp:
