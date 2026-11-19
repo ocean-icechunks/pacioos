@@ -175,8 +175,9 @@ the weekly repository audit.
   Overlap records a skip and returns nonzero. No outer cron `flock` is needed.
 - Preserve the existing root-containment environment, temporary credential refresh,
   no-identity-fallback behavior, runtime limits, log retention and partial-work reporting.
-- ROMS forecast and WW3 support store updates. WRF and ROMS reanalysis support immutable
-  copies and dataset README metadata, without automatic store updates or repository audits.
+- ROMS forecast and WW3 support store updates. ROMS reanalysis supports immutable copies and
+  dataset README metadata, without automatic store updates or repository audits. WRF supports
+  immutable copies only; its existing team-managed store and README are excluded from automation.
   Reanalysis keeps `netcdf/v2.0/` and reads its existing Icechunk `v2.0` tag for documentation.
 - After successful copy/store validation, reconcile the dataset README's marked global-attribute
   section with actual published snapshot attributes and the latest completed file's global
@@ -188,6 +189,13 @@ the weekly repository audit.
   sync and retries without duplicate checksum downloads or store commits. Read the current README
   on every attempt, use conditional writes to protect concurrent edits, and reject ambiguous
   section markers. `verify` remains read-only remotely; dry runs publish nothing.
+- The separate build-bundle publisher must preflight all README destinations before uploads
+  and refuse destinations containing generated metadata markers, including incomplete markers.
+  Unmanaged READMEs use conditional multipart completion to detect concurrent edits. Keep the
+  exact committed-byte publication contract; editing managed README prose is a separate reviewed
+  operation that preserves the generated section. Bundle dry runs may preview uncommitted
+  files without credentials, but actual uploads require clean committed inputs. Exclude
+  development tests and publish the API-key helper beside the shared credential module.
 
 ## Fresh installation and deployment boundaries
 

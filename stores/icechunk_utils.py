@@ -41,6 +41,16 @@ _DEFAULT_CREDS_CACHE = _default_creds_cache()
 _LOGIN_HINT = f"Run: {SOURCE_COOP_CLI} login --duration 1d --port 8400"
 
 
+def _credential_helper() -> Path:
+    """Find the helper in the published bundle or the repository/runtime layout."""
+    folder = Path(__file__).resolve().parent
+    for helper in (folder / 'source_coop_credentials.py',
+                   folder.parent / 'upload' / 'source_coop_credentials.py'):
+        if helper.is_file():
+            return helper
+    raise FileNotFoundError('Missing source_coop_credentials.py; download it beside icechunk_utils.py')
+
+
 def get_source_credentials(creds_cache: str | None = None):
     """
     Refresh and return Source Cooperative temporary credentials.
@@ -74,7 +84,7 @@ def get_source_credentials(creds_cache: str | None = None):
     if auth not in ("api-key", "cli"):
         raise ValueError("SOURCE_COOP_AUTH must be auto, api-key, or cli")
     if auth == "api-key":
-        helper = Path(__file__).resolve().parents[1] / "upload" / "source_coop_credentials.py"
+        helper = _credential_helper()
         role = os.environ.get("SOURCE_COOP_ROLE_ARN") or "arn:aws:iam::ocean-icechunks:role/FullAccess"
         result = subprocess.run(
             [sys.executable, str(helper), "--key-file", str(key_file), "--role-arn", role],

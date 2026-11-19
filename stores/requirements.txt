@@ -13,6 +13,9 @@ xarray>=2026.9
 numpy>=2.3
 pandas>=2.3
 
+# Source Cooperative service-account exchange and conditional bundle publication.
+boto3>=1.44.5
+
 # NetCDF-3 headers (ROMS forecast, WW3, WRF to 2017): kerchunk's parser subclasses
 # scipy's netcdf_file, so scipy is needed even though nothing imports it directly.
 kerchunk>=0.2.10

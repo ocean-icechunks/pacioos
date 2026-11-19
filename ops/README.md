@@ -1,8 +1,9 @@
 # Icechunker operator guide
 
 Icechunker copies eligible PacIOOS NetCDFs unchanged to Source Cooperative and updates the
-existing ROMS forecast and WW3 virtual Icechunk stores. WRF and ROMS reanalysis support
-copies and README metadata without automatic store updates. Source NetCDFs are read-only
+existing ROMS forecast and WW3 virtual Icechunk stores. ROMS reanalysis supports copies and
+README metadata without automatic store updates. WRF supports copies only: the PacIOOS team
+owns its existing store and README, and Icechunker does not modify either. Source NetCDFs are read-only
 inputs; published copies are write-once. The command never creates a missing production store.
 
 The simplified runtime and README metadata feature have been deployed. Bootstrap,
@@ -160,7 +161,9 @@ After a successful transfer, sync maintains a **Global metadata attributes** sec
 attribute with its snapshot ID and every global attribute from the latest completed NetCDF
 copy (selected by filename date, then object key), with a public file link. These are separate
 sources: the stores can add ERDDAP metadata absent from the files, and file attributes can
-vary between runs. WRF has only the file listing. Empty attribute sets are stated explicitly.
+vary between runs. Empty attribute sets are stated explicitly. WRF README automation is
+disabled even if WRF uploads are configured; no file headers or store attributes are read
+for its documentation, and existing pending README state is left for operator review.
 
 Only the section between `<!-- icechunker:global-attributes:start -->` and
 `<!-- icechunker:global-attributes:end -->` is generated. Existing prose is preserved; a
@@ -184,6 +187,12 @@ Failed uploads are aborted when possible. Service support for these conditional 
 needs a supervised production check. Credentials are refreshed
 in memory, and only the dataset README key is writable through this publisher. Dry runs report
 changes without remote writes or acknowledging README work. `verify` never publishes READMEs.
+
+The separate development publisher `stores/publish_bundle.py` refuses to overwrite READMEs
+containing this section's markers and checks all README destinations before any upload.
+It uses conditional multipart completion for unmanaged READMEs to detect concurrent changes.
+Compare live prose with git before publishing. A managed README needs a separate reviewed
+prose update that preserves its generated section; the bundle does not merge it automatically.
 
 To include static reanalysis, uncomment `[datasets.roms_hiig_reanalysis]` in the config example
 and set its source folder. It defaults to `update_store = false`, preserves the uploader's

@@ -1,6 +1,6 @@
 # PacIOOS ROMS Hawaiʻi reanalysis v2.0: Icechunk store
 
-**[🌐 View data in browser](https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/viewer/index.html)** · **[💻 Data access (code)](#how-to-open-it)** · **[📦 PacIOOS dataset page](https://www.pacioos.hawaii.edu/metadata/roms_hiig_reanalysis.html)** · **[📄 How to cite](#citation-and-reuse)**
+**[🌐 View data in browser](https://data.source.coop/ocean-icechunks/pacioos/viewer/index.html#icechunk+https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/icechunk::varname=temp::px=0::py=0::alt=4000000::lat=20.5::lon=-158.2::dimIndices_time=0::dimIndices_depth=0)** · **[💻 Data access (code)](#how-to-open-it)** · **[📦 PacIOOS dataset page](https://www.pacioos.hawaii.edu/metadata/roms_hiig_reanalysis.html)** · **[📄 How to cite](#citation-and-reuse)**
 
 An [Icechunk](https://icechunk.io) store of the **PacIOOS Regional Ocean Modeling System (ROMS)
 reanalysis for the main Hawaiian Islands, version 2.0**. It is 3-hourly, from 2009-01-01 to
@@ -26,14 +26,15 @@ blocks (8.3 MB). A surface map reads 36 times less data than it would from the f
 
 | Field | Viewer |
 |---|---|
-| Potential temperature | [Open `temp`](https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/viewer/index.html#icechunk+https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/icechunk::varname=temp::px=0::py=0::alt=4000000::lat=20.5::lon=-158.2::dimIndices_time=0::dimIndices_depth=0) |
-| Salinity | [Open `salt`](https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/viewer/index.html#icechunk+https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/icechunk::varname=salt::px=0::py=0::alt=4000000::lat=20.5::lon=-158.2::dimIndices_time=0::dimIndices_depth=0) |
-| Eastward current | [Open `u`](https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/viewer/index.html#icechunk+https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/icechunk::varname=u::px=0::py=0::alt=4000000::lat=20.5::lon=-158.2::dimIndices_time=0::dimIndices_depth=0) |
-| Northward current | [Open `v`](https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/viewer/index.html#icechunk+https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/icechunk::varname=v::px=0::py=0::alt=4000000::lat=20.5::lon=-158.2::dimIndices_time=0::dimIndices_depth=0) |
-| Sea-surface height | [Open `zeta`](https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/viewer/index.html#icechunk+https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/icechunk::varname=zeta::px=0::py=0::alt=4000000::lat=20.5::lon=-158.2::dimIndices_time=0) |
+| Potential temperature | [Open `temp`](https://data.source.coop/ocean-icechunks/pacioos/viewer/index.html#icechunk+https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/icechunk::varname=temp::px=0::py=0::alt=4000000::lat=20.5::lon=-158.2::dimIndices_time=0::dimIndices_depth=0) |
+| Salinity | [Open `salt`](https://data.source.coop/ocean-icechunks/pacioos/viewer/index.html#icechunk+https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/icechunk::varname=salt::px=0::py=0::alt=4000000::lat=20.5::lon=-158.2::dimIndices_time=0::dimIndices_depth=0) |
+| Eastward current | [Open `u`](https://data.source.coop/ocean-icechunks/pacioos/viewer/index.html#icechunk+https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/icechunk::varname=u::px=0::py=0::alt=4000000::lat=20.5::lon=-158.2::dimIndices_time=0::dimIndices_depth=0) |
+| Northward current | [Open `v`](https://data.source.coop/ocean-icechunks/pacioos/viewer/index.html#icechunk+https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/icechunk::varname=v::px=0::py=0::alt=4000000::lat=20.5::lon=-158.2::dimIndices_time=0::dimIndices_depth=0) |
+| Sea-surface height | [Open `zeta`](https://data.source.coop/ocean-icechunks/pacioos/viewer/index.html#icechunk+https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/icechunk::varname=zeta::px=0::py=0::alt=4000000::lat=20.5::lon=-158.2::dimIndices_time=0) |
 
 The time and depth sliders move through the 35,040 steps and the 36 levels. The viewer is
-[gridlook](https://github.com/eeholmes/gridlook), published beside the store. It draws in an
+[gridlook](https://github.com/eeholmes/gridlook), published once for the whole product at
+[`pacioos/viewer/`](https://data.source.coop/ocean-icechunks/pacioos/viewer/index.html), where the dataset picker lists all three PacIOOS stores. It draws in an
 ordinary browser, with no extension: both the store and the NetCDF copies are on
 `data.source.coop`, which sends the CORS headers a browser needs (checked in a browser,
 2026-11-14).
@@ -157,6 +158,11 @@ Measured 2026-11-14 from a JupyterHub, with `zarr.config.set({"async.concurrency
 - **Tested with** icechunk 2.3.1, virtualizarr 2.8.0, xarray 2026.9.0, zarr 3.4.2, Python 3.12.
   The loading code above was run as written, in a clean environment holding only the three
   packages it names.
+- **Build files beside the store:** `requirements.txt`, `build_store.py`, `reanalysis_store.py`, the local smoke-test notebook `reanalysis-smoke-test-local.ipynb` and the scratch-store notebook `reanalysis-scratch-sc.ipynb`, `erddap_metadata.json` and `how_store_created.md` are published in
+  [`pacioos/roms_hiig_reanalysis/`](https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/), next to `icechunk/`; the shared modules they import
+  (`pacioos_virtual.py`, `icechunk_utils.py`, `best_series_update.py`) and the shared
+  `requirements.txt` are at the product root, [`pacioos/`](https://data.source.coop/ocean-icechunks/pacioos/). Install with
+  `pip install -r requirements.txt` from the dataset folder (it includes `../requirements.txt`).
 - **How it was made, and how to rebuild it:**
   [`how_store_created.md`](https://github.com/ocean-icechunks/pacioos/blob/main/stores/roms_hiig_reanalysis/how_store_created.md).
   The plan and decisions are in [issue #11](https://github.com/ocean-icechunks/pacioos/issues/11).

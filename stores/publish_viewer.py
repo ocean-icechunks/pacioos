@@ -30,7 +30,7 @@ Usage
 2. Build and upload. ``--build`` runs the Vite build; without it the script uploads an
    existing ``--dist`` folder::
 
-       python publish_viewer.py --product roms_hiig_reanalysis-scratch --build ~/gridlook --dry-run
+       python publish_viewer.py --product pacioos --build ~/gridlook --dry-run
        python publish_viewer.py --product roms_hiig_reanalysis-scratch --build ~/gridlook
 
    ``--prune`` also deletes objects under the viewer prefix that the new build no longer
@@ -62,23 +62,41 @@ PUBLIC = "https://data.source.coop"
 # `alt` is the camera distance; drag the globe and copy the URL to change it.
 _HAWAII_VIEW = "px=0::py=0::alt=4000000::lat=20.5::lon=-158.2"
 
-# One entry per store that gets a viewer (see ocean-icechunks/icechunks for the fields).
+# One entry per viewer (one viewer may list several stores) (see ocean-icechunks/icechunks for the fields).
 PRODUCTS = {
-    # The published reanalysis store (issue #11), 2009-01-01 .. 2020-12-28, tag v2.0.
-    "roms_hiig_reanalysis": {
+    # The production viewer: one for the whole product, at pacioos/viewer/, with a catalog
+    # entry per store (as noaa-ohc does for its three stores). Until 2026-11-19 each store had
+    # its own viewer beside it (pacioos/<dataset>/viewer/); a dataset-level viewer only made
+    # sense while the product held one store. ocean-icechunks/ocean-icechunks-skills#19.
+    # The team's WRF store (pacioos/wrf_hi/icechunk) is not listed: it was built and published
+    # by the PacIOOS team; add it here when they want it in the viewer.
+    "pacioos": {
         "bucket": "ocean-icechunks",
-        "viewer_prefix": "pacioos/roms_hiig_reanalysis/viewer",
+        "viewer_prefix": "pacioos/viewer",
         "stores": {
-            "": {
+            # First entry = what a bare .../viewer/index.html opens.
+            "forecast": {
+                "url": f"{PUBLIC}/ocean-icechunks/pacioos/roms_hiig/icechunk",
+                "title": "ROMS Hawaii forecast, best time series, 2025-",
+                "view": f"{_HAWAII_VIEW}::dimIndices_time=0::dimIndices_depth=0",
+                "variables": ("temp", "salt", "u", "v", "zeta"),
+            },
+            "reanalysis": {
                 "url": f"{PUBLIC}/ocean-icechunks/pacioos/roms_hiig_reanalysis/icechunk",
                 "title": "ROMS Hawaii reanalysis v2.0, 2009-2020",
                 "view": f"{_HAWAII_VIEW}::dimIndices_time=0::dimIndices_depth=0",
+                "variables": ("temp", "salt", "u", "v", "zeta"),
+            },
+            "ww3": {
+                "url": f"{PUBLIC}/ocean-icechunks/pacioos/ww3_hawaii/icechunk",
+                "title": "WaveWatch III Hawaii, best time series, 2011-",
+                "view": f"{_HAWAII_VIEW}::dimIndices_time=0",
+                "variables": ("Thgt", "Tper", "Tdir", "shgt", "sper", "sdir", "whgt", "wper", "wdir"),
             },
         },
-        "variables": ("temp", "salt", "u", "v", "zeta"),
         "catalog": {
             "path": "static/catalog-extended.json",
-            "title": "PacIOOS ROMS Hawaii reanalysis",
+            "title": "PacIOOS Hawaii models",
         },
     },
     # The scratch copy of the reanalysis store (issue #11): may be rewritten or deleted.
@@ -99,23 +117,6 @@ PRODUCTS = {
             "title": "PacIOOS ROMS Hawaii reanalysis (scratch)",
         },
     },
-    # The ROMS forecast best-series store (issue #10), 2025-01-01 onward.
-    "roms_hiig": {
-        "bucket": "ocean-icechunks",
-        "viewer_prefix": "pacioos/roms_hiig/viewer",
-        "stores": {
-            "": {
-                "url": f"{PUBLIC}/ocean-icechunks/pacioos/roms_hiig/icechunk",
-                "title": "ROMS Hawaii forecast, best time series, 2025-",
-                "view": f"{_HAWAII_VIEW}::dimIndices_time=0::dimIndices_depth=0",
-            },
-        },
-        "variables": ("temp", "salt", "u", "v", "zeta"),
-        "catalog": {
-            "path": "static/catalog-extended.json",
-            "title": "PacIOOS ROMS Hawaii forecast",
-        },
-    },
     # The scratch build of the forecast store (issue #10): may be rewritten or deleted.
     "roms_hiig-scratch": {
         "bucket": "ocean-icechunks",
@@ -131,23 +132,6 @@ PRODUCTS = {
         "catalog": {
             "path": "static/catalog-extended.json",
             "title": "PacIOOS ROMS Hawaii forecast (scratch)",
-        },
-    },
-    # The WaveWatch III best-series store (issue #13), 2011-06-21 onward; lon is 0-360.
-    "ww3_hawaii": {
-        "bucket": "ocean-icechunks",
-        "viewer_prefix": "pacioos/ww3_hawaii/viewer",
-        "stores": {
-            "": {
-                "url": f"{PUBLIC}/ocean-icechunks/pacioos/ww3_hawaii/icechunk",
-                "title": "WaveWatch III Hawaii, best time series, 2011-",
-                "view": f"{_HAWAII_VIEW}::dimIndices_time=0",
-            },
-        },
-        "variables": ("Thgt", "Tper", "Tdir", "shgt", "sper", "sdir", "whgt", "wper", "wdir"),
-        "catalog": {
-            "path": "static/catalog-extended.json",
-            "title": "PacIOOS WaveWatch III Hawaii",
         },
     },
     # The scratch build of the WW3 store (issue #13): may be rewritten or deleted.

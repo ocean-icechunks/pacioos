@@ -28,7 +28,8 @@ update_store = true
 source_dir = "/export/data/model/ore/ww3/hawaii"
 update_store = true
 
-# WRF upload only: no Icechunk updater exists yet. Uncomment when ready.
+# WRF uploads only: the team's published store/README are not managed here.
+# No Icechunker WRF updater exists. Uncomment when ready to copy files.
 # [datasets.wrf_hi]
 # source_dir = "/export/data/model/atm/wrf_hi"
 # update_store = false

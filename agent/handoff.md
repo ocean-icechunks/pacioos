@@ -5,6 +5,60 @@ unfinished, not a task list.
 
 ## Where things stand (2026-11-19)
 
+### Reconciliation with main prepared (2026-11-19)
+
+Merged main's product-viewer/build-bundle and team WRF documentation into
+`deployable-icechunker` without rewriting the published branch history. The two textual
+conflicts (this handoff and the Source Cooperative product README) are resolved by preserving
+both sets of work. Shared product viewer links and main's latest dataset READMEs are retained.
+The historical deployment notes below remain dated observations, not live server checks.
+
+Integration safeguards now disable all automated WRF README/header/store-metadata work,
+including direct publication; WRF copies can still be verified/acknowledged. Its existing
+team-owned store and README remain untouched, and any old pending README state is retained
+for operator review. ROMS forecast/WW3 and versioned reanalysis documentation keep their
+existing behavior; the 15-minute default is preserved.
+
+The separate bundle publisher preflights all destination READMEs before any upload, rejects
+Icechunker metadata markers (even incomplete ones), and conditionally completes multipart
+README uploads using the preflight ETag or create-only condition. Concurrent edits fail;
+manual edits made before preflight still require the operator's live-versus-git review.
+Managed README prose changes need a separate reviewed edit preserving the generated block.
+Bundle dry runs may preview pending working-tree changes without credentials/network;
+real publication still requires clean committed inputs and sends exact file bytes.
+
+The bundle excludes development tests and publishes `upload/source_coop_credentials.py`
+beside `icechunk_utils.py` at the product root. Credential lookup supports this downloaded
+layout as well as the repository/deployed layout, and shared requirements include boto3.
+No WRF files, NetCDF objects, stores or viewers are included in bundle publication.
+
+Local validation: 83 operations/deployment tests, six store-authentication tests, eight
+bundle-publisher tests and six upload-authentication tests passed (103 total), plus Python
+compilation and whitespace checks. The network-free bundle preview lists 38 files, including the sibling API-key helper,
+with no development tests, WRF directories, NetCDF objects, stores or viewer assets.
+No production reads/writes, server deployment, cron changes or push were performed. The
+resolved merge is being prepared for explicit commit approval, as requested earlier.
+
+- **One product viewer and the build files published, 2026-11-19 (PR #34,
+  merged).** Viewer at `pacioos/viewer/index.html`, catalog = forecast,
+  reanalysis, WW3 (`publish_viewer.py --product pacioos`). `stores/publish_bundle.py` uploads
+  the committed READMEs, `requirements.txt`, notebooks, scripts and saved metadata, mirroring
+  `stores/` under `pacioos/`; rerun it after editing a README (it replaces `pacioos/README.md`).
+  39 files verified by MD5 and content type. **The old per-dataset viewers
+  (`pacioos/<dataset>/viewer/`) are still up** until Eli checks the new one, then delete them
+  (one key at a time). Why the files had been missing: ocean-icechunks/ocean-icechunks-skills#19.
+- **The PacIOOS team worked on their own, 2026-11-18:** they built and published a WRF store
+  (`pacioos/wrf_hi/icechunk`, HDF5 era from 2017-08-16, snapshot `P9R11AXCREQ7KGD2NQQ0`, with
+  `wrf_hi/README.md` and `build-source.zip`), ran the ROMS and WW3 updaters (copies to the 11-17
+  ROMS / 11-16 WW3 runs) and edited the live product and store READMEs. Their code is not in
+  this repo. Their live READMEs were copied in unchanged before ours were edited; **before any
+  README upload, diff the live copy against git** — they may edit them again. Leave `wrf_hi/`
+  to them (`publish_bundle.py` refuses it; WRF is not in the viewer until they want it).
+- **`~/venvs/pacioos` is now Python 3.13** (`/srv/conda/envs/notebook/bin/python3`): the hub
+  image lost `/srv/conda/bin/python3.12`; the old venv is `~/venvs/pacioos.broken-py312`.
+  The requirements files' "use /srv/conda/bin/python3.12" comment is stale. The WW3 smoke
+  notebook ran clean in it (26 cells, 0 errors).
+
 ### PR commit preparation (2026-11-19)
 
 Prepared the deployable Icechunker runtime, authentication, incremental validation, dataset
@@ -396,6 +450,8 @@ The delivered implementation above supersedes conflicting preservation/migration
   1,249,578,666,176 bytes; WW3 5,237 files, 485,731,852,444 bytes; every NetCDF has a sidecar.
   Icechunk stores have NOT been updated for these two runs. Repo README and product README
   snapshot now reflect the new copies; publish the product README with the next store update.
+
+## Earlier (2026-11-17)
 
 - **Ready for the hackweek, 2026-11-17 (PR #29, merged).** The team note doc was brought up to
   date (stores, updaters, new agent prompts, #12/#14) and snapshotted as

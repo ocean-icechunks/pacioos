@@ -66,11 +66,13 @@ Each file has a `.md5` next to it. The ROMS hindcast (`roms_hiig_assim`, 3.37 TB
 yet ([#3](https://github.com/ocean-icechunks/pacioos/issues/3)). Each dataset's Icechunk store
 goes in `pacioos/<dataset>/icechunk/`. The reanalysis store is built (tag `v2.0`, 2026-11-14):
 `https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/icechunk`, with a
-[viewer](https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/viewer/index.html)
+[viewer](https://data.source.coop/ocean-icechunks/pacioos/viewer/index.html#icechunk+https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/icechunk::varname=temp::px=0::py=0::alt=4000000::lat=20.5::lon=-158.2::dimIndices_time=0::dimIndices_depth=0)
 (see [its README](stores/roms_hiig_reanalysis/README.md), and
 [`how_store_created.md`](stores/roms_hiig_reanalysis/how_store_created.md) for how it was made).
 The ROMS forecast and WW3 stores are built too (see the product README,
-[`source-coop/README.md`](source-coop/README.md)); WRF is not yet. The 2026-11-18 catch-up
+[`source-coop/README.md`](source-coop/README.md)). The PacIOOS team also published a
+[WRF store](https://source.coop/ocean-icechunks/pacioos/wrf_hi/README.md) for the HDF5 era
+from 2017-08-16; its store and README remain team-managed. The 2026-11-18 catch-up
 extended the NetCDF copies to the 2026-11-17 ROMS run and 2026-11-16 WW3 run; both new files
 were verified by full downloaded MD5. WRF copies still end at 2026-11-15. The ROMS forecast
 and WW3 Icechunk stores include those new copies, with forecast coverage through

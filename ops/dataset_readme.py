@@ -76,6 +76,8 @@ def public_url(cfg, key):
 
 
 def prepare_file(cfg, name, state, completed, incoming, dry_run=False):
+    if name == 'wrf_hi':
+        return None  # PacIOOS owns this dataset's store and README.
     cached = read_json(state / 'readme-netcdf.json')
     if cached and completed.get(cached['key']) != cached['identity']:
         raise RuntimeError('README source copy identity changed or disappeared')
@@ -91,7 +93,7 @@ def prepare_file(cfg, name, state, completed, incoming, dry_run=False):
 
 def store_attributes(cfg, name, snapshot=None):
     if name == 'wrf_hi':
-        return None
+        raise ValueError('WRF store documentation is managed by PacIOOS')
     import icechunk
     import zarr
     settings = cfg['datasets'][name]
@@ -193,6 +195,8 @@ def write_readme(client, bucket, key, body, condition):
 
 def publish(cfg, name, generated, dry_run=False):
     """Read afresh on every attempt; conditionally write only this README key."""
+    if name == 'wrf_hi':
+        raise ValueError('WRF README publication is managed by PacIOOS')
     from botocore.exceptions import ClientError
     key = f'{cfg["prefix"]}/{name}/README.md'
     client = s3_client(cfg)
@@ -224,6 +228,9 @@ def publish(cfg, name, generated, dry_run=False):
 
 def reconcile(cfg, name, state, completed, incoming=(), dry_run=False, snapshot=None):
     """Called under the dataset lock, after copy/store validation (or for preview)."""
+    if name == 'wrf_hi':
+        print('WRF README is managed by PacIOOS; skipping documentation writes.', flush=True)
+        return
     cached = prepare_file(cfg, name, state, completed, incoming, dry_run)
     if cached is None:
         print(f'{name}: README metadata waits for the next completed transfer.', flush=True)

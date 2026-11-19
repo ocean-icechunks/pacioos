@@ -1,6 +1,6 @@
 # PacIOOS WaveWatch III Hawaiʻi: Icechunk store, best time series
 
-**[🌐 View data in browser](https://data.source.coop/ocean-icechunks/pacioos/ww3_hawaii/viewer/index.html)** · **[💻 Data access (code)](#how-to-open-it)** · **[📦 PacIOOS dataset page](https://www.pacioos.hawaii.edu/metadata/ww3_hawaii.html)** · **[📄 How to cite](#citation-and-reuse)**
+**[🌐 View data in browser](https://data.source.coop/ocean-icechunks/pacioos/viewer/index.html#icechunk+https://data.source.coop/ocean-icechunks/pacioos/ww3_hawaii/icechunk::varname=Thgt::px=0::py=0::alt=4000000::lat=20.5::lon=-158.2::dimIndices_time=0)** · **[💻 Data access (code)](#how-to-open-it)** · **[📦 PacIOOS dataset page](https://www.pacioos.hawaii.edu/metadata/ww3_hawaii.html)** · **[📄 How to cite](#citation-and-reuse)**
 
 An [Icechunk](https://icechunk.io) store of the **PacIOOS WaveWatch III (WW3) regional wave
 model for the main Hawaiian Islands**: hourly from 2011-06-21, on a 0.05° grid (about 5 km),
@@ -31,13 +31,14 @@ publishes on ERDDAP**, which the files lack ([below](#where-the-metadata-came-fr
 
 | Field | Viewer |
 |---|---|
-| Significant wave height | [Open `Thgt`](https://data.source.coop/ocean-icechunks/pacioos/ww3_hawaii/viewer/index.html#icechunk+https://data.source.coop/ocean-icechunks/pacioos/ww3_hawaii/icechunk::varname=Thgt::px=0::py=0::alt=4000000::lat=20.5::lon=-158.2::dimIndices_time=0) |
-| Peak wave period | [Open `Tper`](https://data.source.coop/ocean-icechunks/pacioos/ww3_hawaii/viewer/index.html#icechunk+https://data.source.coop/ocean-icechunks/pacioos/ww3_hawaii/icechunk::varname=Tper::px=0::py=0::alt=4000000::lat=20.5::lon=-158.2::dimIndices_time=0) |
-| Peak wave direction | [Open `Tdir`](https://data.source.coop/ocean-icechunks/pacioos/ww3_hawaii/viewer/index.html#icechunk+https://data.source.coop/ocean-icechunks/pacioos/ww3_hawaii/icechunk::varname=Tdir::px=0::py=0::alt=4000000::lat=20.5::lon=-158.2::dimIndices_time=0) |
-| Swell height | [Open `shgt`](https://data.source.coop/ocean-icechunks/pacioos/ww3_hawaii/viewer/index.html#icechunk+https://data.source.coop/ocean-icechunks/pacioos/ww3_hawaii/icechunk::varname=shgt::px=0::py=0::alt=4000000::lat=20.5::lon=-158.2::dimIndices_time=0) |
-| Wind-wave height | [Open `whgt`](https://data.source.coop/ocean-icechunks/pacioos/ww3_hawaii/viewer/index.html#icechunk+https://data.source.coop/ocean-icechunks/pacioos/ww3_hawaii/icechunk::varname=whgt::px=0::py=0::alt=4000000::lat=20.5::lon=-158.2::dimIndices_time=0) |
+| Significant wave height | [Open `Thgt`](https://data.source.coop/ocean-icechunks/pacioos/viewer/index.html#icechunk+https://data.source.coop/ocean-icechunks/pacioos/ww3_hawaii/icechunk::varname=Thgt::px=0::py=0::alt=4000000::lat=20.5::lon=-158.2::dimIndices_time=0) |
+| Peak wave period | [Open `Tper`](https://data.source.coop/ocean-icechunks/pacioos/viewer/index.html#icechunk+https://data.source.coop/ocean-icechunks/pacioos/ww3_hawaii/icechunk::varname=Tper::px=0::py=0::alt=4000000::lat=20.5::lon=-158.2::dimIndices_time=0) |
+| Peak wave direction | [Open `Tdir`](https://data.source.coop/ocean-icechunks/pacioos/viewer/index.html#icechunk+https://data.source.coop/ocean-icechunks/pacioos/ww3_hawaii/icechunk::varname=Tdir::px=0::py=0::alt=4000000::lat=20.5::lon=-158.2::dimIndices_time=0) |
+| Swell height | [Open `shgt`](https://data.source.coop/ocean-icechunks/pacioos/viewer/index.html#icechunk+https://data.source.coop/ocean-icechunks/pacioos/ww3_hawaii/icechunk::varname=shgt::px=0::py=0::alt=4000000::lat=20.5::lon=-158.2::dimIndices_time=0) |
+| Wind-wave height | [Open `whgt`](https://data.source.coop/ocean-icechunks/pacioos/viewer/index.html#icechunk+https://data.source.coop/ocean-icechunks/pacioos/ww3_hawaii/icechunk::varname=whgt::px=0::py=0::alt=4000000::lat=20.5::lon=-158.2::dimIndices_time=0) |
 
-The viewer is [gridlook](https://github.com/eeholmes/gridlook), published beside the store, and
+The viewer is [gridlook](https://github.com/eeholmes/gridlook), published once for the whole product at
+[`pacioos/viewer/`](https://data.source.coop/ocean-icechunks/pacioos/viewer/index.html), where the dataset picker lists all three PacIOOS stores, and
 shows all nine variables. Both the store and the NetCDF copies are on `data.source.coop`, which
 sends the CORS headers a browser needs. The viewer opens at the first step, 2011-06-21T21Z.
 
@@ -258,6 +259,11 @@ Measured 2026-11-16 from a JupyterHub, with `zarr.config.set({"async.concurrency
 - **Tested with** icechunk 2.3.1, virtualizarr 2.8.0, xarray 2026.9.0, zarr 3.4.2, Python 3.12.
   The loading code above was run as written, in a clean environment holding only the three
   packages it names (and their dependencies).
+- **Build files beside the store:** `requirements.txt`, `build_store.py`, `ww3_store.py`, `update_store.py`, the local smoke-test notebook `ww3-smoke-test-local.ipynb`, `erddap_metadata.json` and `how_store_created.md` are published in
+  [`pacioos/ww3_hawaii/`](https://data.source.coop/ocean-icechunks/pacioos/ww3_hawaii/), next to `icechunk/`; the shared modules they import
+  (`pacioos_virtual.py`, `icechunk_utils.py`, `best_series_update.py`) and the shared
+  `requirements.txt` are at the product root, [`pacioos/`](https://data.source.coop/ocean-icechunks/pacioos/). Install with
+  `pip install -r requirements.txt` from the dataset folder (it includes `../requirements.txt`).
 - **How it was made, and how to rebuild it:**
   [`how_store_created.md`](https://github.com/ocean-icechunks/pacioos/blob/main/stores/ww3_hawaii/how_store_created.md).
   The plan and decisions are in [issue #13](https://github.com/ocean-icechunks/pacioos/issues/13).

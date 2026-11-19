@@ -28,13 +28,16 @@ class ReadmeTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.state = Path(self.temp.name)
+        self.store_patch = patch('dataset_readme.store_attributes', return_value=None)
+        self.store_patch.start()
+        self.addCleanup(self.store_patch.stop)
         self.cfg = dict(bucket='bucket', prefix='pacioos', datasets={
             'wrf_hi': dict(update_store=False),
             'roms_hiig': dict(update_store=True, store_prefix='pacioos/roms_hiig/icechunk'),
             'roms_hiig_reanalysis': dict(update_store=False,
                 store_prefix='pacioos/roms_hiig_reanalysis/icechunk')})
-        self.old = 'pacioos/wrf_hi/netcdf/2026/wrf_20261117.nc'
-        self.new = 'pacioos/wrf_hi/netcdf/2026/wrf_20261118.nc'
+        self.old = 'pacioos/roms_hiig_reanalysis/netcdf/2026/wrf_20261117.nc'
+        self.new = 'pacioos/roms_hiig_reanalysis/netcdf/2026/wrf_20261118.nc'
         self.completed = {self.old: dict(data={'etag': 'old'}, sidecar={'etag': 'old-md5'}),
                           self.new: dict(data={'etag': 'new'}, sidecar={'etag': 'new-md5'})}
 
@@ -122,12 +125,12 @@ class ReadmeTests(unittest.TestCase):
     def test_section_preserves_prose_and_is_idempotent(self):
         block = docs.section(self.cfg, self.cached(), None)
         original = '# Existing\n\nCarefully written prose.\n'
-        candidate = docs.replace_section(original, block, 'wrf_hi')
+        candidate = docs.replace_section(original, block, 'roms_hiig_reanalysis')
         self.assertTrue(candidate.startswith(original))
         with_tail = candidate + '\n## Handwritten footer\nKeep this.\n'
-        replaced = docs.replace_section(with_tail, block.replace('test', 'new'), 'wrf_hi')
+        replaced = docs.replace_section(with_tail, block.replace('test', 'new'), 'roms_hiig_reanalysis')
         self.assertTrue(replaced.endswith('\n## Handwritten footer\nKeep this.\n'))
-        self.assertEqual(docs.replace_section(candidate, block, 'wrf_hi'), candidate)
+        self.assertEqual(docs.replace_section(candidate, block, 'roms_hiig_reanalysis'), candidate)
         self.assertIn('no published Icechunk store', candidate)
         self.assertIn('File: [wrf_20261118.nc]', candidate)
         self.assertIn('snapshot <code>abc</code>', docs.section(self.cfg, self.cached(),
@@ -137,22 +140,22 @@ class ReadmeTests(unittest.TestCase):
         for original in (docs.START, docs.END, docs.END + docs.START,
                          docs.START + docs.START + docs.END):
             with self.assertRaises(ValueError):
-                docs.replace_section(original, 'block', 'wrf_hi')
+                docs.replace_section(original, 'block', 'roms_hiig_reanalysis')
 
     def test_publish_skips_unchanged_and_uses_conditional_writes(self):
         block = docs.section(self.cfg, self.cached(), None)
-        candidate = docs.replace_section('# Original\n', block, 'wrf_hi')
+        candidate = docs.replace_section('# Original\n', block, 'roms_hiig_reanalysis')
         client = self.client(candidate)
         with patch('dataset_readme.s3_client', return_value=client):
-            docs.publish(self.cfg, 'wrf_hi', block)
+            docs.publish(self.cfg, 'roms_hiig_reanalysis', block)
         client.create_multipart_upload.assert_not_called()
         client.close.assert_called_once()
         client = self.client('# Original\n')
         with patch('dataset_readme.s3_client', return_value=client):
-            docs.publish(self.cfg, 'wrf_hi', block)
+            docs.publish(self.cfg, 'roms_hiig_reanalysis', block)
         kwargs = client.complete_multipart_upload.call_args.kwargs
         self.assertEqual(kwargs['IfMatch'], '"etag"')
-        self.assertEqual(kwargs['Key'], 'pacioos/wrf_hi/README.md')
+        self.assertEqual(kwargs['Key'], 'pacioos/roms_hiig_reanalysis/README.md')
         self.assertEqual(client.upload_part.call_args.kwargs['Body'].decode(), candidate)
         self.assertEqual(client.create_multipart_upload.call_args.kwargs['ContentType'],
                          'text/markdown; charset=utf-8')
@@ -160,15 +163,15 @@ class ReadmeTests(unittest.TestCase):
     def test_missing_readme_is_created_but_access_errors_propagate(self):
         client = self.client(missing=True)
         with patch('dataset_readme.s3_client', return_value=client):
-            docs.publish(self.cfg, 'wrf_hi', 'block')
+            docs.publish(self.cfg, 'roms_hiig_reanalysis', 'block')
         self.assertEqual(client.complete_multipart_upload.call_args.kwargs['IfNoneMatch'], '*')
-        self.assertTrue(client.upload_part.call_args.kwargs['Body'].startswith(b'# PacIOOS wrf_hi'))
+        self.assertTrue(client.upload_part.call_args.kwargs['Body'].startswith(b'# PacIOOS roms_hiig_reanalysis'))
         for code in ('AccessDenied', 'NoSuchBucket', 'InternalError'):
             client = self.client()
             client.get_object.side_effect = ClientError({'Error': {'Code': code}}, 'GetObject')
             with patch('dataset_readme.s3_client', return_value=client):
                 with self.assertRaises(ClientError):
-                    docs.publish(self.cfg, 'wrf_hi', 'block')
+                    docs.publish(self.cfg, 'roms_hiig_reanalysis', 'block')
             client.create_multipart_upload.assert_not_called()
 
     def test_concurrent_edit_failure_retains_work_and_retry_reads_new_prose(self):
@@ -177,13 +180,13 @@ class ReadmeTests(unittest.TestCase):
         client.complete_multipart_upload.side_effect = ClientError({'Error': {'Code': 'PreconditionFailed'}}, 'CompleteMultipartUpload')
         with patch('dataset_readme.s3_client', return_value=client):
             with self.assertRaises(ClientError):
-                docs.reconcile(self.cfg, 'wrf_hi', self.state, self.completed)
+                docs.reconcile(self.cfg, 'roms_hiig_reanalysis', self.state, self.completed)
         self.assertTrue((self.state / 'pending-readme.json').exists())
         client.abort_multipart_upload.assert_called_once_with(Bucket='bucket',
-            Key='pacioos/wrf_hi/README.md', UploadId='upload')
+            Key='pacioos/roms_hiig_reanalysis/README.md', UploadId='upload')
         client = self.client('# Concurrent edit preserved\n')
         with patch('dataset_readme.s3_client', return_value=client):
-            docs.reconcile(self.cfg, 'wrf_hi', self.state, self.completed)
+            docs.reconcile(self.cfg, 'roms_hiig_reanalysis', self.state, self.completed)
         self.assertTrue(client.upload_part.call_args.kwargs['Body'].startswith(b'# Concurrent edit preserved\n'))
         self.assertFalse((self.state / 'pending-readme.json').exists())
 
@@ -207,7 +210,7 @@ class ReadmeTests(unittest.TestCase):
     def test_no_transfer_without_cache_reads_no_headers_or_store(self):
         with patch('dataset_readme.netcdf_attributes') as read, \
              patch('dataset_readme.store_attributes') as store, patch('dataset_readme.publish') as publish:
-            docs.reconcile(self.cfg, 'wrf_hi', self.state, self.completed)
+            docs.reconcile(self.cfg, 'roms_hiig_reanalysis', self.state, self.completed)
         read.assert_not_called()
         store.assert_not_called()
         publish.assert_not_called()
@@ -215,23 +218,23 @@ class ReadmeTests(unittest.TestCase):
     def test_backfill_does_not_replace_newer_cached_file(self):
         atomic_json(self.state / 'readme-netcdf.json', self.cached())
         with patch('dataset_readme.netcdf_attributes') as read:
-            docs.prepare_file(self.cfg, 'wrf_hi', self.state, self.completed, {self.old})
+            docs.prepare_file(self.cfg, 'roms_hiig_reanalysis', self.state, self.completed, {self.old})
         read.assert_not_called()
         self.assertEqual(read_json(self.state / 'readme-netcdf.json')['key'], self.new)
 
     def test_first_transfer_selects_latest_file_and_immutable_cache_is_checked(self):
         with patch('dataset_readme.netcdf_attributes', return_value={'title': 'new'}) as read:
-            docs.prepare_file(self.cfg, 'wrf_hi', self.state, self.completed, {self.old})
+            docs.prepare_file(self.cfg, 'roms_hiig_reanalysis', self.state, self.completed, {self.old})
         self.assertTrue(read.call_args.args[0].endswith('wrf_20261118.nc'))
         changed = {**self.completed, self.new: {'data': {'etag': 'changed'}}}
         with self.assertRaisesRegex(RuntimeError, 'identity changed'):
-            docs.prepare_file(self.cfg, 'wrf_hi', self.state, changed, ())
+            docs.prepare_file(self.cfg, 'roms_hiig_reanalysis', self.state, changed, ())
 
     def test_dry_run_has_no_state_or_remote_writes(self):
         client = self.client(missing=True)
         with patch('dataset_readme.netcdf_attributes', return_value={}), \
              patch('dataset_readme.s3_client', return_value=client):
-            docs.reconcile(self.cfg, 'wrf_hi', self.state, self.completed, {self.new}, dry_run=True)
+            docs.reconcile(self.cfg, 'roms_hiig_reanalysis', self.state, self.completed, {self.new}, dry_run=True)
         client.create_multipart_upload.assert_not_called()
         self.assertEqual(list(self.state.iterdir()), [])
 
@@ -247,14 +250,14 @@ class ReadmeTests(unittest.TestCase):
              patch('dataset_readme.netcdf_attributes', return_value={'title': 'new'}), \
              patch('dataset_readme.publish', side_effect=RuntimeError('readme write failed')):
             with self.assertRaisesRegex(RuntimeError, 'readme write failed'):
-                pipeline.process(self.cfg, 'wrf_hi', self.state, 'sync', 'recent', False)
+                pipeline.process(self.cfg, 'roms_hiig_reanalysis', self.state, 'sync', 'recent', False)
         verify.assert_called_once()
         self.assertEqual(read_json(self.state / 'known-copies.json'), self.completed)
         self.assertTrue((self.state / 'pending-readme.json').exists())
         with patch('pipeline.upload', return_value=set()), patch('pipeline.inventory', return_value=objects), \
              patch('pipeline.verify_copies') as verify, patch('pipeline.modules') as model, \
              patch('dataset_readme.netcdf_attributes') as read, patch('dataset_readme.publish') as publish:
-            pipeline.process(self.cfg, 'wrf_hi', self.state, 'sync', 'recent', False)
+            pipeline.process(self.cfg, 'roms_hiig_reanalysis', self.state, 'sync', 'recent', False)
         verify.assert_not_called()
         model.assert_not_called()
         read.assert_not_called()
@@ -276,7 +279,7 @@ class ReadmeTests(unittest.TestCase):
 
     def test_committed_store_is_not_committed_again_after_readme_failure(self):
         import best_series_update
-        key = self.new.replace('/wrf_hi/', '/roms_hiig/')
+        key = self.new.replace('/roms_hiig_reanalysis/', '/roms_hiig/')
         objects = {key: {'etag': 'data'}, key + '.md5': {'etag': 'sidecar'}}
         atomic_json(self.state / 'baseline-copies.json', {})
         self.cfg.update(verify_lookback_days=3, max_run_age_hours=72)
@@ -334,7 +337,41 @@ class ReadmeTests(unittest.TestCase):
             reconcile.assert_not_called()
             upload.assert_not_called()
 
+    def test_wrf_sync_acknowledges_copies_without_reading_or_writing_documentation(self):
+        objects = {}
+        for key, identity in self.completed.items():
+            key = key.replace('/roms_hiig_reanalysis/', '/wrf_hi/')
+            objects[key] = identity['data']
+            objects[key + '.md5'] = identity['sidecar']
+        atomic_json(self.state / 'baseline-copies.json', {})
+        incoming = {key for key in objects if key.endswith('.nc')}
+        with patch('pipeline.upload', return_value=incoming), \
+             patch('pipeline.inventory', return_value=objects), patch('pipeline.verify_copies') as verify, \
+             patch('dataset_readme.netcdf_attributes') as read, patch('dataset_readme.publish') as publish:
+            pipeline.process(self.cfg, 'wrf_hi', self.state, 'sync', 'recent', False)
+        verify.assert_called_once()
+        read.assert_not_called()
+        publish.assert_not_called()
+        self.assertEqual(set(read_json(self.state / 'known-copies.json')), incoming)
+        self.assertFalse((self.state / 'readme-netcdf.json').exists())
+        self.assertFalse((self.state / 'pending-readme.json').exists())
+
+    def test_wrf_idle_dry_run_and_direct_publication_leave_team_readme_alone(self):
+        atomic_json(self.state / 'readme-netcdf.json', self.cached())
+        atomic_json(self.state / 'pending-readme.json', {'snapshot': 'team'})
+        with patch('dataset_readme.netcdf_attributes') as read, \
+             patch('dataset_readme.s3_client') as client:
+            for dry_run in (True, False):
+                docs.reconcile(self.cfg, 'wrf_hi', self.state, self.completed, {self.new}, dry_run)
+            self.assertIsNone(docs.prepare_file(self.cfg, 'wrf_hi', self.state, {}, {self.new}))
+            with self.assertRaisesRegex(ValueError, 'managed by PacIOOS'):
+                docs.publish(self.cfg, 'wrf_hi', 'should not be written')
+        read.assert_not_called()
+        client.assert_not_called()
+        self.assertEqual(read_json(self.state / 'pending-readme.json'), {'snapshot': 'team'})
+
     def test_store_attributes_are_read_from_real_snapshot_and_reanalysis_tag(self):
+        self.store_patch.stop()
         import icechunk
         import zarr
         storage = icechunk.local_filesystem_storage(str(self.state / 'icechunk'))
@@ -355,7 +392,8 @@ class ReadmeTests(unittest.TestCase):
         self.assertEqual(reanalysis['attributes'], {'title': 'published', 'array': [1, 2]})
         self.assertEqual(forecast['snapshot'], newest)
         self.assertEqual(pinned['attributes']['title'], 'published')
-        self.assertIsNone(docs.store_attributes(self.cfg, 'wrf_hi'))
+        with self.assertRaisesRegex(ValueError, 'managed by PacIOOS'):
+            docs.store_attributes(self.cfg, 'wrf_hi')
 
 
 if __name__ == '__main__':

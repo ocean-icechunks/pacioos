@@ -228,6 +228,10 @@ def recover(cfg, state, repo, storage, bs, model, work):
 
 def complete_sync(cfg, name, state, completed, incoming, snapshot=None):
     """Acknowledge validated data separately from retryable README publication."""
+    if name == 'wrf_hi':
+        # Copy acknowledgment does not grant ownership of the team's WRF README/store.
+        atomic_json(state / 'known-copies.json', completed)
+        return
     from dataset_readme import prepare_file, reconcile
     prepare_file(cfg, name, state, completed, incoming)
     atomic_json(state / 'pending-readme.json', dict(snapshot=snapshot))

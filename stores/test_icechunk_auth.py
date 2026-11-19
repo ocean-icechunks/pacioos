@@ -3,6 +3,7 @@
 import json
 import os
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -61,6 +62,34 @@ class StoreAuthTests(unittest.TestCase):
     def test_invalid_auth_mode_stops_before_subprocess(self):
         with patch.dict(os.environ, {"SOURCE_COOP_AUTH": "invalid"}), patch.object(auth.subprocess, "run") as run:
             with self.assertRaises(ValueError):
+                auth.get_source_credentials()
+        run.assert_not_called()
+
+    def test_published_layout_finds_and_can_run_sibling_helper(self):
+        folder = Path(self.temp.name) / 'product'
+        folder.mkdir()
+        helper = folder / 'source_coop_credentials.py'
+        helper.write_bytes((Path(auth.__file__).resolve().parent.parent /
+                            'upload/source_coop_credentials.py').read_bytes())
+        temporary = dict(AccessKeyId='TEST_ACCESS', SecretAccessKey='TEST_SECRET',
+                         SessionToken='TEST_TOKEN', Expiration='2099-01-01T00:00:00Z')
+        with patch.object(auth, '__file__', str(folder / 'icechunk_utils.py')), \
+             patch.object(auth.subprocess, 'run') as run:
+            run.return_value.stdout = json.dumps(temporary)
+            creds, _ = auth.get_source_credentials()
+        self.assertEqual(run.call_args.args[0][1], str(helper))
+        self.assertEqual(creds['aws_session_token'], 'TEST_TOKEN')
+        result = subprocess.run([sys.executable, str(helper), '--help'],
+                                capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0)
+        self.assertIn('--key-file', result.stdout)
+
+    def test_missing_published_helper_fails_without_cli_fallback(self):
+        folder = Path(self.temp.name) / 'missing-product'
+        folder.mkdir()
+        with patch.object(auth, '__file__', str(folder / 'icechunk_utils.py')), \
+             patch.object(auth.subprocess, 'run') as run:
+            with self.assertRaisesRegex(FileNotFoundError, 'download it beside'):
                 auth.get_source_credentials()
         run.assert_not_called()
 
