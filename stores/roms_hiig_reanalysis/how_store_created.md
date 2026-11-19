@@ -19,12 +19,12 @@ documentation**. Each step has to pass before the next one starts.
 | 2. Local smoke test | done | `reanalysis-smoke-test-local.ipynb` |
 | 3. Scratch store on Source Cooperative | done | `reanalysis-scratch-sc.ipynb`, viewer, scratch README |
 | 4. Production build, all 4,380 files | **done, 2026-11-14** | `build_store.py`; the store, tagged `v2.0`, and its viewer |
-| 5. Project README and loading example | **done, 2026-11-14** | `README.md`, also published beside the store |
+| 5. Project README and loading example | **done, 2026-11-14** | `README.md`, also published beside the store · build files (`requirements.txt`, notebooks, scripts, saved metadata) published beside it with `../publish_bundle.py`, 2026-11-19 |
 
 **The store** (public, anonymous, tag `v2.0`):
 
 - store: `https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/icechunk`
-- viewer: <https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/viewer/index.html>
+- viewer: <https://data.source.coop/ocean-icechunks/pacioos/viewer/index.html> (one viewer for the product; pick the store in its dataset list)
 - README: <https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/README.md> (the copy of `README.md` in this folder; upload it again after editing it)
 
 The viewer draws the store in an ordinary browser, with no extension (checked by Eli Holmes,
@@ -81,7 +81,7 @@ All in `stores/roms_hiig_reanalysis/` unless noted.
 | `requirements.txt` | What these need (it includes `../requirements.txt`) |
 | `../pacioos_virtual.py` | The general reference code for all PacIOOS products: header scans, depth-plane references |
 | `../icechunk_utils.py` | Source Cooperative credentials (through the `source-coop` CLI) and opening a repository there |
-| `../publish_viewer.py` | Builds the gridlook browser viewer and uploads it beside a store |
+| `../publish_viewer.py` | Builds the gridlook browser viewer and uploads it: `pacioos` (the product viewer at `pacioos/viewer/`, all stores) or `roms_hiig_reanalysis-scratch` |
 
 ## Running it yourself
 
@@ -218,7 +218,7 @@ How
 - Validate from the public URL, anonymously: the time axis equals the 35,040 computed steps,
   sampled planes in every year equal netCDF-C (#mode=bytes) reads, land reads as NaN. Time
   the open, a map and a multi-year point series with zarr async.concurrency = 128.
-- Publish the viewer with stores/publish_viewer.py (add a production entry to PRODUCTS) and
+- Publish the viewer with stores/publish_viewer.py (add the store to the `pacioos` entry in PRODUCTS: one viewer per product) and
   ask a person to open it.
 - Verify by running, in a clean Python 3.12 venv built only from requirements.txt. Report what
   the runs printed. Retry a network failure once before calling it a bug.

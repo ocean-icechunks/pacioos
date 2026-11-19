@@ -15,7 +15,8 @@ best-series store (#13) is published**, at `ocean-icechunks/pacioos/ww3_hawaii/i
 | `survey_formats.py` | Reads 8 bytes of every copied file: NetCDF-3 or HDF5, and the NetCDF-3 record count |
 | `requirements.txt` | What the scripts need, checked in a clean venv |
 | `icechunk_utils.py` | Source Cooperative credentials and repositories (copied from ocean-icechunks/icechunks) |
-| `publish_viewer.py` | Builds the gridlook browser viewer and uploads it beside a store (adapted from ocean-icechunks/icechunks) |
+| `publish_viewer.py` | Builds the gridlook browser viewer and uploads it: one viewer for the product at `pacioos/viewer/`, listing every store (adapted from ocean-icechunks/icechunks) |
+| `publish_bundle.py` | Publishes the build files beside the stores (README, `requirements.txt`, notebooks, scripts, saved metadata), mirroring this folder under `pacioos/`; rerun after editing a README |
 | `roms_hiig_reanalysis/` | Reanalysis v2.0 store (#11). Start with its [`how_store_created.md`](roms_hiig_reanalysis/how_store_created.md) |
 | `roms_hiig/` | ROMS forecast store, best time series (#10). Start with its [`how_store_created.md`](roms_hiig/how_store_created.md) |
 | `ww3_hawaii/` | WaveWatch III store, best time series, with cold-start flags and ERDDAP metadata (#13). Start with its [`how_store_created.md`](ww3_hawaii/how_store_created.md) |

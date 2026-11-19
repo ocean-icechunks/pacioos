@@ -56,7 +56,7 @@ Each file has a `.md5` next to it. The ROMS hindcast (`roms_hiig_assim`, 3.37 TB
 yet ([#3](https://github.com/ocean-icechunks/pacioos/issues/3)). Each dataset's Icechunk store
 goes in `pacioos/<dataset>/icechunk/`. The reanalysis store is built (tag `v2.0`, 2026-11-14):
 `https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/icechunk`, with a
-[viewer](https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/viewer/index.html)
+[viewer](https://data.source.coop/ocean-icechunks/pacioos/viewer/index.html#icechunk+https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/icechunk::varname=temp::px=0::py=0::alt=4000000::lat=20.5::lon=-158.2::dimIndices_time=0::dimIndices_depth=0)
 (see [its README](stores/roms_hiig_reanalysis/README.md), and
 [`how_store_created.md`](stores/roms_hiig_reanalysis/how_store_created.md) for how it was made).
 The ROMS forecast and WW3 stores are built too (see the product README,

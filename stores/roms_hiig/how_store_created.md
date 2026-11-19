@@ -21,13 +21,13 @@ documentation**. Each step has to pass before the next one starts.
 | 2. Local smoke test | done | `forecast-smoke-test-local.ipynb` |
 | 3. Scratch store on Source Cooperative | done | `build_store.py --dest scratch`; scratch viewer checked by Eli Holmes |
 | 4. Production build | **done, 2026-11-14** | `build_store.py --dest production`; the store and its viewer |
-| 5. Store README and loading example | **done, 2026-11-14** | `README.md`, also published beside the store; product README updated |
+| 5. Store README and loading example | **done, 2026-11-14** | `README.md`, also published beside the store; product README updated · build files (`requirements.txt`, notebooks, scripts, saved metadata) published beside it with `../publish_bundle.py`, 2026-11-19 |
 
 **The store** (public, anonymous, not tagged: it will change daily once #4 exists):
 
 - store: `https://data.source.coop/ocean-icechunks/pacioos/roms_hiig/icechunk`, built as snapshot
   `W6C8C8NEFTSGB8DYXN30`; updated 2026-11-16 to `W2V6FPBAB0ET285V2XC0` (runs through 11-15)
-- viewer: <https://data.source.coop/ocean-icechunks/pacioos/roms_hiig/viewer/index.html>
+- viewer: <https://data.source.coop/ocean-icechunks/pacioos/viewer/index.html> (one viewer for the product; pick the store in its dataset list)
 - README: <https://data.source.coop/ocean-icechunks/pacioos/roms_hiig/README.md> (the copy of
   `README.md` in this folder; upload it again after editing it)
 
@@ -95,7 +95,7 @@ All in `stores/roms_hiig/` unless noted.
 | `requirements.txt` | What these need (it includes `../requirements.txt`) |
 | `../pacioos_virtual.py` | The reference code shared by all PacIOOS products: header scans, the best rule, depth-plane references |
 | `../icechunk_utils.py` | Source Cooperative credentials (through the `source-coop` CLI) and opening a repository there |
-| `../publish_viewer.py` | Builds the gridlook browser viewer and uploads it beside a store (`roms_hiig`, `roms_hiig-scratch`) |
+| `../publish_viewer.py` | Builds the gridlook browser viewer and uploads it: `pacioos` (the product viewer at `pacioos/viewer/`, all stores) or `roms_hiig-scratch` |
 
 ## Running it yourself
 

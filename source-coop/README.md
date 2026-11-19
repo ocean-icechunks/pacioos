@@ -11,23 +11,29 @@ about a second as one lazy `xarray` dataset.
 | Dataset (PacIOOS id) | About | Dates | NetCDF copies | Icechunk store |
 |---|---|---|---|---|
 | **ROMS ocean reanalysis v2.0** (`roms_hiig_reanalysis`), 3-hourly, ~4 km, 36 depths | [PacIOOS](https://www.pacioos.hawaii.edu/metadata/roms_hiig_reanalysis.html) | 2009-01-01 to 2020-12-28 | `roms_hiig_reanalysis/netcdf/v2.0/`, 4,380 files, 1.17 TB | **`https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/icechunk`** ([README](https://source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/README.md)) |
-| **ROMS ocean forecast** (`roms_hiig`), daily runs | [Currents forecast](https://www.pacioos.hawaii.edu/currents/model-hawaii/) | 2025-01-01 to 2026-11-15 | `roms_hiig/netcdf/`, 656 files, 1.24 TB | **`https://data.source.coop/ocean-icechunks/pacioos/roms_hiig/icechunk`**, best time series ([README](https://source.coop/ocean-icechunks/pacioos/roms_hiig/README.md)) |
-| **WRF weather model** (`wrf_hi`), daily runs | [Wind forecast](https://www.pacioos.hawaii.edu/weather/model-wind-hawaii/) | 2010-05-14 to 2026-11-15 | `wrf_hi/netcdf/`, 5,610 files, 0.94 TB | not built yet |
-| **WaveWatch III waves** (`ww3_hawaii`), daily runs | [Wave forecast](https://www.pacioos.hawaii.edu/waves/model-hawaii/) | 2011-06-21 to 2026-11-15 | `ww3_hawaii/netcdf/`, 5,236 files, 0.49 TB | **`https://data.source.coop/ocean-icechunks/pacioos/ww3_hawaii/icechunk`**, best time series, hourly, with flags on cold starts ([README](https://source.coop/ocean-icechunks/pacioos/ww3_hawaii/README.md)) |
+| **ROMS ocean forecast** (`roms_hiig`), daily runs | [Currents forecast](https://www.pacioos.hawaii.edu/currents/model-hawaii/) | 2025-01-01 to 2026-11-17 | `roms_hiig/netcdf/`, 657 files, 1.25 TB | **`https://data.source.coop/ocean-icechunks/pacioos/roms_hiig/icechunk`**, best time series ([README](https://source.coop/ocean-icechunks/pacioos/roms_hiig/README.md)) |
+| **WRF weather model** (`wrf_hi`), daily runs | [Wind forecast](https://www.pacioos.hawaii.edu/weather/model-wind-hawaii/) | 2010-05-14 to 2026-11-15 | `wrf_hi/netcdf/`, 5,610 files, 0.94 TB | **`https://data.source.coop/ocean-icechunks/pacioos/wrf_hi/icechunk`**, hourly best time series, HDF5 era from 2017-08-16 ([README](https://source.coop/ocean-icechunks/pacioos/wrf_hi/README.md)) |
+| **WaveWatch III waves** (`ww3_hawaii`), daily runs | [Wave forecast](https://www.pacioos.hawaii.edu/waves/model-hawaii/) | 2011-06-21 to 2026-11-16 | `ww3_hawaii/netcdf/`, 5,237 files, 0.49 TB | **`https://data.source.coop/ocean-icechunks/pacioos/ww3_hawaii/icechunk`**, best time series, hourly, with flags on cold starts ([README](https://source.coop/ocean-icechunks/pacioos/ww3_hawaii/README.md)) |
 
 The Icechunk stores are **virtual**. Each holds only Zarr metadata and byte-range references
 to the NetCDF copies beside it, so both the store and its data are served by Source
-Cooperative. The forecast copies run to 2026-11-15 (2026-11-16), and the ROMS forecast and WW3 stores include those runs. A daily update is planned. Where the files lack
+Cooperative. As of 2026-11-18, NetCDF copies extend to the 2026-11-17 ROMS run and 2026-11-16
+WW3 run; WRF copies end at 2026-11-15. The ROMS forecast and WW3 stores include all those
+runs, with forecast coverage through 2026-11-24T00Z and 2026-11-23T18Z, respectively.
+A daily update is planned. Where the files lack
 metadata (WW3 above all), the stores take PacIOOS's ERDDAP attributes, and each store's
 `metadata_source` attribute says so.
 
 ## View it in a browser
 
+One viewer, [`pacioos/viewer/`](https://data.source.coop/ocean-icechunks/pacioos/viewer/index.html), serves every store; its dataset picker lists
+them all. These links open each store directly:
+
 | Dataset | Viewer |
 |---|---|
-| ROMS reanalysis v2.0 | [Open surface temperature in the viewer](https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/viewer/index.html) |
-| ROMS forecast, best time series | [Open surface temperature in the viewer](https://data.source.coop/ocean-icechunks/pacioos/roms_hiig/viewer/index.html) |
-| WaveWatch III, best time series | [Open significant wave height in the viewer](https://data.source.coop/ocean-icechunks/pacioos/ww3_hawaii/viewer/index.html) |
+| ROMS reanalysis v2.0 | [Open surface temperature in the viewer](https://data.source.coop/ocean-icechunks/pacioos/viewer/index.html#icechunk+https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/icechunk::varname=temp::px=0::py=0::alt=4000000::lat=20.5::lon=-158.2::dimIndices_time=0::dimIndices_depth=0) |
+| ROMS forecast, best time series | [Open surface temperature in the viewer](https://data.source.coop/ocean-icechunks/pacioos/viewer/index.html#icechunk+https://data.source.coop/ocean-icechunks/pacioos/roms_hiig/icechunk::varname=temp::px=0::py=0::alt=4000000::lat=20.5::lon=-158.2::dimIndices_time=0::dimIndices_depth=0) |
+| WaveWatch III, best time series | [Open significant wave height in the viewer](https://data.source.coop/ocean-icechunks/pacioos/viewer/index.html#icechunk+https://data.source.coop/ocean-icechunks/pacioos/ww3_hawaii/icechunk::varname=Thgt::px=0::py=0::alt=4000000::lat=20.5::lon=-158.2::dimIndices_time=0) |
 
 It draws in an ordinary browser, with no extension.
 
@@ -40,6 +46,7 @@ icechunk 2.3 or newer are required; no credentials are needed.
 |---|---|
 | ROMS reanalysis v2.0 | [Open in Python](https://source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/README.md) |
 | ROMS forecast, best time series | [Open in Python](https://source.coop/ocean-icechunks/pacioos/roms_hiig/README.md) |
+| WRF, HDF5-era best time series | [Open in Python](https://source.coop/ocean-icechunks/pacioos/wrf_hi/README.md) |
 | WaveWatch III, best time series | [Open in Python](https://source.coop/ocean-icechunks/pacioos/ww3_hawaii/README.md) |
 
 **NetCDF copies:** anonymous HTTPS (with byte ranges) or S3 (endpoint
@@ -63,8 +70,16 @@ The code, notes and audit are in
 from the PacIOOS server with `rclone` and checked against MD5 sums. Each store is built in the
 same order: a written plan, a local smoke test, a scratch store with a viewer, then the
 published store, which is validated anonymously from its public URL against netCDF-C reads of
-the files. How the reanalysis store was made, and how to rebuild it:
-[`how_store_created.md`](https://github.com/ocean-icechunks/pacioos/blob/main/stores/roms_hiig_reanalysis/how_store_created.md).
+the files.
+
+The build files are published here too, beside the stores, as they are in the repository's
+`stores/` folder: in each dataset folder (`roms_hiig/`, `roms_hiig_reanalysis/`, `ww3_hawaii/`)
+the store's `requirements.txt`, smoke-test notebook(s), `build_store.py` and the modules it
+uses, the saved ERDDAP metadata, and `how_store_created.md` (how it was made and how to rebuild
+it); at this root, the shared modules and scripts (`pacioos_virtual.py`, `icechunk_utils.py`,
+`best_series_update.py`, `publish_viewer.py`, ...) and the shared `requirements.txt`. The builds
+are Python scripts rather than one production notebook; `build_store.py` is that step. The WRF
+store's build files are in [`wrf_hi/build-source.zip`](https://data.source.coop/ocean-icechunks/pacioos/wrf_hi/build-source.zip).
 
 ## Citation and reuse
 
@@ -83,5 +98,5 @@ released under the Apache License 2.0. It can be used without attribution.
   on [Source Cooperative](https://source.coop/ocean-icechunks/pacioos).
 - **Viewer:** [gridlook](https://github.com/d70-t/gridlook), developed by Andrej Fast, Tobi
   Kölling, Fabian Wachsmann and contributors at DKRZ and the Max Planck Institute for
-  Meteorology. The copy published beside the data is built from a fork,
+  Meteorology. The copy published at `pacioos/viewer/` is built from a fork,
   [eeholmes/gridlook](https://github.com/eeholmes/gridlook).
