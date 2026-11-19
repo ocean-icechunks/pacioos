@@ -29,10 +29,11 @@ The download URLs stay the same:
 - [Payload archive](https://github.com/ocean-icechunks/pacioos/releases/download/icechunker-main/icechunker-main.tar.gz)
 - [Archive SHA256](https://github.com/ocean-icechunks/pacioos/releases/download/icechunker-main/icechunker-main.tar.gz.sha256)
 
-The **Icechunker payload** workflow builds on every push to `main` and replaces these assets
-after validation succeeds. It can also be started from `main` using **Run workflow** in the
-[Actions tab](https://github.com/ocean-icechunks/pacioos/actions). Runs from other branches and
-outdated builds do not publish. The release notes record the source commit, and the
+The **Icechunker payload** workflow builds and validates pull requests against `main` with
+read-only permissions. On a push to `main`, a separate job replaces these assets after payload
+validation succeeds. The workflow can also be started from `main` using **Run workflow** in the
+[Actions tab](https://github.com/ocean-icechunks/pacioos/actions). The publication job checks that
+the validated commit is still at the tip of `main`. The release notes record the source commit, and the
 `icechunker-main` tag moves to that commit. This is a rolling prerelease, not a versioned release.
 GitHub Actions artifacts must expire, so the workflow publishes release assets instead;
 these have no automatic expiration. The repository must allow mutable releases and permit

@@ -5,7 +5,9 @@ written to Source Cooperative), reopens each in a fresh read-only session with a
 access to the copies, and compares sampled planes with netCDF-C's own byte-range reads.
 
 Run:  python -I smoke_test.py <workdir>     (about 1 minute; see stores/README.md)
+      python -I smoke_test.py <workdir> --wrf-era2
 """
+import argparse
 import shutil, sys, time
 from pathlib import Path
 
@@ -20,8 +22,13 @@ sys.path.insert(0, str(Path(__file__).parent))
 import pacioos_virtual as pb
 
 zarr.config.set({"async.concurrency": 64})
-WORK = Path(sys.argv[1])
-P = "pacioos/"
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("workdir", type=Path)
+parser.add_argument("--wrf-era2", action="store_true", help="Test the single-group WRF HDF5 series only")
+args = parser.parse_args()
+WORK = args.workdir
+
+WRF_ERA2_RUNS = ("20170816", "20170817", "20190429", "20220221", "20220222")
 
 PRODUCTS = {
     # name: (keys oldest->newest, step, science vars, time_chunks_per_manifest)
@@ -31,15 +38,30 @@ PRODUCTS = {
                              "3h", ["temp", "salt", "u", "v", "zeta"], 2920),
     "ww3_hawaii": ([f"ww3_hawaii/netcdf/2013/ww3hawaii_201308{d}.nc" for d in (14, 15, 16, 17)],
                    "1h", ["Thgt", "Tper", "Tdir", "shgt", "sper", "sdir", "whgt", "wper", "wdir"], 8760),
-    "wrf_hi": ([f"wrf_hi/netcdf/2017/wrf_hi_201708{d}.nc" for d in ("09", "10", "16", "17")],
-               "1h", ["Tair", "Pair", "rain", "Uwind", "Vwind", "lwrad_down", "swrad", "Qair", "sst"], 8760),
+    "wrf_hi": ([f"wrf_hi/netcdf/{date[:4]}/wrf_hi_{date}.nc" for date in WRF_ERA2_RUNS],
+               "1h", ["Tair", "Pair", "rain", "Uwind", "Vwind", "lwrad_down", "swrad", "Qair"], 8760),
 }
 
+WRF_DUPLICATE_HOUR = pd.Timestamp("2019-05-06T00:00")
+WRF_TIE_HOUR = pd.Timestamp("2022-02-23T00:00")
 
-def scan(key):
+
+def check_wrf_era2_assignment(scans: list[dict], best: pd.DataFrame) -> None:
+    """Check source anomalies and the selected original file indices."""
+    first, second = scans[-2:]
+    assert first["time"][0] == second["time"][0]
+    assert best.loc[WRF_TIE_HOUR, "run"] == len(scans) - 1
+    repeated = np.flatnonzero(scans[2]["time"] == WRF_DUPLICATE_HOUR)
+    assert len(repeated) == 2
+    assert best.index.is_unique
+    assert best.loc[WRF_DUPLICATE_HOUR, "run"] == 2
+    assert best.loc[WRF_DUPLICATE_HOUR, "lead"] in repeated
+
+
+def scan(key: str, *, strict_chunks: bool = False) -> dict:
     import fsspec
     magic = fsspec.filesystem("https").cat_file(pb.URL_PREFIX + key, start=0, end=4)
-    return pb.scan_nc3(key) if magic[:3] == b"CDF" else pb.scan_h5(key)
+    return pb.scan_nc3(key) if magic[:3] == b"CDF" else pb.scan_h5(key, strict_chunks=strict_chunks)
 
 
 def build_group(scans, best, sci, dims_of, time_units):
@@ -93,19 +115,20 @@ def reference(key, name, lead, k=0):
 
 
 report = []
+if args.wrf_era2:
+    PRODUCTS = {"wrf_hi": PRODUCTS["wrf_hi"]}
+
 for prod, (keys, step, sci, split) in PRODUCTS.items():
     t0 = time.time()
-    scans = [scan(k) for k in keys]
+    scans = [scan(k, strict_chunks=prod == "wrf_hi") for k in keys]
     best = pb.best_assignment(scans, step)
-    # WRF: the two eras get separate groups; split the axis by which era won each step
     if prod == "wrf_hi":
-        era = np.array(["nc3" if r >= 0 and scans[r]["format"] == "nc3" else "hdf5" if r >= 0 else "" for r in best["run"]])
-        last_nc3 = np.where(era == "nc3")[0].max()
-        groups = {"netcdf3_2010_2017": best.iloc[: last_nc3 + 1], "hdf5_2017_present": best.iloc[last_nc3 + 1:]}
-    else:
-        groups = {"": best}
+        assert all(s["format"] == "hdf5" for s in scans)
+        best = best.loc[best["run"] >= 0]
+        check_wrf_era2_assignment(scans, best)
+    groups = {"": best}
     units = scans[0]["vars"]["time"]["attrs"]["units"].replace(" UTC", "")
-    path = WORK / prod
+    path = WORK / ("wrf_hi_era2" if args.wrf_era2 else prod)
     shutil.rmtree(path, ignore_errors=True)
     repo = icechunk.Repository.create(icechunk.local_filesystem_storage(str(path)), config=pb.repository_config(split),
                                       authorize_virtual_chunk_access=pb.reader_authorization())
@@ -130,6 +153,11 @@ for prod, (keys, step, sci, split) in PRODUCTS.items():
         # pick steps: first, every run start, a gap if any, last
         picks = sorted(set([0, len(b) - 1] + [int(i) for i in np.where(b["lead"].to_numpy() == 0)[0]]
                            + [int(i) for i in np.where(b["run"].to_numpy() < 0)[0][:1]]))
+        if prod == "wrf_hi":
+            assert ds.indexes["time"].equals(b.index)
+            assert set(ds.data_vars) == set(sci)
+            assert ds[name].encoding["chunks"] == (1, 138, 213)
+            picks = sorted(set(picks) | set(b.index.get_indexer([WRF_DUPLICATE_HOUR, WRF_TIE_HOUR])))
         for i in picks:
             r, l = int(b["run"].iloc[i]), int(b["lead"].iloc[i])
             k = 0
@@ -159,3 +187,5 @@ for prod, (keys, step, sci, split) in PRODUCTS.items():
             print("   ", g, "runs used:", sorted(set(pd.to_datetime(ds.forecast_reference_time.values).dropna().astype(str))))
 
 pd.DataFrame(report).to_csv(WORK / "report.csv", index=False)
+if any(row["mismatches"] for row in report):
+    raise SystemExit("Smoke test found data mismatches")

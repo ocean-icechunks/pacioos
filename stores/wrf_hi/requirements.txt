@@ -1,0 +1,4 @@
+-r ../requirements.txt
+certifi
+# Used only for Source Cooperative service-account authentication.
+boto3>=1.28

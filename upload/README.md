@@ -25,6 +25,8 @@ built over the copies, so readers use Source Cooperative instead of the PacIOOS 
 Counts as of 2026-11-12. The first four were copied and checked by 2026-11-13; the hindcast
 is waiting on a decision about which years to keep. Product names are PacIOOS's THREDDS/ERDDAP dataset IDs.
 
+The public WRF archive now starts on 2017-08-16. The uploader skips older WRF runs.
+
 **Layout.** Each dataset has its own folder on Source Cooperative, with the original files under
 `netcdf/` and the Icechunk store built over them under `icechunk/`:
 
