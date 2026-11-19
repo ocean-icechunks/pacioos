@@ -26,11 +26,14 @@ metadata (WW3 above all), the stores take PacIOOS's ERDDAP attributes, and each 
 
 ## View it in a browser
 
+One viewer, [`pacioos/viewer/`](https://data.source.coop/ocean-icechunks/pacioos/viewer/index.html), serves every store; its dataset picker lists
+them all. These links open each store directly:
+
 | Dataset | Viewer |
 |---|---|
-| ROMS reanalysis v2.0 | [Open surface temperature in the viewer](https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/viewer/index.html) |
-| ROMS forecast, best time series | [Open surface temperature in the viewer](https://data.source.coop/ocean-icechunks/pacioos/roms_hiig/viewer/index.html) |
-| WaveWatch III, best time series | [Open significant wave height in the viewer](https://data.source.coop/ocean-icechunks/pacioos/ww3_hawaii/viewer/index.html) |
+| ROMS reanalysis v2.0 | [Open surface temperature in the viewer](https://data.source.coop/ocean-icechunks/pacioos/viewer/index.html#icechunk+https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/icechunk::varname=temp::px=0::py=0::alt=4000000::lat=20.5::lon=-158.2::dimIndices_time=0::dimIndices_depth=0) |
+| ROMS forecast, best time series | [Open surface temperature in the viewer](https://data.source.coop/ocean-icechunks/pacioos/viewer/index.html#icechunk+https://data.source.coop/ocean-icechunks/pacioos/roms_hiig/icechunk::varname=temp::px=0::py=0::alt=4000000::lat=20.5::lon=-158.2::dimIndices_time=0::dimIndices_depth=0) |
+| WaveWatch III, best time series | [Open significant wave height in the viewer](https://data.source.coop/ocean-icechunks/pacioos/viewer/index.html#icechunk+https://data.source.coop/ocean-icechunks/pacioos/ww3_hawaii/icechunk::varname=Thgt::px=0::py=0::alt=4000000::lat=20.5::lon=-158.2::dimIndices_time=0) |
 
 It draws in an ordinary browser, with no extension.
 
@@ -67,8 +70,16 @@ The code, notes and audit are in
 from the PacIOOS server with `rclone` and checked against MD5 sums. Each store is built in the
 same order: a written plan, a local smoke test, a scratch store with a viewer, then the
 published store, which is validated anonymously from its public URL against netCDF-C reads of
-the files. How the reanalysis store was made, and how to rebuild it:
-[`how_store_created.md`](https://github.com/ocean-icechunks/pacioos/blob/main/stores/roms_hiig_reanalysis/how_store_created.md).
+the files.
+
+The build files are published here too, beside the stores, as they are in the repository's
+`stores/` folder: in each dataset folder (`roms_hiig/`, `roms_hiig_reanalysis/`, `ww3_hawaii/`)
+the store's `requirements.txt`, smoke-test notebook(s), `build_store.py` and the modules it
+uses, the saved ERDDAP metadata, and `how_store_created.md` (how it was made and how to rebuild
+it); at this root, the shared modules and scripts (`pacioos_virtual.py`, `icechunk_utils.py`,
+`best_series_update.py`, `publish_viewer.py`, ...) and the shared `requirements.txt`. The builds
+are Python scripts rather than one production notebook; `build_store.py` is that step. The WRF
+store's build files are in [`wrf_hi/build-source.zip`](https://data.source.coop/ocean-icechunks/pacioos/wrf_hi/build-source.zip).
 
 ## Citation and reuse
 
@@ -87,5 +98,5 @@ released under the Apache License 2.0. It can be used without attribution.
   on [Source Cooperative](https://source.coop/ocean-icechunks/pacioos).
 - **Viewer:** [gridlook](https://github.com/d70-t/gridlook), developed by Andrej Fast, Tobi
   Kölling, Fabian Wachsmann and contributors at DKRZ and the Max Planck Institute for
-  Meteorology. The copy published beside the data is built from a fork,
+  Meteorology. The copy published at `pacioos/viewer/` is built from a fork,
   [eeholmes/gridlook](https://github.com/eeholmes/gridlook).

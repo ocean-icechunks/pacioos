@@ -21,14 +21,14 @@ step has to pass before the next one starts.
 | 2. Local smoke test | done | `ww3-smoke-test-local.ipynb` |
 | 3. Scratch store on Source Cooperative | done | `build_store.py --dest scratch`; scratch viewer published for Eli Holmes |
 | 4. Production build | **done, 2026-11-16** | `build_store.py --dest production`; the store and its viewer |
-| 5. Store README and loading example | **done, 2026-11-16** | `README.md` and `cold_starts_2026.png`, published beside the store |
+| 5. Store README and loading example | **done, 2026-11-16** | `README.md` and `cold_starts_2026.png`, published beside the store · build files (`requirements.txt`, notebooks, scripts, saved metadata) published beside it with `../publish_bundle.py`, 2026-11-19 |
 | 6. Daily update | **updater done, 2026-11-16**; schedule open (#4) | `update_store.py`, over `../best_series_update.py`; first production update 2026-11-16 |
 
 **The store** (public, anonymous, not tagged: it will change daily once #4 exists):
 
 - store: `https://data.source.coop/ocean-icechunks/pacioos/ww3_hawaii/icechunk`, built as snapshot
   `ZRCNA5VTJJGRR12GECW0`; updated 2026-11-16 to `H4T38ERC0AV8DM92RAZG` (runs through 11-15)
-- viewer: <https://data.source.coop/ocean-icechunks/pacioos/ww3_hawaii/viewer/index.html>
+- viewer: <https://data.source.coop/ocean-icechunks/pacioos/viewer/index.html> (one viewer for the product; pick the store in its dataset list)
 - README: <https://data.source.coop/ocean-icechunks/pacioos/ww3_hawaii/README.md> (the copy of
   `README.md` in this folder; upload it again, with the figure, after editing it)
 
@@ -165,7 +165,7 @@ All in `stores/ww3_hawaii/` unless noted.
 | `../pacioos_virtual.py` | Reference code shared by all PacIOOS products: header scans, the best rule |
 | `../best_series_update.py` | The diff, one-commit update and verify shared by the forecast stores' `update_store.py` |
 | `../icechunk_utils.py` | Source Cooperative credentials (through the `source-coop` CLI) |
-| `../publish_viewer.py` | Builds the gridlook viewer and uploads it beside a store (`ww3_hawaii`, `ww3_hawaii-scratch`) |
+| `../publish_viewer.py` | Builds the gridlook viewer and uploads it: `pacioos` (the product viewer at `pacioos/viewer/`, all stores) or `ww3_hawaii-scratch` |
 
 The smoke test's cases: **A** the 2020 tie and the suspect week; **B** the 2013 short runs and a
 131-step gap (covered steps equal ERDDAP's times); **C** the 24-day gap of 2015 (NaN steps) and
