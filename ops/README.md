@@ -298,8 +298,70 @@ store updater is rejected. No reanalysis header backfill, store rebuild or tag m
 Review the printed fragment, cron daemon timezone, completion times and mail/monitoring.
 Default suggestions are sync every three hours and full verification Sunday at 02:47.
 Configure numeric five-field `sync_schedule` and `full_verify_schedule` in TOML. Install new
-entries manually only after supervised tests. Set `MAILTO` separately if local mail works.
+entries manually only after supervised tests. Both suggested commands include `--notify`.
 There is no cron install/remove command. Do not run old standalone scripts concurrently.
+
+### Failure email
+
+`sync --notify` and `verify --notify --scope full` opt into one aggregated, best-effort
+failure email from the parent after all selected datasets finish. Manual commands do not
+send email unless explicitly opted in. Successful/idle jobs, dry runs (even failed ones),
+and expected dataset-lock skips send nothing. A lock skip still returns nonzero and records
+`last-skip.json`; monitor repeated skips separately.
+
+Configure failure email in `config/config.toml`:
+
+| `[notifications]` key | Meaning |
+| --- | --- |
+| `from_address` | Required sender permitted by the SMTP relay |
+| `to_addresses` | Required TOML list of recipients |
+| `smtp_host` | Required SMTP relay |
+| `smtp_security` | `starttls` (default) or `ssl`; unencrypted SMTP is unsupported |
+| `smtp_port` | Defaults to 587 for STARTTLS, 465 for SSL |
+| `smtp_username`, `smtp_password_file` | Set both for authentication, or omit both for an unauthenticated relay |
+
+The password itself must not be stored in TOML. Create the configured password file beneath
+the installation root, owned by the job user, mode `600` (the config directory is mode `700`).
+For example, `config/smtp-password` may contain the password and a trailing newline. The file
+is read only when sending an alert. The configured path must stay inside the root, including
+through symlinks. Do not put the password in crontab, logs, or git. Cron needs no exported SMTP
+environment.
+
+Alerts contain action/scope, failed dataset names, failure/timeout status and, when available,
+the exception type, failing function and exact worker log path. Explicitly marked,
+application-owned recovery guidance can be included (currently the missing historical
+header/schema cache instructions); arbitrary SDK/subprocess exception text and tracebacks
+are not emailed. Existing worker/retry log messages are unchanged and are not automatically
+sanitized.
+
+For notified jobs, the parent assigns each worker a unique timestamp/UUID log filename
+under `<root>/logs/`. The worker exclusively creates this mode-`600` file and keeps the
+existing combined stdout/stderr logging. On a caught failure it appends a final
+`ICECHUNKER_FAILURE_JSON` summary line containing exception type/location, bounded
+explicitly safe guidance and the dataset/action/scope/log identity. Arbitrary exception
+strings are not copied into the summary; existing human-readable diagnostics are unchanged.
+After the worker exits, the parent reads only this structured footer from a bounded log
+tail and validates its identity. It never emails arbitrary output or searches for the
+latest matching log. Missing, partial, malformed or wrong-identity summaries explicitly
+fall back to failure status and the exact expected log path, including crashes/timeouts.
+
+There are no extra reporting files, temporary report directories or report cleanup steps.
+The summary follows normal log retention, while durable failure/pending records are unchanged.
+Jobs without `--notify`, and all dry runs, append no structured summary. Repeated selections
+of the same dataset run once.
+
+One parent-level exception boundary also attempts an alert for startup and orchestration
+failures, including invalid paths/configuration, permission/import errors and failed timeout
+bookkeeping. These emails identify `parent-job`, include the exception type and warn that
+selected work may be incomplete; they do not invent a worker log path. Original exceptions
+are reraised, preserving exit behavior. Expected installation-lock contention stays silent.
+
+SMTP configuration/delivery failures print a generic warning without changing the original
+exit status, failure records, pending transactions or retries. Alerts require a working
+interpreter and importable sender. Missing interpreters, argument-parsing exits, killed
+parents and broken SMTP still need independent stdout/stderr/liveness monitoring. `MAILTO`
+can provide cron-output monitoring if local mail works, but may also mail normal
+output/skips and duplicate failure alerts.
 
 Jobs set their own working directory/environment and lock each dataset/destination internally;
 no outer cron `flock` is needed. Overlap records a skip and returns nonzero. Commands also hold

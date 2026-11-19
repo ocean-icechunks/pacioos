@@ -12,7 +12,7 @@ FILES = {
     'ops/icechunker': 'icechunker',
     'LICENSE': 'app/LICENSE',
 }
-for filename in ('cli.py', 'install.py', 'layout.py', 'jobs.py', 'common.py', 'pipeline.py',
+for filename in ('cli.py', 'install.py', 'layout.py', 'jobs.py', 'job_reports.py', 'notifications.py', 'common.py', 'pipeline.py',
                  'headers.py', 'dataset_readme.py', 'validation.py', 'requirements.lock', 'config.example.toml'):
     FILES['ops/' + filename] = 'app/ops/' + filename
 for filename in ('upload_to_source_coop.sh', 'source_coop_credentials.py'):

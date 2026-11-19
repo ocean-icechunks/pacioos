@@ -28,6 +28,12 @@ outside Icechunker's store/README automation and the bundle publisher.
 | `roms_hiig/` | ROMS forecast store, best time series (#10). Start with its [`how_store_created.md`](roms_hiig/how_store_created.md) |
 | `ww3_hawaii/` | WaveWatch III store, best time series, with cold-start flags and ERDDAP metadata (#13). Start with its [`how_store_created.md`](ww3_hawaii/how_store_created.md) |
 
+The ROMS and WW3 `update_store.py` scripts are manual tools and do not send email; the old
+`--no-email` option has been removed. Scheduled automation uses `icechunker sync --notify`
+and `icechunker verify --scope full --notify`, with one aggregated failure alert from the
+parent runner. See [notification setup](../ops/README.md#failure-email) for private SMTP
+configuration and skip/dry-run behavior.
+
 ```bash
 /srv/conda/bin/python3.12 -m venv ~/venvs/pacioos
 ~/venvs/pacioos/bin/pip install --no-cache-dir -r stores/requirements.txt

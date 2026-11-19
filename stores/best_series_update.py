@@ -242,7 +242,7 @@ def update(repo, storage, planned, open_store: Callable, dry_run: bool = False) 
 
 
 def main(description: str, bs, open_store: Callable, default_procs: int = 4) -> None:
-    """Command line for a product: `bs` is its build_store module (scan, planned_dataset, ...)."""
+    """Run a manual product update; `bs` is its build_store module."""
     import argparse
     import sys
     import warnings
@@ -257,16 +257,17 @@ def main(description: str, bs, open_store: Callable, default_procs: int = 4) -> 
     ap.add_argument('--procs', type=int, default=default_procs)
     ap.add_argument('--dry-run', action='store_true', help='report what would change; write nothing')
     a = ap.parse_args()
-    a.workdir.mkdir(parents=True, exist_ok=True)
-    log(f'update: {bs.BUCKET}/{bs.DESTINATIONS[a.dest]}' + (' (PRODUCTION)' if a.dest == 'production' else ''))
-    bs.scan(a.workdir, a.procs)
-    planned = bs.planned_dataset(a.workdir)[0]
-    repo, time_left = bs.open_destination(a.dest)
-    log(f'  keys valid for {time_left}')
-    if bs._written(repo) is None:
-        sys.exit('  the store is empty: build it first with build_store.py write')
-    storage = icechunk.http_storage(f'{bs.PUBLIC}/{bs.BUCKET}/{bs.DESTINATIONS[a.dest]}')
     try:
+        a.workdir.mkdir(parents=True, exist_ok=True)
+        log(f'update: {bs.BUCKET}/{bs.DESTINATIONS[a.dest]}' +
+            (' (PRODUCTION)' if a.dest == 'production' else ''))
+        bs.scan(a.workdir, a.procs)
+        planned = bs.planned_dataset(a.workdir)[0]
+        repo, time_left = bs.open_destination(a.dest)
+        log(f'  keys valid for {time_left}')
+        if bs._written(repo) is None:
+            sys.exit('  the store is empty: build it first with build_store.py write')
+        storage = icechunk.http_storage(f'{bs.PUBLIC}/{bs.BUCKET}/{bs.DESTINATIONS[a.dest]}')
         update(repo, storage, planned, open_store, dry_run=a.dry_run)
     except Stop as exc:
         sys.exit(f'  stopped: {exc}')
