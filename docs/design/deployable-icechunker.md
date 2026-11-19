@@ -87,7 +87,11 @@ The approved GitHub distribution is one rolling main payload, implemented by
   permission for release/tag updates; repository policy must permit mutable releases and the
   dedicated tag update. No server access, production jobs or cron activation belongs in CI.
 
-The tar archive preserves executable permissions and has no enclosing payload directory.
+The tar archive preserves executable permissions and encloses the payload in one `icechunker/`
+directory (user-requested 2026-11-19). Local archive builds use the same layout. CI requires
+exactly this one entry at the extraction root before validating the enclosed payload; the
+manifest paths remain relative to the payload root. Use `--strip-components=1` when extracting
+into an installation or staging root, including a custom installation root.
 Operators verify its checksum before extraction and `MANIFEST.sha256` afterwards. Extract
 fresh installs into the chosen root; extract upgrades into a new
 `<root>/.runtime/install-work/payload/` and invoke its bootstrap with `--root`. Never unpack an
@@ -291,7 +295,9 @@ Do not rewrite model selection, computed virtual references or array layout for 
 ## Acceptance checks
 
 - Manual payload generation and documented staging work without an agent or scientific
-  dependencies. Archive extraction preserves the manifest and executable permissions.
+  dependencies. Both CI and local-build archives contain exactly one top-level `icechunker/`
+  directory. Extraction preserves executable permissions; documented fresh-install and upgrade
+  staging commands strip that directory and pass manifest verification at the chosen root.
 - Rolling publication creates or replaces the same release assets, records the source commit,
   and skips non-main/stale builds. Check failure handling locally with mocked publication;
   separately verify real GitHub download/checksums and replacement after the first hosted runs.

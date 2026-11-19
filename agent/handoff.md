@@ -5,6 +5,31 @@ unfinished, not a task list.
 
 ## Where things stand (2026-11-19)
 
+### Icechunker archive parent directory prepared (2026-11-19)
+
+The user requested a top-level `icechunker/` directory in the GHA-produced tarball.
+`.github/workflows/icechunker-payload.yml` now builds the payload under that name and
+archives the directory itself. Extracted-payload validation requires exactly that one
+entry at the extraction root, then checks the manifest, contents, permissions and offline
+help inside it. Release notes and the workflow summary describe the new archive layout.
+
+`ops/README.md` uses the same layout for local builds and documents
+`--strip-components=1` for fresh-install and upgrade staging extraction, preserving the
+chosen installation root. `docs/design/deployable-icechunker.md` records the archive
+contract and acceptance checks. The payload manifest remains relative to its own root.
+
+Local validation executed the workflow's actual path-preparation, build/archive and
+extracted-content validation scripts successfully. All archive entries were confirmed to
+start with `icechunker/`; fresh-install and upgrade staging extractions using the documented
+strip option both passed manifest verification. Archive checksums, permissions, shell
+syntax and offline CLI/bootstrap help passed, as did `git diff --check`. Actionlint was
+not available for this follow-up; earlier validation below is historical.
+
+**Pending:** user approval of the proposed commit message before creating a commit, then
+push and hosted release/download verification. Changes remain uncommitted. No release
+publication, server deployment, bootstrap execution, production processing or cron changes
+were performed. The unrelated untracked `stores/wrf_hi/` directory remains untouched.
+
 ### Manual deployment and rolling main payload prepared (2026-11-19)
 
 The root README now links to complete agent-free deployment instructions in `ops/README.md`:

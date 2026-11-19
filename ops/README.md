@@ -39,8 +39,8 @@ these have no automatic expiration. The repository must allow mutable releases a
 the workflow's `GITHUB_TOKEN` to write contents and update the `icechunker-main` tag.
 If a download overlaps replacement and its checksum differs, download both files again.
 
-The tar archive preserves executable permissions and contains the installation files without
-an enclosing directory. Copy both files to the server under `~/icechunker/.runtime/install-work/` using
+The tar archive preserves executable permissions and contains the installation files inside
+a single `icechunker/` directory. Copy both files to the server under `~/icechunker/.runtime/install-work/` using
 your normal SSH/SCP access. Create that directory privately first:
 
 ```bash
@@ -60,9 +60,9 @@ the repository root. No scientific dependencies or credentials are needed:
 umask 077
 build_dir="$HOME/icechunker/.runtime/install-work/local-build"
 mkdir -p "$build_dir"
-python3 ops/package.py "$build_dir/payload"
-(cd "$build_dir/payload" && sha256sum -c MANIFEST.sha256)
-tar -czf "$build_dir/icechunker-local.tar.gz" -C "$build_dir/payload" .
+python3 ops/package.py "$build_dir/icechunker"
+(cd "$build_dir/icechunker" && sha256sum -c MANIFEST.sha256)
+tar -czf "$build_dir/icechunker-local.tar.gz" -C "$build_dir" icechunker
 (cd "$build_dir" && sha256sum icechunker-local.tar.gz > icechunker-local.tar.gz.sha256)
 ```
 
@@ -86,12 +86,14 @@ On the server, set `archive` to the downloaded or locally built filename:
 cd "$HOME/icechunker/.runtime/install-work"
 archive=icechunker-main.tar.gz  # For a local build, use icechunker-local.tar.gz.
 sha256sum -c "$archive.sha256"
-tar -xzf "$archive" -C "$HOME/icechunker"
+tar -xzf "$archive" --strip-components=1 -C "$HOME/icechunker"
 cd "$HOME/icechunker"
 sha256sum -c MANIFEST.sha256
 ```
 
-Use this extraction destination only for a fresh installation. For an existing installation,
+The `--strip-components=1` option removes the enclosing `icechunker/` directory, so the
+installation files land directly in the chosen root. Use this extraction destination only
+for a fresh installation. For an existing installation,
 follow **Later upgrades and recovery** below so bootstrap can lock and replace the active app.
 After verification, continue with **First use**. For a custom root, substitute it in all paths
 and pass that same root to bootstrap. The server needs Python 3.6+, curl, tar, sha256sum and
@@ -326,7 +328,7 @@ cd "$HOME/icechunker/.runtime/install-work"
 archive=icechunker-main.tar.gz  # Or icechunker-local.tar.gz.
 sha256sum -c "$archive.sha256"
 mkdir -m 700 payload  # Must be new; inspect an existing staging directory before proceeding.
-tar -xzf "$archive" -C payload
+tar -xzf "$archive" --strip-components=1 -C payload
 (cd payload && sha256sum -c MANIFEST.sha256)
 ```
 

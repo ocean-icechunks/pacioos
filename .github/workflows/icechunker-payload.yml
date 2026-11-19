@@ -32,7 +32,7 @@ jobs:
         shell: bash
         run: |
           {
-            echo "PAYLOAD_DIR=$RUNNER_TEMP/icechunker-payload"
+            echo "PAYLOAD_DIR=$RUNNER_TEMP/icechunker-payload/icechunker"
             echo "ARCHIVE_DIR=$RUNNER_TEMP/icechunker-dist"
             echo "EXTRACTED_DIR=$RUNNER_TEMP/icechunker-extracted"
           } >> "$GITHUB_ENV"
@@ -45,7 +45,7 @@ jobs:
           python ops/package.py "$PAYLOAD_DIR"
           (cd "$PAYLOAD_DIR" && sha256sum -c MANIFEST.sha256)
           mkdir -p "$ARCHIVE_DIR" "$EXTRACTED_DIR"
-          tar -czf "$ARCHIVE_DIR/icechunker-main.tar.gz" -C "$PAYLOAD_DIR" .
+          tar -czf "$ARCHIVE_DIR/icechunker-main.tar.gz" -C "$(dirname "$PAYLOAD_DIR")" icechunker
           cd "$ARCHIVE_DIR"
           sha256sum icechunker-main.tar.gz > icechunker-main.tar.gz.sha256
           sha256sum -c icechunker-main.tar.gz.sha256
@@ -67,7 +67,9 @@ jobs:
           import install
           import package
 
-          root = Path(os.environ['EXTRACTED_DIR'])
+          extracted = Path(os.environ['EXTRACTED_DIR'])
+          assert {p.name for p in extracted.iterdir()} == {'icechunker'}
+          root = extracted / 'icechunker'
           expected = set(package.FILES.values())
           assert set(install.verify_payload(root)) == expected
           actual = {str(p.relative_to(root)) for p in root.rglob('*') if p.is_file()}
@@ -117,7 +119,7 @@ jobs:
             echo
             echo "Source commit: $GITHUB_SHA"
             echo
-            echo 'Download icechunker-main.tar.gz and icechunker-main.tar.gz.sha256. Verify the archive checksum, extract it, then follow README.md for installation or upgrades.'
+            echo 'Download icechunker-main.tar.gz and icechunker-main.tar.gz.sha256. Verify the archive checksum, extract the icechunker/ directory, then follow icechunker/README.md for installation or upgrades.'
           } > "$notes"
           if ! gh release view "$tag" > /dev/null 2>&1; then
             gh release create "$tag" --verify-tag --draft --prerelease --latest=false \
@@ -141,7 +143,7 @@ jobs:
             echo
             echo "[Download icechunker-main]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/icechunker-main) (replaced on successful main builds; no automatic expiration)."
             echo
-            echo 'Download the tar archive and its checksum. Verify the archive checksum, extract into a fresh installation root (or the upgrade staging directory), then verify MANIFEST.sha256.'
+            echo 'Download the tar archive and its checksum. Verify the archive checksum, extract with --strip-components=1 into a fresh installation root (or the upgrade staging directory), then verify MANIFEST.sha256.'
             echo
             echo 'Follow README.md in the payload for bootstrap, configuration and supervised validation. This workflow does not deploy or activate jobs.'
           } >> "$GITHUB_STEP_SUMMARY"
