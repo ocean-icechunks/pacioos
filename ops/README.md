@@ -11,6 +11,93 @@ configuration/API-key provisioning, supervised production tests and new cron act
 belong to the operator. Consult the repository handoff for the latest observed deployment
 state; deployment alone does not establish that production access or processing works.
 
+## Obtain and stage the payload
+
+No coding agent is needed to deploy Icechunker. The repository's `ops/` directory is a
+development directory, not an installation package. `ops/package.py` selects the required
+runtime files from `ops/`, `upload/` and `stores/`, arranges them for installation and writes
+`MANIFEST.sha256`. Tests, old launchers, notebooks and development documentation are excluded.
+The payload contains source code and dependency locks; bootstrap downloads and installs the
+pinned dependencies on the server. It contains no operator config, keys or runtime state.
+
+### Download the rolling main payload
+
+Download `icechunker-main.tar.gz` and `icechunker-main.tar.gz.sha256` from the
+[Icechunker main prerelease](https://github.com/ocean-icechunks/pacioos/releases/tag/icechunker-main).
+The download URLs stay the same:
+
+- [Payload archive](https://github.com/ocean-icechunks/pacioos/releases/download/icechunker-main/icechunker-main.tar.gz)
+- [Archive SHA256](https://github.com/ocean-icechunks/pacioos/releases/download/icechunker-main/icechunker-main.tar.gz.sha256)
+
+The **Icechunker payload** workflow builds on every push to `main` and replaces these assets
+after validation succeeds. It can also be started from `main` using **Run workflow** in the
+[Actions tab](https://github.com/ocean-icechunks/pacioos/actions). Runs from other branches and
+outdated builds do not publish. The release notes record the source commit, and the
+`icechunker-main` tag moves to that commit. This is a rolling prerelease, not a versioned release.
+GitHub Actions artifacts must expire, so the workflow publishes release assets instead;
+these have no automatic expiration. The repository must allow mutable releases and permit
+the workflow's `GITHUB_TOKEN` to write contents and update the `icechunker-main` tag.
+If a download overlaps replacement and its checksum differs, download both files again.
+
+The tar archive preserves executable permissions and contains the installation files without
+an enclosing directory. Copy both files to the server under `~/icechunker/.runtime/install-work/` using
+your normal SSH/SCP access. Create that directory privately first:
+
+```bash
+# On the server; use the job user's account.
+umask 077
+mkdir -p "$HOME/icechunker/.runtime/install-work"
+chmod 700 "$HOME/icechunker"
+```
+
+### Or generate the payload locally
+
+On a workstation with Python 3 and a checkout of the desired repository revision, run from
+the repository root. No scientific dependencies or credentials are needed:
+
+```bash
+# Choose a new build directory for each build; package.py rejects an existing destination.
+umask 077
+build_dir="$HOME/icechunker/.runtime/install-work/local-build"
+mkdir -p "$build_dir"
+python3 ops/package.py "$build_dir/payload"
+(cd "$build_dir/payload" && sha256sum -c MANIFEST.sha256)
+tar -czf "$build_dir/icechunker-local.tar.gz" -C "$build_dir/payload" .
+(cd "$build_dir" && sha256sum icechunker-local.tar.gz > icechunker-local.tar.gz.sha256)
+```
+
+Copy the archive and checksum to the server's `~/icechunker/.runtime/install-work/`, created
+as above (replace `USER@SERVER` with your SSH destination):
+
+```bash
+scp "$build_dir/icechunker-local.tar.gz" "$build_dir/icechunker-local.tar.gz.sha256" \
+  USER@SERVER:icechunker/.runtime/install-work/
+```
+
+Packaging copies only the explicit runtime manifest; do not copy `ops/` wholesale.
+Validated historical header seeds are optional specialist initialization material and are
+not included in the rolling main payload or these instructions.
+
+### Stage a fresh installation
+
+On the server, set `archive` to the downloaded or locally built filename:
+
+```bash
+cd "$HOME/icechunker/.runtime/install-work"
+archive=icechunker-main.tar.gz  # For a local build, use icechunker-local.tar.gz.
+sha256sum -c "$archive.sha256"
+tar -xzf "$archive" -C "$HOME/icechunker"
+cd "$HOME/icechunker"
+sha256sum -c MANIFEST.sha256
+```
+
+Use this extraction destination only for a fresh installation. For an existing installation,
+follow **Later upgrades and recovery** below so bootstrap can lock and replace the active app.
+After verification, continue with **First use**. For a custom root, substitute it in all paths
+and pass that same root to bootstrap. The server needs Python 3.6+, curl, tar, sha256sum and
+the Linux prerequisites described below. Bootstrap and production activation run as the job
+user without sudo. Successful bootstrap removes the temporary install-work downloads.
+
 ## First use
 
 The default root is `~/icechunker`. Read help before doing anything else:
@@ -230,9 +317,23 @@ recovery material automatically. Installed commands work without those caches.
 
 ## Later upgrades and recovery
 
-Stage a complete new manifest payload temporarily at `.runtime/install-work/payload/`, then:
+Obtain an archive and checksum using the instructions above, and copy them into
+`~/icechunker/.runtime/install-work/`. Extract into a new staging directory, preserving the
+active application until bootstrap acquires its installation lock:
 
 ```bash
+cd "$HOME/icechunker/.runtime/install-work"
+archive=icechunker-main.tar.gz  # Or icechunker-local.tar.gz.
+sha256sum -c "$archive.sha256"
+mkdir -m 700 payload  # Must be new; inspect an existing staging directory before proceeding.
+tar -xzf "$archive" -C payload
+(cd payload && sha256sum -c MANIFEST.sha256)
+```
+
+Then run the staged bootstrap:
+
+```bash
+cd "$HOME/icechunker"
 bash "$HOME/icechunker/.runtime/install-work/payload/bootstrap.sh" --root "$HOME/icechunker"
 ```
 
@@ -259,8 +360,9 @@ must remain untouched.
 
 The repository keeps development tests and historical scripts. Only the explicit manifest in
 `ops/package.py` defines the runtime payload; old standalone launchers are not shipped.
-Build with `python ops/package.py NEW_DIRECTORY [--seeds VALIDATED_HEADER_DIRECTORY]`.
-Stage its contents directly under the chosen root. Verify `MANIFEST.sha256` and, if present,
+See **Obtain and stage the payload** for the standard build and deployment steps. Specialist
+builds can use `python3 ops/package.py NEW_DIRECTORY --seeds VALIDATED_HEADER_DIRECTORY`.
+Verify `MANIFEST.sha256` and, if present,
 `state/seeds/MANIFEST.sha256` from that root before initial use. Adopted compressed seeds
 are intentionally removed; their original seed manifest no longer describes the consumed files.
 

@@ -5,6 +5,59 @@ unfinished, not a task list.
 
 ## Where things stand (2026-11-19)
 
+### Manual deployment and rolling main payload prepared (2026-11-19)
+
+The root README now links to complete agent-free deployment instructions in `ops/README.md`:
+generate the explicit payload with `ops/package.py` or download it, verify the archive and
+payload manifests, stage a fresh installation or an upgrade, then run bootstrap and supervised
+validation manually. Copying `ops/` alone is insufficient; the payload includes required
+modules and metadata from `upload/` and `stores/` too.
+
+`.github/workflows/icechunker-payload.yml` builds and validates on every push to `main` or a
+manual dispatch from `main`. The final user-requested distribution is one rolling
+`icechunker-main` prerelease with replaceable `icechunker-main.tar.gz` and
+`icechunker-main.tar.gz.sha256` assets at stable URLs. Release notes identify the source
+commit and the dedicated tag moves to it. This supersedes the initial per-commit, 30-day
+Actions-artifact proposal: workflow artifacts must expire, while release assets have no
+automatic expiration. Publication is serialized without cancellation during asset replacement;
+non-main and stale builds do not publish. The workflow requires contents-write permission,
+mutable releases and permission to update its dedicated tag. It never deploys to a server.
+
+Local validation passed actionlint 1.7.12, all build/archive/extraction/checksum/permission/help
+steps, README build commands and shell syntax, and mocked first-publication, replacement,
+stale-build and failed-upload scenarios. The deployment test suite passed 13 of 14 tests in
+the current Python environment; the remaining local-readiness test errors because Icechunk
+is not installed there. These checks do not establish live GitHub publication or host setup.
+
+**Pending:** after the workflow is pushed to `main`, confirm the rolling release and tag,
+download both assets, and verify the archive and payload checksums. Confirm a subsequent
+successful build replaces the same assets. No live release publication, server deployment,
+bootstrap, production processing or cron changes were performed for this follow-up.
+
+### Updated merged runtime deployed (2026-11-19)
+
+Deployed the explicit 26-file runtime payload from merged main commit `8253aac` to the
+existing Icechunker root. This completes the pending 15-minute-default deployment below
+and includes the merged WRF automation exclusions and shared credential-helper changes.
+The six untracked legacy wrappers remain excluded from the payload and untouched locally.
+
+Deployment acquired the exclusive installation lock and both existing dataset locks,
+verified the previous payload, and confirmed the dependency lock was unchanged before
+replacement. Temporary rollback copies were retained until validation passed, then removed
+along with the incoming payload. No bootstrap or dependency installation was run.
+
+Server validation passed all 26 runtime checksums, private ownership/permissions, host-Python
+early-helper syntax, shell syntax, global/per-command help and local readiness checks using
+the installed environment. Config parsing confirms an effective 15-minute minimum age and
+configured datasets `roms_hiig` and `ww3_hawaii`. Configuration, credentials, durable state,
+installed runtime metadata and crontab were compared before/after and are unchanged.
+
+Local validation passed 83 operations/deployment tests, six store-authentication tests and
+six upload-authentication tests (95 total), shell syntax and whitespace checks. No production
+sync, historical verification, credential exchange, remote README publication or cron change
+was performed. Production processing and conditional README publication still require the
+operator's supervised validation; local readiness does not establish remote access.
+
 ### Reconciliation with main prepared (2026-11-19)
 
 Merged main's product-viewer/build-bundle and team WRF documentation into
