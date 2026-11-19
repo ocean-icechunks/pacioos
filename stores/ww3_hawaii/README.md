@@ -59,7 +59,7 @@ One group (the root). Every variable is `(time, lat, lon)`, `float32`:
 
 | Coordinate | Size | Values |
 |---|---|---|
-| `time` | 135,190 (2026-11-16) | 2011-06-21T21Z to the end of the newest run, every hour |
+| `time` | 135,214 (2026-11-18) | 2011-06-21T21Z to the end of the newest run, every hour |
 | `forecast_reference_time` | on `time` | the run each step comes from (NaT if no run covers it) |
 | `forecast_period` | on `time` | hours since that run's start |
 | `best_step_flag` | on `time` | 0, or flags on the run a step comes from (below) |
@@ -240,8 +240,8 @@ Measured 2026-11-16 from a JupyterHub, with `zarr.config.set({"async.concurrency
 ## Provenance
 
 - **Source files:** PacIOOS's daily run files `ww3hawaii_YYYYMMDD.nc` (NetCDF-3, uncompressed),
-  copied unchanged from PacIOOS to Source Cooperative, each with an `.md5` beside it. 5,236
-  runs, 2011-06-21 to 2026-11-15 (2026-11-16), most of them 181 hourly steps (five in 2013 are
+  copied unchanged from PacIOOS to Source Cooperative, each with an `.md5` beside it. 5,237
+  runs, 2011-06-21 to 2026-11-16 (2026-11-18), most of them 181 hourly steps (five in 2013 are
   shorter).
   `ww3hawaii_20201230.nc` and `…1231.nc` sit in the `netcdf/2021/` folder, as on the PacIOOS
   server; the store references them there.
@@ -264,8 +264,10 @@ Measured 2026-11-16 from a JupyterHub, with `zarr.config.set({"async.concurrency
 
 **Updates.** The store is brought up to date with `update_store.py`, which adds the steps of new
 runs, re-points older steps to the newest run that has them and rewrites `best_step_flag`, in
-one commit. Last update 2026-11-16: runs through 2026-11-15, snapshot `H4T38ERC0AV8DM92RAZG`,
-135,190 steps; read anonymously afterwards, its 133,596 covered steps equal ERDDAP's times.
+one commit. Last update 2026-11-18: runs through 2026-11-16, snapshot `2SWWVCGZ5X3GW567FSGG`,
+135,214 steps through 2026-11-23T18Z (133,620 covered). It added 24 steps and re-pointed 157.
+Anonymous validation confirmed all time coordinates, including `best_step_flag`, against the
+plan and 72 sampled planes against netCDF-C.
 Updates are run by hand until the daily update (issue #4) is scheduled. Every update is a new
 Icechunk snapshot, so the series as it stood on an earlier day stays readable.
 
