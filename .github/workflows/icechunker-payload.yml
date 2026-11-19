@@ -1,0 +1,147 @@
+name: Icechunker payload
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# Serialize publication; do not cancel a run halfway through replacing release assets.
+concurrency:
+  group: icechunker-main
+  cancel-in-progress: false
+
+jobs:
+  payload:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.12'
+
+      - name: Prepare temporary paths
+        shell: bash
+        run: |
+          {
+            echo "PAYLOAD_DIR=$RUNNER_TEMP/icechunker-payload"
+            echo "ARCHIVE_DIR=$RUNNER_TEMP/icechunker-dist"
+            echo "EXTRACTED_DIR=$RUNNER_TEMP/icechunker-extracted"
+          } >> "$GITHUB_ENV"
+
+      - name: Build and archive the manifest payload
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          python ops/package.py "$PAYLOAD_DIR"
+          (cd "$PAYLOAD_DIR" && sha256sum -c MANIFEST.sha256)
+          mkdir -p "$ARCHIVE_DIR" "$EXTRACTED_DIR"
+          tar -czf "$ARCHIVE_DIR/icechunker-main.tar.gz" -C "$PAYLOAD_DIR" .
+          cd "$ARCHIVE_DIR"
+          sha256sum icechunker-main.tar.gz > icechunker-main.tar.gz.sha256
+          sha256sum -c icechunker-main.tar.gz.sha256
+          tar -xzf icechunker-main.tar.gz -C "$EXTRACTED_DIR"
+
+      - name: Validate extracted contents, permissions and offline help
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          import stat
+          import subprocess
+          import sys
+
+          sys.path.insert(0, 'ops')
+          import cli
+          import install
+          import package
+
+          root = Path(os.environ['EXTRACTED_DIR'])
+          expected = set(package.FILES.values())
+          assert set(install.verify_payload(root)) == expected
+          actual = {str(p.relative_to(root)) for p in root.rglob('*') if p.is_file()}
+          assert actual == expected | {'MANIFEST.sha256'}, actual ^ expected
+          assert not any(p.is_symlink() for p in root.rglob('*'))
+          for name in expected:
+              mode = stat.S_IMODE((root / name).stat().st_mode)
+              assert mode == (0o700 if name in ('bootstrap.sh', 'icechunker') else 0o600), name
+          for name in ('bootstrap.sh', 'icechunker'):
+              subprocess.run(['bash', '-n', str(root / name)], check=True)
+          env = {**os.environ, 'HTTP_PROXY': 'http://127.0.0.1:1',
+                 'HTTPS_PROXY': 'http://127.0.0.1:1', 'ALL_PROXY': 'http://127.0.0.1:1',
+                 'NO_PROXY': ''}
+          for args in ([], ['--help'], ['help'], ['help', 'help']):
+              subprocess.run([str(root / 'icechunker'), *args], env=env, check=True)
+          for command in cli.DESCRIPTIONS:
+              for args in (['help', command], [command, '--help']):
+                  subprocess.run([str(root / 'icechunker'), *args], env=env, check=True)
+          subprocess.run(['bash', str(root / 'bootstrap.sh'), '--help'], env=env, check=True)
+          assert not (root / 'config').exists()
+          assert not (root / '.runtime').exists()
+          PY
+
+      # Workflow artifacts must expire. A mutable prerelease gives main stable,
+      # non-expiring download URLs without creating a release for each commit.
+      - name: Replace the rolling main payload
+        id: publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          current_main=$(gh api "repos/$GH_REPO/git/ref/heads/main" --jq '.object.sha')
+          if [[ "$current_main" != "$GITHUB_SHA" ]]; then
+            echo 'Main has advanced; leaving the rolling payload unchanged.' >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          tag=icechunker-main
+          if ! gh api "repos/$GH_REPO/git/ref/tags/$tag" > /dev/null 2>&1; then
+            gh api --method POST "repos/$GH_REPO/git/refs" \
+              -f ref="refs/tags/$tag" -f sha="$GITHUB_SHA" > /dev/null
+          fi
+          notes="$RUNNER_TEMP/icechunker-release-notes.md"
+          {
+            echo 'Rolling Icechunker payload from main. Assets are replaced after successful builds and have no automatic expiration.'
+            echo
+            echo "Source commit: $GITHUB_SHA"
+            echo
+            echo 'Download icechunker-main.tar.gz and icechunker-main.tar.gz.sha256. Verify the archive checksum, extract it, then follow README.md for installation or upgrades.'
+          } > "$notes"
+          if ! gh release view "$tag" > /dev/null 2>&1; then
+            gh release create "$tag" --verify-tag --draft --prerelease --latest=false \
+              --title 'Icechunker main' --notes-file "$notes"
+          fi
+          gh release upload "$tag" \
+            "$ARCHIVE_DIR/icechunker-main.tar.gz" \
+            "$ARCHIVE_DIR/icechunker-main.tar.gz.sha256" --clobber
+          gh api --method PATCH "repos/$GH_REPO/git/refs/tags/$tag" \
+            -f sha="$GITHUB_SHA" -F force=true > /dev/null
+          gh release edit "$tag" --draft=false --prerelease --latest=false \
+            --title 'Icechunker main' --notes-file "$notes"
+          echo 'published=true' >> "$GITHUB_OUTPUT"
+
+      - name: Summarize download and deployment
+        if: steps.publish.outputs.published == 'true'
+        shell: bash
+        run: |
+          {
+            echo "Source commit: $GITHUB_SHA"
+            echo
+            echo "[Download icechunker-main]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/icechunker-main) (replaced on successful main builds; no automatic expiration)."
+            echo
+            echo 'Download the tar archive and its checksum. Verify the archive checksum, extract into a fresh installation root (or the upgrade staging directory), then verify MANIFEST.sha256.'
+            echo
+            echo 'Follow README.md in the payload for bootstrap, configuration and supervised validation. This workflow does not deploy or activate jobs.'
+          } >> "$GITHUB_STEP_SUMMARY"
