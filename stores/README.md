@@ -1,6 +1,11 @@
 # stores/
 
 Code for the virtual Icechunk stores over the NetCDF copies on Source Cooperative.
+For persistent server installation and scheduled uploads/updates, see
+[`ops/README.md`](../ops/README.md). Its runner checks a recent window on normal runs and
+provides a separate historical verification command; the standalone scripts below retain
+their existing behavior. Bootstrap and cron activation are manual.
+
 `smoke_test.py` is the smoke test behind issues #10–#14. The **reanalysis store (#11) is
 published**, at `ocean-icechunks/pacioos/roms_hiig_reanalysis/icechunk` (tag `v2.0`), built by
 `roms_hiig_reanalysis/build_store.py`. The **ROMS forecast best-series store (#10) is published**, at

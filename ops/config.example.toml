@@ -1,0 +1,40 @@
+# Paths are relative to the installation root; absolute paths must stay inside it.
+# Source model folders are read-only inputs and may be outside the root.
+bucket = "ocean-icechunks"
+prefix = "pacioos"
+# key_file = "config/source-coop.key"   # defaults beside this config file
+role_arn = "arn:aws:iam::ocean-icechunks:role/FullAccess"
+# state_dir = "state"                 # defaults to state inside the root
+# rclone = ".runtime/bin/rclone"       # defaults to the installed binary inside the root
+upload_parallel = 1
+scan_processes = 2
+minimum_age_minutes = 15
+max_upload_batches = 3
+max_job_seconds = 7200
+verify_lookback_days = 3
+verify_samples = 8
+max_run_age_hours = 72
+log_retention_days = 30
+sync_schedule = "17 */3 * * *"
+full_verify_schedule = "47 2 * * 0"
+# Configure cron MAILTO separately if the server has working mail delivery.
+
+[datasets.roms_hiig]
+source_dir = "/export/data/model/ocn/roms_forecast/hiig"
+update_store = true
+# store_prefix = "pacioos/roms_hiig/icechunk"
+
+[datasets.ww3_hawaii]
+source_dir = "/export/data/model/ore/ww3/hawaii"
+update_store = true
+
+# WRF upload only: no Icechunk updater exists yet. Uncomment when ready.
+# [datasets.wrf_hi]
+# source_dir = "/export/data/model/atm/wrf_hi"
+# update_store = false
+
+# Static ROMS reanalysis: immutable v2.0 uploads and README metadata only.
+# The existing Icechunk v2.0 tag is read for documentation; no store updater exists.
+# [datasets.roms_hiig_reanalysis]
+# source_dir = "/export/data/model/ocn/roms_reanalysis/hiig"
+# update_store = false

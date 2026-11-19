@@ -66,7 +66,7 @@
 #
 #   PARALLEL=2          files uploaded at the same time
 #   MAX_HOURS=0         stop starting new files after this many hours (0 = no limit)
-#   MIN_AGE_MINUTES=120 leave files younger than this alone
+#   MIN_AGE_MINUTES=15 leave files younger than this alone
 #   DEST=ocean-icechunks/pacioos   where on Source Cooperative ("account/product")
 #   VERSION=            version folder for every product in this run, e.g. VERSION=v3.0;
 #                       overrides the VERSION table below. Leave unset normally.
@@ -98,7 +98,7 @@ declare -A PRODUCT_VERSION=(
 
 PARALLEL=${PARALLEL:-2}
 MAX_HOURS=${MAX_HOURS:-0}
-MIN_AGE_MINUTES=${MIN_AGE_MINUTES:-120}
+MIN_AGE_MINUTES=${MIN_AGE_MINUTES:-15}
 DEST=${DEST:-ocean-icechunks/pacioos}
 RCLONE=${RCLONE:-rclone}
 VERSION=${VERSION:-}

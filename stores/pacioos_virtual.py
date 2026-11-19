@@ -16,6 +16,7 @@ contiguous (ny, nx) plane, so a slab can be cut into planes (per depth level, or
 from __future__ import annotations
 
 import json
+import os
 import warnings
 
 import fsspec
@@ -24,7 +25,10 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 
-URL_PREFIX = "https://data.source.coop/ocean-icechunks/pacioos/"
+PUBLIC = "https://data.source.coop"
+BUCKET = os.environ.get("PACIOOS_BUCKET", "ocean-icechunks")
+ROOT_PREFIX = os.environ.get("PACIOOS_PREFIX", "pacioos").strip("/")
+URL_PREFIX = f"{PUBLIC}/{BUCKET}/{ROOT_PREFIX}/"
 
 
 # ------------------------------------------------------------------ headers

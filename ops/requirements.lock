@@ -1,0 +1,53 @@
+# Python 3.12 environment, updated 2026-11-18 for the server's glibc 2.27.
+# netCDF4 1.7.5.1.post1 and h5py 3.16 require glibc 2.28 wheels; use the last
+# releases with CPython 3.12 x86_64 wheels supporting glibc 2.27 instead.
+# Refresh deliberately after validation; bootstrap never resolves latest dependencies.
+pip==25.0.1
+aiohappyeyeballs==2.7.1
+aiohttp==3.14.5
+aiosignal==1.4.0
+attrs==26.1.0
+boto3==1.44.5
+botocore==1.44.5
+certifi==2026.10.23
+cftime==1.6.6.1
+click==8.5.1
+cloudpickle==3.1.3
+dask==2026.8.0
+donfig==0.8.1.post1
+frozenlist==1.8.0
+fsspec==2026.9.0
+google-crc32c==1.9.0
+h5py==3.15.1
+icechunk==2.3.1
+idna==3.20
+jmespath==1.1.0
+kerchunk==0.2.10
+locket==1.0.0
+msgspec==0.22.0
+multidict==7.2.1
+netCDF4==1.7.4
+numcodecs==0.17.1
+numpy==2.5.5
+obspec==0.1.0
+obspec-utils==0.9.0
+obstore==0.12.1
+packaging==26.3
+pandas==3.1.1
+partd==1.4.2
+pathlib_abc==0.5.2
+propcache==0.5.4
+python-dateutil==2.9.0.post0
+PyYAML==6.0.3
+s3transfer==0.19.3
+scipy==1.18.1
+six==1.17.0
+toolz==1.2.0
+typing_extensions==4.16.0
+ujson==6.1.0
+universal_pathlib==0.3.10
+urllib3==2.8.0
+virtualizarr==2.8.0
+xarray==2026.9.0
+yarl==1.25.1
+zarr==3.4.2

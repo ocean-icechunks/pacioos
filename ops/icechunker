@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+umask 077
+export PATH=/usr/local/bin:/usr/bin:/bin
+root=$(cd "$(dirname "$0")" && pwd -P)
+export ICECHUNKER_ROOT="$root" PYTHONDONTWRITEBYTECODE=1
+# Help is available with only the OS Python, before bootstrap or configuration.
+python=python3
+[[ ! -x $root/.runtime/venv/bin/python ]] || python="$root/.runtime/venv/bin/python"
+exec "$python" "$root/app/ops/cli.py" "$@"

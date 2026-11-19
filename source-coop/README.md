@@ -11,15 +11,25 @@ about a second as one lazy `xarray` dataset.
 | Dataset (PacIOOS id) | About | Dates | NetCDF copies | Icechunk store |
 |---|---|---|---|---|
 | **ROMS ocean reanalysis v2.0** (`roms_hiig_reanalysis`), 3-hourly, ~4 km, 36 depths | [PacIOOS](https://www.pacioos.hawaii.edu/metadata/roms_hiig_reanalysis.html) | 2009-01-01 to 2020-12-28 | `roms_hiig_reanalysis/netcdf/v2.0/`, 4,380 files, 1.17 TB | **`https://data.source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/icechunk`** ([README](https://source.coop/ocean-icechunks/pacioos/roms_hiig_reanalysis/README.md)) |
-| **ROMS ocean forecast** (`roms_hiig`), daily runs | [Currents forecast](https://www.pacioos.hawaii.edu/currents/model-hawaii/) | 2025-01-01 to 2026-11-15 | `roms_hiig/netcdf/`, 656 files, 1.24 TB | **`https://data.source.coop/ocean-icechunks/pacioos/roms_hiig/icechunk`**, best time series ([README](https://source.coop/ocean-icechunks/pacioos/roms_hiig/README.md)) |
+| **ROMS ocean forecast** (`roms_hiig`), daily runs | [Currents forecast](https://www.pacioos.hawaii.edu/currents/model-hawaii/) | 2025-01-01 to 2026-11-17 | `roms_hiig/netcdf/`, 657 files, 1.25 TB | **`https://data.source.coop/ocean-icechunks/pacioos/roms_hiig/icechunk`**, best time series ([README](https://source.coop/ocean-icechunks/pacioos/roms_hiig/README.md)) |
 | **WRF weather model** (`wrf_hi`), daily runs | [Wind forecast](https://www.pacioos.hawaii.edu/weather/model-wind-hawaii/) | 2010-05-14 to 2026-11-15 | `wrf_hi/netcdf/`, 5,610 files, 0.94 TB | not built yet |
-| **WaveWatch III waves** (`ww3_hawaii`), daily runs | [Wave forecast](https://www.pacioos.hawaii.edu/waves/model-hawaii/) | 2011-06-21 to 2026-11-15 | `ww3_hawaii/netcdf/`, 5,236 files, 0.49 TB | **`https://data.source.coop/ocean-icechunks/pacioos/ww3_hawaii/icechunk`**, best time series, hourly, with flags on cold starts ([README](https://source.coop/ocean-icechunks/pacioos/ww3_hawaii/README.md)) |
+| **WaveWatch III waves** (`ww3_hawaii`), daily runs | [Wave forecast](https://www.pacioos.hawaii.edu/waves/model-hawaii/) | 2011-06-21 to 2026-11-16 | `ww3_hawaii/netcdf/`, 5,237 files, 0.49 TB | **`https://data.source.coop/ocean-icechunks/pacioos/ww3_hawaii/icechunk`**, best time series, hourly, with flags on cold starts ([README](https://source.coop/ocean-icechunks/pacioos/ww3_hawaii/README.md)) |
 
 The Icechunk stores are **virtual**. Each holds only Zarr metadata and byte-range references
 to the NetCDF copies beside it, so both the store and its data are served by Source
-Cooperative. The forecast copies run to 2026-11-15 (2026-11-16), and the ROMS forecast and WW3 stores include those runs. A daily update is planned. Where the files lack
+Cooperative. As of 2026-11-18, NetCDF copies extend to the 2026-11-17 ROMS run and 2026-11-16
+WW3 run; WRF copies end at 2026-11-15. The ROMS forecast and WW3 stores include all those
+runs, with forecast coverage through 2026-11-24T00Z and 2026-11-23T18Z, respectively.
+A daily update is planned. Where the files lack
 metadata (WW3 above all), the stores take PacIOOS's ERDDAP attributes, and each store's
 `metadata_source` attribute says so.
+
+Each configured dataset's README gains a **Global metadata attributes** section when
+Icechunker next processes a completed transfer. It distinguishes attributes of the published
+Icechunk snapshot from those of the latest copied NetCDF file and identifies both sources.
+Later syncs refresh changed content while preserving the rest of the README. WRF lists file
+attributes only; static ROMS reanalysis documents its existing `v2.0` store tag. Existing
+archives are not scanned just to initialize these listings.
 
 ## View it in a browser
 

@@ -106,14 +106,15 @@ def _scan_one(day: str) -> dict:
     return {'day': day, 'key': k, 'error': err}
 
 
-def scan(workdir: Path, procs: int) -> None:
+def scan(workdir: Path, procs: int, force: bool = False) -> None:
     out = workdir / 'scan.jsonl'
     runs = fs.list_runs()
     recs = load_scan(workdir) if out.exists() else {}
     done = {d for d, r in recs.items() if 'error' not in r}
-    todo = [f'{d:%Y-%m-%d}' for d in runs if f'{d:%Y-%m-%d}' not in done]
-    log(f'scan: {len(runs)} runs on Source Cooperative ({runs[0]:%Y-%m-%d} .. {runs[-1]:%Y-%m-%d}); '
-        f'{len(done)} scanned, {len(todo)} to go, {procs} processes')
+    todo = [f'{d:%Y-%m-%d}' for d in runs if force or f'{d:%Y-%m-%d}' not in done]
+    cached = sum(f'{d:%Y-%m-%d}' in done for d in runs)
+    log(f'scan: {len(runs)} selected runs ({runs[0]:%Y-%m-%d} .. {runs[-1]:%Y-%m-%d}); '
+        f'{cached} requested headers cached, {len(todo)} to read, {procs} processes')
     if not todo:
         return
     t0 = time.perf_counter()

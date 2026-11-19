@@ -97,10 +97,10 @@ def load_scan(workdir: Path) -> dict[str, dict]:
     return recs
 
 
-def scan(workdir: Path, procs: int) -> None:
+def scan(workdir: Path, procs: int, force: bool = False) -> None:
     keys = ws.list_runs()
     recs = load_scan(workdir)
-    todo = [k for k in keys if k not in recs or 'error' in recs[k]]
+    todo = [k for k in keys if force or k not in recs or 'error' in recs[k]]
     log(f'scan: {len(keys)} runs on Source Cooperative; {len(keys) - len(todo)} scanned, '
         f'{len(todo)} to go, {procs} processes')
     if not todo:
