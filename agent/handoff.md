@@ -3,7 +3,29 @@
 Rolling state for this repo. Orientation only: the open threads are a record of what is
 unfinished, not a task list.
 
-## Where things stand (2026-11-17)
+## Where things stand (2026-11-19)
+
+- **One product viewer and the build files published, 2026-11-19 (branch
+  `product-bundle-root-viewer`).** Viewer at `pacioos/viewer/index.html`, catalog = forecast,
+  reanalysis, WW3 (`publish_viewer.py --product pacioos`). `stores/publish_bundle.py` uploads
+  the committed READMEs, `requirements.txt`, notebooks, scripts and saved metadata, mirroring
+  `stores/` under `pacioos/`; rerun it after editing a README (it replaces `pacioos/README.md`).
+  39 files verified by MD5 and content type. **The old per-dataset viewers
+  (`pacioos/<dataset>/viewer/`) are still up** until Eli checks the new one, then delete them
+  (one key at a time). Why the files had been missing: ocean-icechunks/ocean-icechunks-skills#19.
+- **The PacIOOS team worked on their own, 2026-11-18:** they built and published a WRF store
+  (`pacioos/wrf_hi/icechunk`, HDF5 era from 2017-08-16, snapshot `P9R11AXCREQ7KGD2NQQ0`, with
+  `wrf_hi/README.md` and `build-source.zip`), ran the ROMS and WW3 updaters (copies to the 11-17
+  ROMS / 11-16 WW3 runs) and edited the live product and store READMEs. Their code is not in
+  this repo. Their live READMEs were copied in unchanged before ours were edited; **before any
+  README upload, diff the live copy against git** — they may edit them again. Leave `wrf_hi/`
+  to them (`publish_bundle.py` refuses it; WRF is not in the viewer until they want it).
+- **`~/venvs/pacioos` is now Python 3.13** (`/srv/conda/envs/notebook/bin/python3`): the hub
+  image lost `/srv/conda/bin/python3.12`; the old venv is `~/venvs/pacioos.broken-py312`.
+  The requirements files' "use /srv/conda/bin/python3.12" comment is stale. The WW3 smoke
+  notebook ran clean in it (26 cells, 0 errors).
+
+## Earlier (2026-11-17)
 
 - **Ready for the hackweek, 2026-11-17 (PR #29, merged).** The team note doc was brought up to
   date (stores, updaters, new agent prompts, #12/#14) and snapshotted as
