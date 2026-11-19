@@ -28,7 +28,8 @@ import pacioos_virtual as pv
 
 BUCKET = "ocean-icechunks"
 PUBLIC = "https://data.source.coop"
-SOURCE = "pacioos/wrf_hi/netcdf/"
+SOURCE_ROOT = "pacioos"
+SOURCE = f"{SOURCE_ROOT}/wrf_hi/netcdf/"
 DESTINATIONS = {
     "scratch": "test-repo/pacioos/wrf_hi/icechunk-build",
     "production": "pacioos/wrf_hi/icechunk",
@@ -59,7 +60,7 @@ def list_runs() -> list[str]:
             key = item["path"]
             match = FILENAME.fullmatch(key.rsplit("/", 1)[-1])
             if match and match[1] >= FIRST_RUN:
-                keys.append(key.removeprefix("pacioos/"))
+                keys.append(key.removeprefix(f"{SOURCE_ROOT}/"))
     keys.sort(key=lambda key: key.rsplit("/", 1)[-1])
     if not keys or keys[0].rsplit("/", 1)[-1] != f"wrf_hi_{FIRST_RUN}.nc":
         raise ValueError("Source listing does not include the first Era 2 run")
@@ -336,6 +337,11 @@ def main() -> None:
     parser.add_argument("--key-file", type=Path, help="Source Cooperative service-account key file for write")
     parser.add_argument("--role-arn", help="Source Cooperative service-account FullAccess role for write")
     args = parser.parse_args()
+    if pv.URL_PREFIX != f"{PUBLIC}/{BUCKET}/{SOURCE_ROOT}/":
+        parser.error(
+            f"WRF builds require PACIOOS_BUCKET={BUCKET} and PACIOOS_PREFIX={SOURCE_ROOT}. "
+            "Unset conflicting overrides. --dest selects the Icechunk destination only."
+        )
     if (args.key_file is None) != (args.role_arn is None):
         parser.error("--key-file and --role-arn must be supplied together")
     keys = list_runs()
