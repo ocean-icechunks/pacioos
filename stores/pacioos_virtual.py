@@ -29,6 +29,15 @@ PUBLIC = "https://data.source.coop"
 BUCKET = os.environ.get("PACIOOS_BUCKET", "ocean-icechunks")
 ROOT_PREFIX = os.environ.get("PACIOOS_PREFIX", "pacioos").strip("/")
 URL_PREFIX = f"{PUBLIC}/{BUCKET}/{ROOT_PREFIX}/"
+# Headers are always read over HTTPS (URL_PREFIX). What a store records as its chunk locations
+# is REF_PREFIX: https (the default, as published so far) or s3:// on the same bucket (#40,
+# suggested by Earthmover). Source Cooperative's S3 API needs path-style addressing: icechunk's
+# default virtual-hosted style looks up <bucket>.data.source.coop, which does not resolve.
+REF_SCHEME = os.environ.get("PACIOOS_REF_SCHEME", "https")
+if REF_SCHEME not in ("https", "s3"):
+    raise ValueError(f"PACIOOS_REF_SCHEME must be https or s3, not {REF_SCHEME!r}")
+S3_PREFIX = f"s3://{BUCKET}/{ROOT_PREFIX}/"
+REF_PREFIX = S3_PREFIX if REF_SCHEME == "s3" else URL_PREFIX
 
 
 # ------------------------------------------------------------------ headers
@@ -174,7 +183,7 @@ def manifest_variable(name: str, scans: list[dict], best: pd.DataFrame, dims: tu
         if r < 0 or name not in scans[r]["vars"]:
             continue
         o, n, _ = plane_refs(scans[r], name, l)
-        paths[i] = URL_PREFIX + scans[r]["key"]
+        paths[i] = REF_PREFIX + scans[r]["key"]
         offsets[i], lengths[i] = o, n
     endian = {">": "big", "<": "little"}[np.dtype(v0["dtype"]).str[0]]
     four_d = len(dims) == 4
@@ -198,8 +207,7 @@ def repository_config(time_chunks_per_manifest: int):
     import icechunk
 
     config = icechunk.RepositoryConfig.default()
-    config.set_virtual_chunk_container(
-        icechunk.VirtualChunkContainer(url_prefix=URL_PREFIX, store=icechunk.http_store()))
+    config.set_virtual_chunk_container(virtual_chunk_container())
     config.manifest = icechunk.ManifestConfig(
         splitting=icechunk.ManifestSplittingConfig.from_dict({
             icechunk.ManifestSplitCondition.AnyArray(): {
@@ -207,6 +215,19 @@ def repository_config(time_chunks_per_manifest: int):
     return config
 
 
+def virtual_chunk_container():
+    import icechunk
+
+    if REF_SCHEME == "s3":
+        store = icechunk.s3_store(region="us-east-1", endpoint_url=PUBLIC, anonymous=True,
+                                  force_path_style=True)
+    else:
+        store = icechunk.http_store()
+    return icechunk.VirtualChunkContainer(url_prefix=REF_PREFIX, store=store)
+
+
 def reader_authorization():
     import icechunk
-    return {URL_PREFIX: icechunk.credentials.HttpAccess}
+    if REF_SCHEME == "s3":
+        return {REF_PREFIX: icechunk.Credentials.S3(icechunk.S3Credentials.Anonymous())}
+    return {REF_PREFIX: icechunk.credentials.HttpAccess}

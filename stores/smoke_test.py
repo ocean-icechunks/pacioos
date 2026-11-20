@@ -144,6 +144,10 @@ for prod, (keys, step, sci, split) in PRODUCTS.items():
     repo2 = icechunk.Repository.open(icechunk.local_filesystem_storage(str(path)),
                                      authorize_virtual_chunk_access=pb.reader_authorization())
     ro = repo2.readonly_session("main")
+    # A pass must mean the reads went through the chosen container (#40), not a stale prefix.
+    locations = ro.all_virtual_chunk_locations()
+    assert locations and all(u.startswith(pb.REF_PREFIX) for u in locations), sorted(locations)[:3]
+    assert set(repo2.config.virtual_chunk_containers) == {pb.REF_PREFIX}
     for g, b in groups.items():
         t1 = time.time()
         ds = xr.open_zarr(ro.store, group=g or None, consolidated=False, chunks={}, mask_and_scale=False, decode_times=True)
