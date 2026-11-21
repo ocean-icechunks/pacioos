@@ -5,7 +5,7 @@ unfinished, not a task list.
 
 ## Where things stand (2026-11-19)
 
-### #40 s3:// vs https:// references: tested, decision on hold (2026-11-20)
+### #40 s3:// vs https:// references: tested, on hold for icechunk#2571 (2026-11-21)
 
 Branch `s3-virtual-refs` (pushed, no PR). `PACIOOS_REF_SCHEME=s3` in `stores/pacioos_virtual.py`
 records refs as `s3://ocean-icechunks/pacioos/...` (anonymous, **`force_path_style=True`**, or
@@ -14,8 +14,9 @@ unchanged. Smoke test passes both ways for all four products. Benchmarks (hub,
 `stores/bench_ref_scheme.py`, and Colab, notebook from ocean-icechunks/ocean-icechunks-skills#27):
 S3 matches or beats HTTPS on one-chunk reads but is 1.2–4.4x slower on many-chunk reads, worst at
 concurrency 64, and one S3 read failed there (unhandled service error). Results and plan are
-comments on #40. **Eli is waiting on the skills-repo research (#27 there) before deciding**;
-open choices: keep both containers vs rebuild S3-only; reanalysis first; WRF is the team's.
+comments on #40. Cause filed by Eli as earth-mover/icechunk#2571 (`s3_store` 2–7x slower than
+`http_store` on HTTP/2 endpoints). **No ref change until Earthmover fixes it** (Eli, 2026-11-21);
+then rerun `bench_ref_scheme.py` on the fixed release. Open choices: keep both containers vs rebuild S3-only; reanalysis first; WRF is the team's.
 
 ### Icechunker archive parent directory prepared (2026-11-19)
 
@@ -676,7 +677,7 @@ Moved here from `ocean-icechunks/icechunks` on 2026-11-13 so the PacIOOS team ca
 
 ## Open threads
 
-- **#40 — s3:// references.** On hold for ocean-icechunks/ocean-icechunks-skills#27; see the
+- **#40 — s3:// references.** On hold until earth-mover/icechunk#2571 is fixed; see the
   entry at the top. `ops/validation.py` requires the container set to equal the HTTPS prefix,
   so it changes with any switch.
 
