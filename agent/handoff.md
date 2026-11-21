@@ -5,6 +5,18 @@ unfinished, not a task list.
 
 ## Where things stand (2026-11-19)
 
+### #40 s3:// vs https:// references: tested, decision on hold (2026-11-20)
+
+Branch `s3-virtual-refs` (pushed, no PR). `PACIOOS_REF_SCHEME=s3` in `stores/pacioos_virtual.py`
+records refs as `s3://ocean-icechunks/pacioos/...` (anonymous, **`force_path_style=True`**, or
+icechunk looks up `ocean-icechunks.data.source.coop`); default still `https`, production
+unchanged. Smoke test passes both ways for all four products. Benchmarks (hub,
+`stores/bench_ref_scheme.py`, and Colab, notebook from ocean-icechunks/ocean-icechunks-skills#27):
+S3 matches or beats HTTPS on one-chunk reads but is 1.2–4.4x slower on many-chunk reads, worst at
+concurrency 64, and one S3 read failed there (unhandled service error). Results and plan are
+comments on #40. **Eli is waiting on the skills-repo research (#27 there) before deciding**;
+open choices: keep both containers vs rebuild S3-only; reanalysis first; WRF is the team's.
+
 ### Icechunker archive parent directory prepared (2026-11-19)
 
 The user requested a top-level `icechunker/` directory in the GHA-produced tarball.
@@ -663,6 +675,10 @@ Moved here from `ocean-icechunks/icechunks` on 2026-11-13 so the PacIOOS team ca
   store and viewer deleted 2026-11-16 (`build_store.py --dest scratch` recreates them).
 
 ## Open threads
+
+- **#40 — s3:// references.** On hold for ocean-icechunks/ocean-icechunks-skills#27; see the
+  entry at the top. `ops/validation.py` requires the container set to equal the HTTPS prefix,
+  so it changes with any switch.
 
 - **Server access ended, 2026-11-17.** The `pacioos` SSH login refused this hub's key on
   2026-11-17 (publickey denied; the key is intact). Eli thinks the access was granted for 7 days
